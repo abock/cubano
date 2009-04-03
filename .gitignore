@@ -1,0 +1,45 @@
+# Build/Make
+Makefile
+Makefile.in
+.deps
+.libs
+*.la
+*.lo
+*.o
+*~
+
+# Autotools/Configure
+config.guess
+/config.h
+config.h.in
+config.log
+config.status
+config.sub
+compile
+INSTALL
+aclocal.m4
+autom4te.cache/
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+stamp-h1
+m4/
+
+# Intltool
+intltool-extract.in
+intltool-merge.in
+intltool-update.in
+po/Makefile.in.in
+po/POTFILES
+po/stamp-it
+
+# Extra
+*.swp
+
+
+# Dist
+*.tar.bz2
+*.tar.gz
