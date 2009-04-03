@@ -43,3 +43,8 @@ po/stamp-it
 # Dist
 *.tar.bz2
 *.tar.gz
+
+# Moonlight
+moonlight/*.dll*
+moonlight/libmoon.so
+
