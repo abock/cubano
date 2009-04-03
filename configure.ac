@@ -23,7 +23,7 @@ AM_GLIB_GNU_GETTEXT
 IT_PROG_INTLTOOL([0.40.0]) 
 
 PKG_CHECK_EXISTS(MONO, mono >= 2.0)
-PKG_CHECK_EXISTS(BANSHEE, banshee-1-thickclient >= 1.4.1)
+PKG_CHECK_MODULES(BANSHEE, banshee-1-thickclient >= 1.4.1)
 AC_PATH_PROG(MONO, mono)
 AC_PATH_PROG(MCS, gmcs)
 
@@ -42,8 +42,9 @@ fi
 AC_OUTPUT([
 Makefile
 po/Makefile.in
+bin/Makefile
 src/Makefile
-moonlight/Makefile
+src/Cubano/Makefile
 ])
 
 cat <<EOF

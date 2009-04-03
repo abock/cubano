@@ -1,1 +1,4 @@
+SUBDIRS = \
+	Cubano
+
 MAINTAINERCLEANFILES = Makefile.in

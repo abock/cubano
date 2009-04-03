@@ -1,7 +1,10 @@
 SUBDIRS = \
-	moonlight \
+	bin \
 	src \
 	po
+
+run:
+	@(cd $(top_builddir)/bin; make -s run)
 
 EXTRA_DIST = \
 	intltool-extract.in \

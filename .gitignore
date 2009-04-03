@@ -45,6 +45,7 @@ po/stamp-it
 *.tar.gz
 
 # Moonlight
-moonlight/*.dll*
-moonlight/libmoon.so
+bin/*.dll*
+bin/*.exe*
+bin/libmoon.so
 

@@ -15,4 +15,7 @@ gtksilver.dll: $(MOONLIGHT_SOURCE)/gtk/gtksilver.dll ; cp $<{,.mdb} .
 clean-local:
 	for file in $(TARGETS); do rm -f $$file{,.mdb}; done
 
+run:
+	@mono --debug Cubano.exe
+
 MAINTAINERCLEANFILES = Makefile.in
