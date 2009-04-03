@@ -1,5 +1,6 @@
 SUBDIRS = \
 	moonlight \
+	src \
 	po
 
 EXTRA_DIST = \

@@ -38,6 +38,7 @@ fi
 AC_OUTPUT([
 Makefile
 po/Makefile.in
+src/Makefile
 moonlight/Makefile
 ])
 
