@@ -25,6 +25,10 @@ IT_PROG_INTLTOOL([0.40.0])
 PKG_CHECK_EXISTS(MONO, mono >= 2.0)
 PKG_CHECK_EXISTS(BANSHEE, banshee-1-thickclient >= 1.4.1)
 AC_PATH_PROG(MONO, mono)
+AC_PATH_PROG(MCS, gmcs)
+
+BANSHEE_PATH=`pkg-config --variable=bansheedir banshee-1-core`
+AC_SUBST(BANSHEE_PATH)
 
 AC_ARG_WITH(moonlight-source, AC_HELP_STRING([--with-moonlight-source=<path>],
 	[Path to the top of the Moonlight source tree]),
@@ -47,8 +51,12 @@ cat <<EOF
 Cubano Configuration
 --------------------
 
-  Install Prefix:   $prefix
-  Moonlight Source: $with_moonlight_source
+  Install Prefix:       $prefix
+  Moonlight Source:     $MOONLIGHT_SOURCE
+  Banshee Runtime Path: $BANSHEE_PATH
+
+  Mono Runtime:         $MONO
+  C# Compiler:          $MCS
 
 EOF
 
