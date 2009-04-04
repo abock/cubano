@@ -1,2 +1,38 @@
 Cubano is a Moonlight/XAML based client for the Banshee Media Player
 http://banshee-project.org/
+
+Cubano currently requires Moonlight from trunk, but works with a stock
+Mono 2.0 or newer. Lots of changes are happening against Moonlight to 
+make it a first class citizen for developing desktop applications,
+and Cubano aims to be the first major Linux Desktop application developed
+with Silverlight technology.
+
+Building Moonlight from trunk to work as a desktop platform is actually
+very easy.
+
+In the directory above your cubano checkout:
+
+  svn co http://anonsvn.mono-project.com/source/trunk/moon
+  cd moon
+
+  ./autogen.sh --disable-browser-support
+  make
+
+You do not need to specifiy a prefix, as you do not need to 'make install'.
+Installing Moonlight from trunk into your system is not recommended.
+
+Once you have built Moonlight, go back into the top of your cubano directory.
+
+  ./autogen.sh --prefix=/usr
+  make
+  make run
+
+If configure complains that it cannot find Moonlight, you must specify
+the full path to your Moonlight checkout above like this:
+
+  ./autogen.sh --prefix=/usr --with-moonlight-source=/home/me/svn/moon
+
+By default, cubano's configure tries to find your Moonlight checkout at
+../moon, so if you have checked both Moonlight and Cubano out into the same
+directory, you should not need to specify the path to Moonlight.
+
