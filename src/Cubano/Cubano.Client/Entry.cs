@@ -21,7 +21,14 @@ namespace Cubano.Client
             window.DeleteEvent += (o, e) => Application.Quit ();
 
             XamlHost xaml_host = new XamlHost ();
-            xaml_host.LoadXaml ("<Canvas><Rectangle Width=\"50\" Height=\"50\" Fill=\"Green\"/></Canvas>");
+            xaml_host.LoadXaml (@"
+                <Canvas 
+                    xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
+                    xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
+                    >
+                    <Button Content=""Hell Yes"" Width=""100"" Height=""50"" />
+                </Canvas>
+            ");
 
             window.Add (xaml_host);
             window.ShowAll ();
