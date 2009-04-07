@@ -1,9 +1,9 @@
 ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 
 SOURCES =  \
+	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoWindow.cs \
-	Cubano.Client/CubanoXamlHost.cs \
-	Cubano.Client/Entry.cs
+	Cubano.Client/CubanoXamlHost.cs
 
 REFERENCES_PACKAGES =  \
 	-pkg:banshee-1-core \
@@ -15,6 +15,7 @@ REFERENCES_PACKAGES =  \
 	-r:Mono.Cairo
 
 REFERENCES_ASSEMBLIES =  \
+	-r:../../bin/Mono.Addins.dll \
 	-r:../../bin/Moonlight.Gtk.dll \
 	-r:../../bin/System.Windows.Controls.Data.dll \
 	-r:../../bin/System.Windows.Controls.dll \

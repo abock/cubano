@@ -52,4 +52,5 @@ po/stamp-it
 bin/*.dll*
 bin/*.exe*
 bin/libmoon.so
+bin/cubano
 
