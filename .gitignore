@@ -39,6 +39,10 @@ po/stamp-it
 # Extra
 *.swp
 
+# Mono/MonoDevelop
+*.pidb
+*.userprefs
+*.usertasks
 
 # Dist
 *.tar.bz2
