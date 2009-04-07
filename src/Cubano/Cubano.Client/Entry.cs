@@ -1,40 +1,27 @@
 using System;
 
-using Cairo;
-using Gtk;
-using Moonlight.Gtk;
-using System.Windows;
+//using Hyena;
+//using Hyena.CommandLine;
 
-using Application = Gtk.Application;
+//using Banshee.Base;
+using Banshee.ServiceStack;
 
 namespace Cubano.Client
 {
-    public static class Entry
+    public class CubanoClient : Banshee.Gui.GtkBaseClient
     {
-        public static void Main ()
+        public static void Main (string [] args)
         {
-            Application.Init ();
-            XamlRuntime.Init ();
+            Startup<CubanoClient> (args);
+        }
+        
+        protected override void OnRegisterServices ()
+        {
+            ServiceManager.RegisterService<CubanoWindow> ();
+        }
 
-            Window window = new Window ("Cubano");
-            window.SetDefaultSize (400, 300);
-            window.DeleteEvent += (o, e) => Application.Quit ();
-
-            XamlHost xaml_host = new XamlHost ();
-            xaml_host.LoadXaml (@"
-                <Canvas 
-                    xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
-                    xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
-                    >
-                    <Button Content=""Hell Yes"" Width=""100"" Height=""50"" />
-                </Canvas>
-            ");
-
-            window.Add (xaml_host);
-            window.ShowAll ();
-
-            Application.Run ();
+        public override string ClientId {
+            get { return "cubano"; }
         }
     }
 }
-

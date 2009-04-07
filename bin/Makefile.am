@@ -16,6 +16,6 @@ clean-local:
 	for file in $(TARGETS); do rm -f $$file{,.mdb}; done
 
 run:
-	@LD_LIBRARY_PATH=. mono --debug Cubano.exe
+	@LD_LIBRARY_PATH=$$PWD:$(BANSHEE_PATH) MONO_PATH=$(BANSHEE_PATH):$(BANSHEE_PATH)/Extension:$(BANSHEE_PATH)/Backends mono --debug Cubano.exe
 
 MAINTAINERCLEANFILES = Makefile.in
