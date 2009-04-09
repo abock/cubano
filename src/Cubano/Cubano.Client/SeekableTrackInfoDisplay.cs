@@ -41,6 +41,7 @@ namespace Banshee.Gui.Widgets
     public class SeekableTrackInfoDisplay : ClassicTrackInfoDisplay
     {
         private uint transition_timeout_id;
+        private int text_y;
         private Pango.Layout text_layout;
         
         public SeekableTrackInfoDisplay () : base ()
@@ -78,6 +79,18 @@ namespace Banshee.Gui.Widgets
             }
         }
 
+        private void EnsureLayout (Context cr)
+        {
+            if (text_layout == null) {
+                text_layout = CairoExtensions.CreateLayout (this, cr);
+                text_layout.Ellipsize = Pango.EllipsizeMode.End;
+
+                Pango.FontMetrics metrics = PangoContext.GetMetrics (Style.FontDescription, PangoContext.Language);
+                text_y = ((int)(metrics.Ascent + metrics.Descent) + 512) >> 10; // PANGO_PIXELS(d)
+                metrics.Dispose ();
+            }
+        }
+
         private static int transition_states = 3;
         private bool transition_actor_reset;
         private int transition_index;
@@ -104,59 +117,71 @@ namespace Banshee.Gui.Widgets
             
             Invalidate ();
         }
+
+        protected override void RenderIdle (Context cr)
+        {
+            RenderSlider (cr);
+        }
         
         protected override void RenderTrackInfo (Context cr, TrackInfo track, bool renderTrack, bool renderArtistAlbum)
         {
+            RenderSlider (cr);
+            
             if (track == null) {
                 return;
             }
             
-            double offset = Allocation.Height + 10;
-            double x = Allocation.X + offset;
+            double x = ContentXOffset;
             double y = Allocation.Y;
-            double width = Allocation.Width - offset;
-            int text_width, text_height;
+            double width = ContentWidth;
             int pango_width = (int)(width * Pango.Scale.PangoScale);
-
-            if (text_layout == null) {
-                text_layout = CairoExtensions.CreateLayout (this, cr);
-                text_layout.Ellipsize = Pango.EllipsizeMode.End;
-            }
-
-            string display = String.Empty;
             
+            string display = String.Empty;
             switch (transition_index) {
                 case 0: display = track.DisplayTrackTitle; break;
                 case 1: display = track.DisplayArtistName; break;
                 case 2: display = track.DisplayAlbumTitle; break;
             }
 
-            // Set up the text layouts
             text_layout.Width = pango_width;
             text_layout.SetMarkup (display);
-            text_layout.GetPixelSize (out text_width, out text_height);
             
-            if (text_height > Allocation.Height) {
-                SetSizeRequest (-1, text_height);
-            }
+            double percent = transition_stage != null && transition_stage.Actor != null 
+                ? transition_stage.Actor.Percent : 1.0;
             
-            // Render the layouts
+            Cairo.Color color = TextColor;
+            color.A = percent <= 0.5
+                ? 1.0 - (percent * 2.0)
+                : (percent - 0.5) * 2.0;
+            
+            cr.Color = color;
+            cr.MoveTo (x, y);
             cr.Antialias = Cairo.Antialias.Default;
             
-            if (renderTrack) {
-                double percent = transition_stage != null && transition_stage.Actor != null 
-                    ? transition_stage.Actor.Percent : 1.0;
-                
-                Cairo.Color color = TextColor;
-                color.A = percent <= 0.5
-                    ? 1.0 - (percent * 2.0)
-                    : (percent - 0.5) * 2.0;
-                
-                cr.Color = color;
-                cr.MoveTo (x, y);
-                
-                PangoCairoHelper.ShowLayout (cr, text_layout);
-            }
+            PangoCairoHelper.ShowLayout (cr, text_layout);
+        }
+
+        private void RenderSlider (Context cr)
+        {
+            EnsureLayout (cr);
+            cr.Rectangle (ContentXOffset + 0.5, Allocation.Y + text_y, ContentWidth - 1, 10);
+            cr.LineWidth = 1.0;
+            cr.Color = new Cairo.Color (0, 0, 0);
+            cr.Stroke ();
+        }
+
+        private const double ArtworkSpacing = 10;
+
+        private double ContentXOffset {
+            get { return Allocation.X + Allocation.Height + ArtworkSpacing; }
+        }
+
+        private double ContentWidth {
+            get { return Allocation.Width - (Allocation.Height + ArtworkSpacing); }
+        }
+        
+        protected override bool CanRenderIdle {
+            get { return true; }
         }
     }
 }
