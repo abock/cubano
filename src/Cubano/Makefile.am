@@ -3,7 +3,7 @@ ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 SOURCES =  \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoWindow.cs \
-	Cubano.Client/CubanoXamlHost.cs
+	Cubano.Client/SeekableTrackInfoDisplay.cs
 
 REFERENCES_PACKAGES =  \
 	-pkg:banshee-1-core \
@@ -11,15 +11,11 @@ REFERENCES_PACKAGES =  \
 	-pkg:banshee-1-hyena-gui \
 	-pkg:banshee-1-services \
 	-pkg:banshee-1-thickclient \
+	-pkg:glib-sharp-2.0 \
 	-pkg:gtk-sharp-2.0 \
 	-r:Mono.Cairo
 
-REFERENCES_ASSEMBLIES =  \
-	-r:../../bin/Mono.Addins.dll \
-	-r:../../bin/Moonlight.Gtk.dll \
-	-r:../../bin/System.Windows.Controls.Data.dll \
-	-r:../../bin/System.Windows.Controls.dll \
-	-r:../../bin/System.Windows.dll
+REFERENCES_ASSEMBLIES = -r:../../bin/Mono.Addins.dll
 
 REFERENCES_BUILD = $(REFERENCES_PACKAGES) $(REFERENCES_ASSEMBLIES)
 

@@ -5,6 +5,7 @@ ASSEMBLY=Cubano.exe
 
 export LD_LIBRARY_PATH=${BANSHEE_PATH}${LD_LIBRARY_PATH+:$LD_LIBRARY_PATH}
 export MONO_PATH=${PWD}:${BANSHEE_PATH}${MONO_PATH+:$MONO_PATH}
+export MOONLIGHT_DEBUG=deployment
 
 mono --debug $ASSEMBLY $@ --debug
 

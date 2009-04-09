@@ -52,7 +52,8 @@ namespace Cubano.Client
 {
     public class CubanoWindow : BaseClientWindow, IClientWindow, IDBusObjectName, IService, IDisposable
     {
-        private CubanoXamlHost xaml_host;
+        private Toolbar header_toolbar;
+        private VBox primary_vbox;
         
         protected CubanoWindow (IntPtr ptr) : base (ptr)
         {
@@ -72,27 +73,60 @@ namespace Cubano.Client
                 Gtk.Application.Quit ();
             }
         }
-        
+
 #endregion     
 
         protected override void Initialize ()
         {
-            xaml_host = new CubanoXamlHost ();
-            xaml_host.LoadXaml (@"
-                <Canvas 
-                    xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
-                    xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml""
-                    >
-                    <Button Content=""Hell Yes"" Width=""100"" Height=""50"" />
-                </Canvas>
-            ");
-
-            Add (xaml_host);
-            
+            BuildInterface ();
+            ConnectEvents ();
             InitialShowPresent ();
         }
 
-        // Note this is copied from GtkBaseClient, it was added in 
+#region Interface Construction
+
+        private void BuildInterface ()
+        {
+            primary_vbox = new VBox ();
+
+            BuildHeader ();
+
+            primary_vbox.Show ();
+            Add (primary_vbox);
+        }
+
+        private void BuildHeader ()
+        {
+            Alignment toolbar_alignment = new Alignment (0.0f, 0.0f, 1.0f, 1.0f);
+            
+            header_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/HeaderToolbar");
+            header_toolbar.ShowArrow = false;
+            header_toolbar.ToolbarStyle = ToolbarStyle.BothHoriz;
+            
+            toolbar_alignment.Add (header_toolbar);
+            toolbar_alignment.ShowAll ();
+            
+            primary_vbox.PackEnd (toolbar_alignment, false, false, 0);
+            
+            Widget next_button = new NextButton (ActionService);
+            next_button.Show ();
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/NextArrowButton", next_button);
+            
+            ConnectedSeekSlider seek_slider = new ConnectedSeekSlider ();
+            seek_slider.Show ();
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
+            
+            SeekableTrackInfoDisplay track_info_display = new SeekableTrackInfoDisplay ();
+            track_info_display.Show ();
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", track_info_display, true);
+            
+            ConnectedVolumeButton volume_button = new ConnectedVolumeButton ();
+            volume_button.Show ();
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", volume_button);
+        }
+        
+
+        // NOTE: this is copied from GtkBaseClient, it was added in 
         // r5063 for 1.5.x, but I am aiming to make Cubano work on 1.4.x
         protected void InitialShowPresent ()
         {
@@ -106,7 +140,47 @@ namespace Cubano.Client
             if (present) {
                 Present ();
             }
-        } 
+        }
+
+#endregion
+
+#region Events and Logic Setup
+        
+        protected override void ConnectEvents ()
+        {
+            base.ConnectEvents ();
+
+            /*// Service events
+            ServiceManager.SourceManager.ActiveSourceChanged += OnActiveSourceChanged;
+            ServiceManager.SourceManager.SourceUpdated += OnSourceUpdated;
+            
+            ActionService.TrackActions ["SearchForSameArtistAction"].Activated += OnProgrammaticSearch;
+            ActionService.TrackActions ["SearchForSameAlbumAction"].Activated += OnProgrammaticSearch;
+
+            // UI events
+            view_container.SearchEntry.Changed += OnSearchEntryChanged;
+            views_pane.SizeRequested += delegate {
+                SourceViewWidth.Set (views_pane.Position);
+            };
+            
+            source_view.RowActivated += delegate {
+                Source source = ServiceManager.SourceManager.ActiveSource;
+                if (source is ITrackModelSource) {
+                    ServiceManager.PlaybackController.NextSource = (ITrackModelSource)source;
+                    // Allow changing the play source without stopping the current song by
+                    // holding ctrl when activating a source. After the song is done, playback will
+                    // continue from the new source.
+                    if (GtkUtilities.NoImportantModifiersAreSet (Gdk.ModifierType.ControlMask)) {
+                        ServiceManager.PlaybackController.Next ();
+                    }
+                }
+            };*/
+            
+            header_toolbar.ExposeEvent += OnToolbarExposeEvent;
+            //footer_toolbar.ExposeEvent += OnToolbarExposeEvent;
+        }
+        
+#endregion
 
 #region Service/Export Implementation
 

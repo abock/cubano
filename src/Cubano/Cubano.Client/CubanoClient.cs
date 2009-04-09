@@ -3,7 +3,6 @@ using System;
 using Banshee.Base;
 using Banshee.ServiceStack;
 using Mono.Addins;
-using Moonlight.Gtk;
 
 namespace Cubano.Client
 {
@@ -20,7 +19,6 @@ namespace Cubano.Client
         
         protected override void OnRegisterServices ()
         {
-            XamlRuntime.Init ();
             ServiceManager.RegisterService<CubanoWindow> ();
         }
 

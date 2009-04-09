@@ -21,31 +21,11 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Include="Cubano.Client\CubanoXamlHost.cs" />
     <Compile Include="Cubano.Client\CubanoWindow.cs" />
     <Compile Include="Cubano.Client\CubanoClient.cs" />
+    <Compile Include="Cubano.Client\SeekableTrackInfoDisplay.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Moonlight.Gtk, Version=0.0.0.0, Culture=neutral, PublicKeyToken=976ad8f3443f9a4d">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\Moonlight.Gtk.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Windows.Controls.Data, Version=2.0.5.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\System.Windows.Controls.Data.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Windows.Controls, Version=2.0.5.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\System.Windows.Controls.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System.Windows, Version=3.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\System.Windows.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
       <Package>banshee-1-core</Package>
     </Reference>
@@ -74,6 +54,7 @@
       <HintPath>..\..\bin\Mono.Addins.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
