@@ -24,6 +24,11 @@
     <Compile Include="Cubano.Client\CubanoWindow.cs" />
     <Compile Include="Cubano.Client\CubanoClient.cs" />
     <Compile Include="Cubano.Client\SeekableTrackInfoDisplay.cs" />
+    <Compile Include="Cubano.Client\CanvasItem.cs" />
+    <Compile Include="Cubano.Client\CanvasSlider.cs" />
+    <Compile Include="Cubano.Client\CanvasSeekSlider.cs" />
+    <Compile Include="Cubano.Client\CanvasPositionLabel.cs" />
+    <Compile Include="Cubano.Client\CanvasLabel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">

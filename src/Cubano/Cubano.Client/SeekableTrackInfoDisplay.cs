@@ -27,12 +27,16 @@
 //
 
 using System;
+using System.Collections.Generic;
 using Gdk;
 using Gtk;
 using Cairo;
 
 using Hyena.Gui;
+using Hyena.Gui.Theming;
 using Hyena.Gui.Theatrics;
+using Hyena.Gui.Canvas;
+
 using Banshee.Collection;
 using Banshee.Collection.Gui;
 
@@ -43,13 +47,57 @@ namespace Banshee.Gui.Widgets
         private uint transition_timeout_id;
         private int text_y;
         private Pango.Layout text_layout;
+        private GtkTheme theme;
+        private CanvasSeekSlider slider;
+        private CanvasPositionLabel position_label;
         
         public SeekableTrackInfoDisplay () : base ()
         {
+            children.Add (slider = new CanvasSeekSlider () {
+                PaddingTop = 4,
+                PaddingBottom = 4
+            });
+            
+            children.Add (position_label = new CanvasPositionLabel (this));
+            
+            foreach (ICanvasItem child in children) {
+                child.Rerender += (o, e) => QueueDraw ();
+            }
         }
         
         protected SeekableTrackInfoDisplay (IntPtr native) : base (native)
         {
+        }
+        
+        protected override void OnRealized ()
+        {
+            base.OnRealized ();
+            
+            Gdk.Window [] children = GdkWindow.Children;
+            for (int i = 0; i < children.Length; i++) {
+                children[i].Events |= EventMask.ButtonPressMask | EventMask.ButtonReleaseMask;
+            }
+        }
+        
+        protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
+        {
+            double x = evnt.X + Allocation.X, y = evnt.Y + Allocation.Y;
+            WithChildAt (x, y, child => child.ButtonPress (x - child.Left, y - child.Top, evnt.Button));
+            return base.OnButtonPressEvent (evnt);
+        }
+        
+        protected override bool OnButtonReleaseEvent (Gdk.EventButton evnt)
+        {
+            double x = evnt.X + Allocation.X, y = evnt.Y + Allocation.Y;
+            WithChildAt (x, y, child => child.ButtonRelease ());
+            return base.OnButtonReleaseEvent (evnt);
+        }
+        
+        protected override bool OnMotionNotifyEvent (EventMotion evnt)
+        {
+            double x = evnt.X + Allocation.X, y = evnt.Y + Allocation.Y;
+            WithChildAt (x, y, child => child.PointerMotion (x - child.Left, y - child.Top));
+            return base.OnMotionNotifyEvent (evnt);
         }
         
         protected override void OnMapped ()
@@ -73,21 +121,50 @@ namespace Banshee.Gui.Widgets
         
         protected override void OnThemeChanged ()
         {
+            theme = new GtkTheme (this);
+            foreach (ICanvasItem child in children) {
+                child.Theme = theme;
+            }
+        
             if (text_layout != null) {
                 text_layout.Dispose ();
                 text_layout = null;
             }
         }
+        
+        protected override void OnSizeRequested (ref Requisition requisition)
+        {
+            double slider_width, slider_height;
+            slider.SizeRequest (out slider_width, out slider_height);
+            requisition.Height = (int)Math.Ceiling (2 * ComputeTextHeight () + slider_height);
+        }
+        
+        protected override void OnSizeAllocated (Gdk.Rectangle allocation)
+        {
+            base.OnSizeAllocated (allocation);
+            
+            slider.Left = ContentXOffset;
+            slider.Top = Allocation.Y + text_y;
+            slider.Width = ContentWidth;
+            
+            position_label.Left = slider.Left;
+            position_label.Top = slider.Top + slider.Height;
+            position_label.Width = slider.Width;
+        }
 
+        private int ComputeTextHeight ()
+        {
+            using (var metrics = PangoContext.GetMetrics (Style.FontDescription, PangoContext.Language)) {
+                return ((int)(metrics.Ascent + metrics.Descent) + 512) >> 10; // PANGO_PIXELS(d)
+            }
+        }
+        
         private void EnsureLayout (Context cr)
         {
             if (text_layout == null) {
                 text_layout = CairoExtensions.CreateLayout (this, cr);
                 text_layout.Ellipsize = Pango.EllipsizeMode.End;
-
-                Pango.FontMetrics metrics = PangoContext.GetMetrics (Style.FontDescription, PangoContext.Language);
-                text_y = ((int)(metrics.Ascent + metrics.Descent) + 512) >> 10; // PANGO_PIXELS(d)
-                metrics.Dispose ();
+                text_y = ComputeTextHeight ();
             }
         }
 
@@ -164,10 +241,10 @@ namespace Banshee.Gui.Widgets
         private void RenderSlider (Context cr)
         {
             EnsureLayout (cr);
-            cr.Rectangle (ContentXOffset + 0.5, Allocation.Y + text_y, ContentWidth - 1, 10);
-            cr.LineWidth = 1.0;
-            cr.Color = new Cairo.Color (0, 0, 0);
-            cr.Stroke ();
+            
+            foreach (ICanvasItem child in children) {
+                child.Render (cr);
+            }
         }
 
         private const double ArtworkSpacing = 10;
@@ -183,5 +260,35 @@ namespace Banshee.Gui.Widgets
         protected override bool CanRenderIdle {
             get { return true; }
         }
+        
+#region Should be CanvasContainer : ICanvasItem
+
+        private List<ICanvasItem> children = new List<ICanvasItem> ();
+        
+        public delegate void CanvasItemHandler (ICanvasItem item);
+        
+        private ICanvasItem GetChildAt (double x, double y)
+        {   
+            foreach (ICanvasItem child in children) {
+                if (x >= child.Left && x <= child.Left + child.Width &&
+                    y >= child.Top && y <= child.Top + child.Height) {
+                    return child;
+                }
+            }
+            
+            return null;
+        }
+        
+        private ICanvasItem WithChildAt (double x, double y, CanvasItemHandler handler)
+        {
+            ICanvasItem child = GetChildAt (x, y);
+            if (child != null && handler != null) {
+                handler (child);
+            }
+            return child;
+        }
+        
+#endregion
+
     }
 }
