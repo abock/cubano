@@ -95,7 +95,7 @@ namespace Banshee.Gui.Widgets
             } else if (IsLoading) {
                 UpdateLabel (Catalog.GetString ("Loading..."));
             } else if (IsIdle) {
-                UpdateLabel (Catalog.GetString ("Idle"));
+                UpdateLabel (String.Empty);
             } else if (duration == Int64.MaxValue) {
                 UpdateLabel (FormatDuration ((long)position));
             } else if (position == 0 && duration == 0) {

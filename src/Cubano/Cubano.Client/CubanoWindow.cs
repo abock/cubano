@@ -48,6 +48,8 @@ using Banshee.Widgets;
 using Banshee.Collection.Gui;
 using Banshee.Sources.Gui;
 
+using Hyena.Gui.Canvas;
+
 namespace Cubano.Client
 {
     public class CubanoWindow : BaseClientWindow, IClientWindow, IDBusObjectName, IService, IDisposable
@@ -106,7 +108,7 @@ namespace Cubano.Client
             toolbar_alignment.Add (header_toolbar);
             toolbar_alignment.ShowAll ();
             
-            primary_vbox.PackEnd (toolbar_alignment, false, false, 0);
+           // primary_vbox.PackEnd (toolbar_alignment, false, false, 0);
             
             Widget next_button = new NextButton (ActionService);
             next_button.Show ();
@@ -123,6 +125,30 @@ namespace Cubano.Client
             ConnectedVolumeButton volume_button = new ConnectedVolumeButton ();
             volume_button.Show ();
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", volume_button);
+            
+            var host = new CanvasHost ();
+            
+            var tile1 = new CanvasTestTile () { Width = 50, Height = 50 };
+            var tile2_1 = new CanvasTestTile () { Width = 50, Height = 50 };
+            var tile2_2 = new CanvasTestTile () { Width = 50, Height = 50, Expanded = true };
+            var tile2_3 = new CanvasTestTile () { Width = 50, Height = 50 };
+            var tile3 = new CanvasTestTile () { Width = 50, Height = 50 };
+            var tile4 = new CanvasTestTile () { Width = 50, Height = 50, Expanded = true };
+            
+            var tile2_box = new CanvasHBox () { BorderWidth = 20, Spacing = 20, Expanded = true };
+            tile2_box.Add (tile2_1);
+            tile2_box.Add (tile2_2);
+            tile2_box.Add (tile2_3);
+            
+            var container = new CanvasVBox () { BorderWidth = 10, Spacing = 10 };
+            container.Add (tile1);
+            container.Add (tile2_box);
+            container.Add (tile3);
+            
+            host.Add (container);
+            
+            primary_vbox.PackStart (host, true, true, 0);
+            host.Show ();
         }
         
 

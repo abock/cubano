@@ -40,6 +40,7 @@ namespace Hyena.Gui.Canvas
         ICanvasItem Parent { get; set; }
     
         void Render (Context cr);
+        void Layout ();
         void SizeRequest (out double width, out double height);
         
         void ButtonPress (double x, double y, uint button);
@@ -47,6 +48,9 @@ namespace Hyena.Gui.Canvas
         void PointerMotion (double x, double y);
         
         Theme Theme { get; set; }
+        
+        bool Visible { get; set; }
+        bool Expanded { get; set; }
         
         double Left { get; set; }
         double Top { get; set; }
@@ -70,7 +74,7 @@ namespace Hyena.Gui.Canvas
         public virtual void Render (Context cr)
         {
             cr.Save ();
-            cr.Translate (Left + PaddingLeft, Top + PaddingTop);
+            cr.Translate (ParentLeft + Left + PaddingLeft, ParentTop + Top + PaddingTop);
             cr.Antialias = Cairo.Antialias.Default;
             ClippedRender (cr);
             cr.Restore ();
@@ -84,6 +88,10 @@ namespace Hyena.Gui.Canvas
         {
             width = PaddingLeft + PaddingRight;
             height = PaddingTop + PaddingBottom;
+        }
+        
+        public virtual void Layout ()
+        {
         }
         
         public void ButtonPress (double x, double y, uint button)
@@ -211,6 +219,30 @@ namespace Hyena.Gui.Canvas
         internal protected int ButtonPressed {
             get { return button_pressed; }
             set { button_pressed = value; }
+        }
+        
+        public double BorderWidth {
+            set { PaddingLeft = PaddingRight = PaddingTop = PaddingBottom = value; }
+        }
+        
+        private bool expanded;
+        public bool Expanded {
+            get { return expanded; }
+            set { expanded = value; }
+        }
+        
+        private bool visible = true;
+        public bool Visible {
+            get { return visible; }
+            set { visible = value; }
+        }
+        
+        protected double ParentLeft {
+            get { return Parent == null ? 0 : Parent.Left; }
+        }
+        
+        protected double ParentTop {
+            get { return Parent == null ? 0 : Parent.Top; }
         }
     }
 }

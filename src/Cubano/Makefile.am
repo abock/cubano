@@ -1,11 +1,17 @@
 ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 
+ass:
+
 SOURCES =  \
+	Cubano.Client/CanvasBox.cs \
+	Cubano.Client/CanvasContainer.cs \
+	Cubano.Client/CanvasHost.cs \
 	Cubano.Client/CanvasItem.cs \
 	Cubano.Client/CanvasLabel.cs \
 	Cubano.Client/CanvasPositionLabel.cs \
 	Cubano.Client/CanvasSeekSlider.cs \
 	Cubano.Client/CanvasSlider.cs \
+	Cubano.Client/CanvasTestTile.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoWindow.cs \
 	Cubano.Client/SeekableTrackInfoDisplay.cs
