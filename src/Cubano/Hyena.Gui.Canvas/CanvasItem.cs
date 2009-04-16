@@ -38,7 +38,6 @@ namespace Hyena.Gui.Canvas
         private Theme theme;
         private Thickness margin;
         private Size desired_size;
-        private Size actual_size;
         private double height = Double.NaN;
         private double width = Double.NaN;
         private Dictionary<string, object> properties;
@@ -70,21 +69,26 @@ namespace Hyena.Gui.Canvas
         
         public virtual void Arrange ()
         {
-            ActualSize = Measure ();
         }
         
-        public virtual Size Measure ()
+        public virtual Size Measure (Size available)
         {
+            double m_x = Margin.Left + Margin.Right;
+            double m_y = Margin.Top + Margin.Bottom;
+            
+            double a_w = available.Width - m_x;
+            double a_h = available.Height - m_y;
+            
             return DesiredSize = new Size (
-                Width == Double.NaN ? Allocation.Width : (Width + Margin.Left + Margin.Right),
-                Height == Double.NaN ? Allocation.Height : (Height + Margin.Top + Margin.Bottom)
+                Math.Max (0, Math.Min (a_w, Double.IsNaN (Width) ? a_w : Width + m_x)),
+                Math.Max (0, Math.Min (a_h, Double.IsNaN (Height) ? a_h : Height + m_y))
             );
         }
         
         public virtual void Render (Cairo.Context cr)
         {
             cr.Save ();
-            cr.Translate (Allocation.Left + Margin.Left, Allocation.Top + Margin.Top);
+            cr.Translate (ContentAllocation.X, ContentAllocation.Y);
             cr.Antialias = Cairo.Antialias.Default;
             ClippedRender (cr);
             cr.Restore ();
@@ -145,11 +149,6 @@ namespace Hyena.Gui.Canvas
             protected set { desired_size = value; }
         }
         
-        public Size ActualSize {
-            get { return actual_size; }
-            set { actual_size = value; }
-        }
-        
         public double Width {
             get { return width; }
             set { width = value; }
@@ -159,18 +158,25 @@ namespace Hyena.Gui.Canvas
             get { return height; }
             set { height = value; }
         }
-        
-        protected double RenderWidth {
-            get { return Math.Max (0, Allocation.Width - Margin.Left - Margin.Right); }
-        }
-        
-        protected double RenderHeight {
-            get { return Math.Max (0, Allocation.Height - Margin.Top - Margin.Bottom); }
-        }
-        
+
         public Rect Allocation {
             get { return allocation; }
             set { allocation = value; }
+        }
+        
+        public Rect ContentAllocation {
+            get {
+                return new Rect (
+                    Allocation.X + Margin.Left, 
+                    Allocation.Y + Margin.Top,
+                    Math.Max (0, Allocation.Width - Margin.Left - Margin.Right),
+                    Math.Max (0, Allocation.Height - Margin.Top - Margin.Bottom)
+                );
+            }
+        }
+        
+        public Size ContentSize {
+            get { return new Size (ContentAllocation.Width, ContentAllocation.Height); }
         }
         
         public bool Visible {

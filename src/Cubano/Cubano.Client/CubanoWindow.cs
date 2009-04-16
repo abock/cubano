@@ -145,13 +145,30 @@ namespace Cubano.Client
             container.Add (tile2_box);
             container.Add (tile3);*/
             
-            var panel = new StackPanel () { Margin = new Thickness (20) };
+            this.Resize (500, 300);
             
-            var tile1 = new TestTile () { Width = 50, Height = 50, Margin = new Thickness (10) };
-            var tile2 = new TestTile () { Width = 50, Height = 50, Margin = new Thickness (10) };
+            var panel = new StackPanel () { Margin = new Thickness (20), Orientation = Hyena.Gui.Canvas.Orientation.Vertical  };
+            
+            var tile1 = new TestTile () { Width = 50, Height = 50};
+            var tile2 = new TestTile () ;
+            var tile4 = new TestTile () ;
+            var tile5 = new TestTile () { Width = 50, Height = 50 };
+            
+            var tile21 = new TestTile () { Width = 50, Height = 50 };
+            var tile22 = new TestTile ();
+            var tile23 = new TestTile () { Width = 50, Height = 50 };
+            
+            var panel2 = new StackPanel ();
+            panel2.Children.Add (tile21);
+            panel2.Children.Add (tile22);
+            panel2.Children.Add (tile23);
             
             panel.Children.Add (tile1);
             panel.Children.Add (tile2);
+            panel.Children.Add (panel2);
+            panel.Children.Add (tile4);
+            panel.Children.Add (tile5);
+            panel.Spacing = 10;
             
             host.Add (panel);
             

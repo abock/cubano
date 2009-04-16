@@ -37,27 +37,22 @@ namespace Hyena.Gui.Canvas
             children = new CanvasItemCollection (this);
         }
 
-        public override Size Measure ()
+        public override Size Measure (Size available)
         {
             Size size = new Size (0, 0);
             
             foreach (var child in Children) {
                 if (child.Visible) {
-                    var child_size = child.Measure ();
+                    var child_size = child.Measure (available);
                     if (child_size.Width > size.Width) size.Width = child_size.Width;
                     if (child_size.Height > size.Height) size.Height = child_size.Height;
                 }
             }
             
-            Console.WriteLine ("MAX CHILD SIZE: {0}", size);
-            
             size.Width += Margin.Left + Margin.Right;
             size.Height += Margin.Top + Margin.Bottom;
             
-            Console.WriteLine ("DESIRED PARENT SIZE: {0}", size);
-            
-            DesiredSize = size;
-            return DesiredSize;
+            return DesiredSize = size;
         }
         
         public override void Arrange ()
@@ -66,28 +61,17 @@ namespace Hyena.Gui.Canvas
                 if (!child.Visible) {
                     continue;
                 }
-                
-                double max_width = Math.Max (0, Allocation.Width - Margin.Left - Margin.Right);
-                double max_height = Math.Max (0, Allocation.Width - Margin.Left - Margin.Right);
-                
-                Size size = new Size (0, 0);
-                size.Width = Math.Min (max_width, child.DesiredSize.Width);
-                size.Height = Math.Min (max_height, child.DesiredSize.Height);
-                child.ActualSize = size;
-                
-                Console.WriteLine ("DESIRED CHILD: {0}x{1}", child.DesiredSize.Width, child.DesiredSize.Height);
-                
-                child.Allocation = new Rect (0, 0, size.Width, size.Height);
+                                
+                child.Allocation = new Rect (0, 0, 
+                    Math.Min (ContentAllocation.Width, child.DesiredSize.Width), 
+                    Math.Min (ContentAllocation.Height, child.DesiredSize.Height));
+                    
                 child.Arrange ();
             }
         }
 
         protected override void ClippedRender (Cairo.Context cr)
         {
-            cr.Color = new Cairo.Color (1, 0, 0, 0.5);
-            cr.Rectangle (0, 0, RenderWidth, RenderHeight);
-            cr.Fill ();
-        
             foreach (var child in Children) {
                 if (child.Visible) {
                     child.Render (cr);

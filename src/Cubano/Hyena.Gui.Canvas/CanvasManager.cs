@@ -41,7 +41,7 @@ namespace Hyena.Gui.Canvas
         
         public void QueueMeasure (CanvasItem item)
         {
-            item.Measure ();
+            item.Measure (item.ContentSize);
         }
     }
 }

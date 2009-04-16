@@ -107,7 +107,7 @@ namespace Hyena.Gui.Canvas
             
             if (canvas_child != null) {
                 canvas_child.Allocation = new Rect (0, 0, Allocation.Width, Allocation.Height);
-                canvas_child.Measure ();
+                canvas_child.Measure (new Size (Allocation.Width, Allocation.Height));
                 canvas_child.Arrange ();
             }
         }
@@ -115,7 +115,7 @@ namespace Hyena.Gui.Canvas
         protected override void OnSizeRequested (ref Gtk.Requisition requisition)
         {
             if (canvas_child != null) {
-                Size size = canvas_child.Measure ();
+                Size size = canvas_child.Measure (new Size (requisition.Width, requisition.Height));
                 requisition.Width = (int)Math.Ceiling (size.Width);
                 requisition.Height = (int)Math.Ceiling (size.Height);
             }
