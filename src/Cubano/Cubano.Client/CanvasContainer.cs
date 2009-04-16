@@ -27,7 +27,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Hyena.Gui.Canvas
+namespace Hyena.Gui.Canvas2
 {
     public class CanvasContainer : CanvasItem
     {

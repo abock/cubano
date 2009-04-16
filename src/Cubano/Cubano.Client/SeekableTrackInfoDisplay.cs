@@ -35,7 +35,7 @@ using Cairo;
 using Hyena.Gui;
 using Hyena.Gui.Theming;
 using Hyena.Gui.Theatrics;
-using Hyena.Gui.Canvas;
+using Hyena.Gui.Canvas2;
 
 using Banshee.Collection;
 using Banshee.Collection.Gui;

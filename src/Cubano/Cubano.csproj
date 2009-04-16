@@ -33,6 +33,17 @@
     <Compile Include="Cubano.Client\CanvasHost.cs" />
     <Compile Include="Cubano.Client\CanvasBox.cs" />
     <Compile Include="Cubano.Client\CanvasTestTile.cs" />
+    <Compile Include="Hyena.Gui.Canvas\Thickness.cs" />
+    <Compile Include="Hyena.Gui.Canvas\Size.cs" />
+    <Compile Include="Hyena.Gui.Canvas\CanvasItem.cs" />
+    <Compile Include="Hyena.Gui.Canvas\CanvasManager.cs" />
+    <Compile Include="Hyena.Gui.Canvas\CanvasHost.cs" />
+    <Compile Include="Hyena.Gui.Canvas\TestTile.cs" />
+    <Compile Include="Hyena.Gui.Canvas\Rect.cs" />
+    <Compile Include="Hyena.Gui.Canvas\Panel.cs" />
+    <Compile Include="Hyena.Gui.Canvas\CanvasItemCollection.cs" />
+    <Compile Include="Hyena.Gui.Canvas\StackPanel.cs" />
+    <Compile Include="Hyena.Gui.Canvas\Orientation.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
@@ -80,4 +91,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="Hyena.Gui.Canvas\" />
+  </ItemGroup>
 </Project>

@@ -30,7 +30,7 @@ using Gdk;
 
 using Hyena.Gui.Theming;
 
-namespace Hyena.Gui.Canvas
+namespace Hyena.Gui.Canvas2
 {
     public class CanvasHost : Widget
     {

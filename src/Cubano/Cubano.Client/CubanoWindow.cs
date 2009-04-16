@@ -128,7 +128,7 @@ namespace Cubano.Client
             
             var host = new CanvasHost ();
             
-            var tile1 = new CanvasTestTile () { Width = 50, Height = 50 };
+           /* var tile1 = new CanvasTestTile () { Width = 50, Height = 50 };
             var tile2_1 = new CanvasTestTile () { Width = 50, Height = 50 };
             var tile2_2 = new CanvasTestTile () { Width = 50, Height = 50, Expanded = true };
             var tile2_3 = new CanvasTestTile () { Width = 50, Height = 50 };
@@ -143,9 +143,17 @@ namespace Cubano.Client
             var container = new CanvasVBox () { BorderWidth = 10, Spacing = 10 };
             container.Add (tile1);
             container.Add (tile2_box);
-            container.Add (tile3);
+            container.Add (tile3);*/
             
-            host.Add (container);
+            var panel = new StackPanel () { Margin = new Thickness (20) };
+            
+            var tile1 = new TestTile () { Width = 50, Height = 50, Margin = new Thickness (10) };
+            var tile2 = new TestTile () { Width = 50, Height = 50, Margin = new Thickness (10) };
+            
+            panel.Children.Add (tile1);
+            panel.Children.Add (tile2);
+            
+            host.Add (panel);
             
             primary_vbox.PackStart (host, true, true, 0);
             host.Show ();

@@ -30,7 +30,7 @@ using Cairo;
 using Hyena.Gui;
 using Hyena.Gui.Theming;
 
-namespace Hyena.Gui.Canvas
+namespace Hyena.Gui.Canvas2
 {    
     public class CanvasSlider : CanvasItem
     {

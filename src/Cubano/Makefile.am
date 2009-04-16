@@ -14,7 +14,18 @@ SOURCES =  \
 	Cubano.Client/CanvasTestTile.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoWindow.cs \
-	Cubano.Client/SeekableTrackInfoDisplay.cs
+	Cubano.Client/SeekableTrackInfoDisplay.cs \
+	Hyena.Gui.Canvas/CanvasHost.cs \
+	Hyena.Gui.Canvas/CanvasItem.cs \
+	Hyena.Gui.Canvas/CanvasItemCollection.cs \
+	Hyena.Gui.Canvas/CanvasManager.cs \
+	Hyena.Gui.Canvas/Orientation.cs \
+	Hyena.Gui.Canvas/Panel.cs \
+	Hyena.Gui.Canvas/Rect.cs \
+	Hyena.Gui.Canvas/Size.cs \
+	Hyena.Gui.Canvas/StackPanel.cs \
+	Hyena.Gui.Canvas/TestTile.cs \
+	Hyena.Gui.Canvas/Thickness.cs
 
 REFERENCES_PACKAGES =  \
 	-pkg:banshee-1-core \

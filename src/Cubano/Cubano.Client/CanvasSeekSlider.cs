@@ -26,7 +26,7 @@
 
 using System;
 
-using Hyena.Gui.Canvas;
+using Hyena.Gui.Canvas2;
 
 using Banshee.MediaEngine;
 using Banshee.ServiceStack;

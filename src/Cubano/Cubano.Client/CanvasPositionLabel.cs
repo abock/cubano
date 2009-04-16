@@ -30,7 +30,7 @@ using Mono.Unix;
 
 using Hyena.Gui;
 using Hyena.Gui.Theming;
-using Hyena.Gui.Canvas;
+using Hyena.Gui.Canvas2;
 
 using Banshee.Widgets;
 

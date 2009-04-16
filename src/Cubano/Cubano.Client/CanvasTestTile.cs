@@ -29,7 +29,7 @@ using System;
 using Cairo;
 using Hyena.Gui;
 
-namespace Hyena.Gui.Canvas
+namespace Hyena.Gui.Canvas2
 {
     public class CanvasTestTile : CanvasItem
     {
