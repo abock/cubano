@@ -44,6 +44,7 @@
     <Compile Include="Hyena.Gui.Canvas\CanvasItemCollection.cs" />
     <Compile Include="Hyena.Gui.Canvas\StackPanel.cs" />
     <Compile Include="Hyena.Gui.Canvas\Orientation.cs" />
+    <Compile Include="Hyena.Gui.Canvas\TextBlock.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">

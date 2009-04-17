@@ -25,6 +25,7 @@ SOURCES =  \
 	Hyena.Gui.Canvas/Size.cs \
 	Hyena.Gui.Canvas/StackPanel.cs \
 	Hyena.Gui.Canvas/TestTile.cs \
+	Hyena.Gui.Canvas/TextBlock.cs \
 	Hyena.Gui.Canvas/Thickness.cs
 
 REFERENCES_PACKAGES =  \
