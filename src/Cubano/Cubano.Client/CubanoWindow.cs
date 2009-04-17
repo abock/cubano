@@ -114,13 +114,13 @@ namespace Cubano.Client
             next_button.Show ();
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/NextArrowButton", next_button);
             
-            ConnectedSeekSlider seek_slider = new ConnectedSeekSlider ();
-            seek_slider.Show ();
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
+            //ConnectedSeekSlider seek_slider = new ConnectedSeekSlider ();
+            //seek_slider.Show ();
+            //ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
             
-            SeekableTrackInfoDisplay track_info_display = new SeekableTrackInfoDisplay ();
-            track_info_display.Show ();
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", track_info_display, true);
+            //SeekableTrackInfoDisplay track_info_display = new SeekableTrackInfoDisplay ();
+            //track_info_display.Show ();
+            //ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", track_info_display, true);
             
             ConnectedVolumeButton volume_button = new ConnectedVolumeButton ();
             volume_button.Show ();
@@ -165,7 +165,8 @@ namespace Cubano.Client
                         }
                     },
                     new TestTile () { Width = 100 },
-                    new TestTile ()
+                    new TestTile (),
+                    new SeekableTrackInfoDisplay ()
                 }
             });
             
