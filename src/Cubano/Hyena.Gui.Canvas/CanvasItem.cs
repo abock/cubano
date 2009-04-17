@@ -87,11 +87,13 @@ namespace Hyena.Gui.Canvas
         
         public virtual void Render (Cairo.Context cr)
         {
-            cr.Save ();
-            cr.Translate (ContentAllocation.X, ContentAllocation.Y);
-            cr.Antialias = Cairo.Antialias.Default;
-            ClippedRender (cr);
-            cr.Restore ();
+            if (ContentAllocation.Width > 0 && ContentAllocation.Height > 0) {
+                cr.Save ();
+                cr.Translate (ContentAllocation.X, ContentAllocation.Y);
+                cr.Antialias = Cairo.Antialias.Default;
+                ClippedRender (cr);
+                cr.Restore ();
+            }
         }
         
         protected virtual void ClippedRender (Cairo.Context cr)
@@ -115,14 +117,14 @@ namespace Hyena.Gui.Canvas
         }
         
         internal CanvasManager Manager {
-            get { return manager; }
+            get { return manager ?? (Parent != null ? Parent.Manager : null); }
             set { manager = value; }
         }
         
         public CanvasItem RootAncestor {
             get {
-                CanvasItem root = Parent;
-                while (root != null) {
+                CanvasItem root = Parent ?? this;
+                while (root != null && root.Parent != null) {
                     root = root.Parent;
                 }
                 return root;
