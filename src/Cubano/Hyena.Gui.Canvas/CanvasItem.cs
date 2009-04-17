@@ -89,7 +89,7 @@ namespace Hyena.Gui.Canvas
         {
             if (ContentAllocation.Width > 0 && ContentAllocation.Height > 0) {
                 cr.Save ();
-                cr.Translate (ContentAllocation.X, ContentAllocation.Y);
+                cr.Translate (Math.Round (ContentAllocation.X), Math.Round (ContentAllocation.Y));
                 cr.Antialias = Cairo.Antialias.Default;
                 ClippedRender (cr);
                 cr.Restore ();
@@ -179,6 +179,10 @@ namespace Hyena.Gui.Canvas
         
         public Size ContentSize {
             get { return new Size (ContentAllocation.Width, ContentAllocation.Height); }
+        }
+        
+        protected Size RenderSize {
+            get { return new Size (Math.Round (ContentAllocation.Width), Math.Round (ContentAllocation.Height)); }
         }
         
         public bool Visible {

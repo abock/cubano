@@ -43,7 +43,7 @@ namespace Hyena.Gui.Canvas
         
         protected override void ClippedRender (Context cr)
         {
-            CairoExtensions.RoundedRectangle (cr, 0, 0, ContentAllocation.Width, ContentAllocation.Height, 5);
+            CairoExtensions.RoundedRectangle (cr, 0, 0, RenderSize.Width, RenderSize.Height, 5);
             cr.Color = color;
             cr.Fill ();
         }
