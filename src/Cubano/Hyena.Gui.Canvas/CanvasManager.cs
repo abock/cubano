@@ -30,8 +30,11 @@ namespace Hyena.Gui.Canvas
 {
     public class CanvasManager
     {
-        public CanvasManager ()
+        private object host;
+    
+        public CanvasManager (object host)
         {
+            this.host = host;
         }
         
         public void QueueArrange (CanvasItem item)
@@ -42,6 +45,10 @@ namespace Hyena.Gui.Canvas
         public void QueueMeasure (CanvasItem item)
         {
             item.Measure (item.ContentSize);
+        }
+        
+        public object Host {
+            get { return host; }
         }
     }
 }
