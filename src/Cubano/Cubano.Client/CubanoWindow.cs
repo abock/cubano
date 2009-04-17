@@ -158,7 +158,10 @@ namespace Cubano.Client
                             new TestTile () { Height = 50 },
                             new TestTile () { Margin = new Thickness (10) },
                             new TestTile () { Height = 75 },
-                            new TextBlock () { Markup = "Hello from the half-assed Silverlight written in just C# and Cairo, yay!" }
+                            new TextBlock () { 
+                                Markup = "Hello from the half-assed Silverlight written in just C# and Cairo, yay!",
+                                Margin = new Thickness (5)
+                            }
                         }
                     },
                     new TestTile () { Width = 100 },

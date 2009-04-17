@@ -108,7 +108,6 @@ namespace Hyena.Gui.Canvas
             
             if (canvas_child != null) {
                 canvas_child.Allocation = new Rect (0, 0, Allocation.Width, Allocation.Height);
-                canvas_child.Measure (new Size (Allocation.Width, Allocation.Height));
                 canvas_child.Arrange ();
             }
         }

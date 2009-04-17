@@ -40,7 +40,7 @@ namespace Hyena.Gui.Canvas
         public override Size Measure (Size available)
         {
             Size result = new Size (0, 0);
-
+            
             foreach (var child in Children) {
                 if (!child.Visible) {
                     continue;
@@ -83,6 +83,8 @@ namespace Hyena.Gui.Canvas
                 if (!child.Visible) {
                     continue;
                 }
+                
+                child.Measure (ContentSize);
                 
                 visible_child_count++;
                 

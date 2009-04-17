@@ -32,6 +32,7 @@ namespace Hyena.Gui.Canvas
     {
         private string markup;
         private Pango.Layout layout;
+        private bool remeasure = true;
     
         public TextBlock ()
         {
@@ -52,6 +53,11 @@ namespace Hyena.Gui.Canvas
                 layout = CairoExtensions.CreateLayout (widget, cr);
             }
             
+            if (remeasure) {
+                remeasure = false;
+                Measure (ContentSize);
+            }
+                        
             return layout != null;
         }
         
@@ -74,9 +80,6 @@ namespace Hyena.Gui.Canvas
             // Hack, as this prevents the TextBlock from 
             // being flexible in a Vertical StackPanel 
             Height = DesiredSize.Height;
-            
-            Console.WriteLine (available.Width);
-            Console.WriteLine (text_h);
             
             return DesiredSize;
         }
