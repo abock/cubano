@@ -37,11 +37,12 @@ namespace Hyena.Gui.Canvas
         private Gdk.Window event_window;
         private CanvasItem canvas_child;
         private Theme theme;
-        private CanvasManager manager = new CanvasManager ();
+        private CanvasManager manager;
     
         public CanvasHost ()
         {
             WidgetFlags |= WidgetFlags.NoWindow;
+            manager = new CanvasManager (this);
         }
         
         protected CanvasHost (IntPtr native) : base (native)
