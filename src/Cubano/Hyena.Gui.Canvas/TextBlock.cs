@@ -30,12 +30,13 @@ namespace Hyena.Gui.Canvas
 {
     public class TextBlock : CanvasItem
     {
-        private string markup;
         private Pango.Layout layout;
-        private bool remeasure = true;
     
         public TextBlock ()
         {
+            InstallProperty<string> ("Text", String.Empty);
+            InstallProperty<double> ("HorizontalAlignment", 0.5);
+            InstallProperty<double> ("VerticalAlignment", 0.0);
         }
         
         private bool EnsureLayout ()
@@ -52,11 +53,6 @@ namespace Hyena.Gui.Canvas
             using (var cr = Gdk.CairoHelper.Create (widget.GdkWindow)) {
                 layout = CairoExtensions.CreateLayout (widget, cr);
             }
-            
-            if (remeasure) {
-                remeasure = false;
-                Measure (ContentSize);
-            }
                         
             return layout != null;
         }
@@ -71,11 +67,10 @@ namespace Hyena.Gui.Canvas
             
             int text_w, text_h;
             layout.Width = (int)(Pango.Scale.PangoScale * available.Width);
-            layout.SetMarkup (Markup);
+            layout.SetMarkup (Text);
             layout.GetPixelSize (out text_w, out text_h);
             
-            DesiredSize = new Size (available.Width,
-                text_h + Margin.Top + Margin.Bottom);
+            DesiredSize = new Size (available.Width, text_h + Margin.Top + Margin.Bottom);
 
             // Hack, as this prevents the TextBlock from 
             // being flexible in a Vertical StackPanel 
@@ -95,14 +90,46 @@ namespace Hyena.Gui.Canvas
                 layout.Width = layout_width;
             }
             
-            cr.Color = new Cairo.Color (1, 0, 0);
+            int text_width, text_height;
+            layout.GetPixelSize (out text_width, out text_height);
+            
+            cr.MoveTo (
+                Math.Round ((RenderSize.Width - text_width) * HorizontalAlignment),
+                Math.Round ((RenderSize.Height - text_height) * VerticalAlignment)
+            );
+            
+            Cairo.Color color = new Cairo.Color (1, 0, 0);
+            color.A = GetValue<double> ("Opacity", 1.0);
+            cr.Color = color;
             Pango.CairoHelper.ShowLayout (cr, layout);
             cr.Fill ();
         }
         
-        public string Markup {
-            get { return markup; }
-            set { markup = value; }
+        protected override void OnPropertyChange (string property, object value)
+        {
+            switch (property) {
+                case "Text":
+                    if (layout != null) {
+                        layout.SetMarkup ((string)value);
+                        InvalidateMeasure ();
+                    }
+                    break;
+            }
+        }
+        
+        public string Text {
+            get { return GetValue<string> ("Text"); }
+            set { SetValue<string> ("Text", value); }
+        }
+        
+        public double HorizontalAlignment {
+            get { return GetValue<double> ("HorizontalAlignment", 0.5); }
+            set { SetValue<double> ("HorizontalAlignment", value); }
+        }
+        
+        public double VerticalAlignment {
+            get { return GetValue<double> ("VerticalAlignment", 0.0); }
+            set { SetValue<double> ("VerticalAlignment", value); }
         }
     }
 }
