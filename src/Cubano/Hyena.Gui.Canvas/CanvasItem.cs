@@ -49,6 +49,7 @@ namespace Hyena.Gui.Canvas
         
         public CanvasItem ()
         {
+            InstallProperty<double> ("Opacity", 1.0);
         }
         
         public void InvalidateArrange ()
@@ -64,6 +65,19 @@ namespace Hyena.Gui.Canvas
             CanvasItem root = RootAncestor;
             if (root != null && root.Manager != null) {
                 root.Manager.QueueMeasure (this);
+            }
+        }
+
+        protected void InvalidateRender ()
+        {
+            InvalidateRender (Allocation);
+        }
+
+        protected void InvalidateRender (Rect area)
+        {
+            CanvasItem root = RootAncestor;
+            if (root != null && root.Manager != null) {
+                root.Manager.QueueRender (this, area);
             }
         }
         
@@ -190,47 +204,90 @@ namespace Hyena.Gui.Canvas
             set { visible = value; }
         }
         
+        protected void InstallProperty<T> (string property)
+        {
+            InstallProperty (property, default (T));
+        }
+        
+        protected void InstallProperty<T> (string property, T defaultValue)
+        {
+            if (properties == null) {
+                properties = new Dictionary<string, object> ();
+            }
+            
+            if (properties.ContainsKey (property)) {
+                throw new InvalidOperationException ("Property is already installed: " + property);
+            }
+            
+            properties.Add (property, defaultValue);
+        }
+        
+        protected virtual void OnPropertyChange (string property, object value)
+        {
+        }
+         
         public object this[string property] {
             get {
                 object result;
                 if (properties != null && properties.TryGetValue (property, out result)) {
                     return result;
                 }
+                
                 return result;
             }
             
             set {
-                if (properties == null) {
-                    properties = new Dictionary<string, object> ();
+                if (properties == null || !properties.ContainsKey (property)) {
+                    throw new InvalidOperationException ("Property does not exist: " + property);
+                } else if (properties[property].GetType () != value.GetType ()) {
+                    throw new InvalidOperationException ("Invalid value type " + 
+                        value.GetType () + " for property: " + property);
                 }
                 
-                if (properties.ContainsKey (property)) {
+                if (properties[property] != value) {
                     properties[property] = value;
-                } else {
-                    properties.Add (property, value);
+                    OnPropertyChange (property, value);
+                    InvalidateRender ();
                 }
             }
         }
         
         public T GetValue<T> (string property)
         {
+            return GetValue (property, default (T));
+        }
+        
+        public T GetValue<T> (string property, T fallback)
+        {
             object result = this[property];
             if (result == null) {
-                return default (T);
+                return fallback;
             }
             
             try {
                 result = Convert.ChangeType (result, typeof (T));
             } catch {
-                return default (T);
+                return fallback;
             }
             
             return (T)result;
         }
         
-        public void SetValue (string property, object value)
+        public void SetValue<T> (string property, T value)
         {
             this[property] = value;
+        }
+        
+        public T Animate<T> (T animation) where T : Animation
+        {
+            animation.Item = this;
+            AnimationManager.Instance.Animate (animation);
+            return animation;
+        }
+        
+        public DoubleAnimation AnimateDouble (string property)
+        {
+            return Animate (new DoubleAnimation (property));
         }
     }
 }
