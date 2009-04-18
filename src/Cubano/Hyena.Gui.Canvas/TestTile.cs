@@ -35,14 +35,25 @@ namespace Hyena.Gui.Canvas
     {
         private static Random rand = new Random ();
         private Color color;
+        private bool color_set;
+        
+        private bool change_on_render = true;
+        public bool ChangeOnRender {
+            get { return change_on_render; }
+            set { change_on_render = value; }
+        }
         
         public TestTile ()
         {
-            color = CairoExtensions.RgbToColor ((uint)rand.Next (0, 0xffffff));
         }
         
         protected override void ClippedRender (Context cr)
         {
+            if (!color_set || ChangeOnRender) {
+                color = CairoExtensions.RgbToColor ((uint)rand.Next (0, 0xffffff));
+                color_set = true;
+            }
+        
             CairoExtensions.RoundedRectangle (cr, 0, 0, RenderSize.Width, RenderSize.Height, 5);
             cr.Color = color;
             cr.Fill ();
