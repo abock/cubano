@@ -15,6 +15,7 @@ SOURCES =  \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoWindow.cs \
 	Cubano.Client/SeekableTrackInfoDisplay.cs \
+	Hyena.Gui.Canvas/AnimationManager.cs \
 	Hyena.Gui.Canvas/CanvasHost.cs \
 	Hyena.Gui.Canvas/CanvasItem.cs \
 	Hyena.Gui.Canvas/CanvasItemCollection.cs \
@@ -23,6 +24,7 @@ SOURCES =  \
 	Hyena.Gui.Canvas/Panel.cs \
 	Hyena.Gui.Canvas/Rect.cs \
 	Hyena.Gui.Canvas/Size.cs \
+	Hyena.Gui.Canvas/Slider.cs \
 	Hyena.Gui.Canvas/StackPanel.cs \
 	Hyena.Gui.Canvas/TestTile.cs \
 	Hyena.Gui.Canvas/TextBlock.cs \
