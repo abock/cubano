@@ -29,13 +29,14 @@
 using System;
 
 using Hyena.Gui.Canvas;
+using Hyena.Gui.Theatrics;
 
 namespace Banshee.Gui.Widgets
 {
     public class SeekableTrackInfoDisplay : StackPanel
     {
         private TextBlock title;
-        private TestTile seek_bar;
+        private Slider seek_bar;
         private StackPanel time_bar;
         private TextBlock elapsed;
         private TextBlock seek_to;
@@ -47,20 +48,60 @@ namespace Banshee.Gui.Widgets
             Orientation = Orientation.Vertical;
             
             Children.Add (title = new TextBlock ());
-            Children.Add (seek_bar = new TestTile ());
+            Children.Add (seek_bar = new Slider ());
             Children.Add (time_bar = new StackPanel () {
                 Spacing = 10,
                 Children = {
-                    (elapsed = new TextBlock ()),
-                    (seek_to = new TextBlock ()),
-                    (remaining = new TextBlock ())
+                    (elapsed = new TextBlock ()   { HorizontalAlignment = 0.0 }),
+                    (seek_to = new TextBlock ()   { HorizontalAlignment = 0.5 }),
+                    (remaining = new TextBlock () { HorizontalAlignment = 1.0 })
                 }
-           });
+            });
            
-           title.Markup = "Some Awesome Title";
-           elapsed.Markup = "0:35";
-           seek_to.Markup = "1:59";
-           remaining.Markup = "-3:18";
+            int str_idx = 0;
+            string [] strings = {
+                "The Brighter side of Suffering",
+                "As Blood Runs Black",
+                "Allegiance"
+            };
+              
+            var fade = new DoubleAnimation ("Opacity")
+                .Throttle (500)
+                .Compose ((a, p) => {
+                    var opacity = a.StartState == 0 ? p : 1 - p;
+                    if (p == 1) {
+                        if (a.StartState == 1) {
+                            title.Text = strings[(str_idx = (str_idx + 1) % strings.Length)];
+                        }
+                        
+                        if (a.ToValue == 1) {
+                            a.Expire ();
+                        } else {
+                            a.Reverse ();
+                        }
+                    }
+
+                    return opacity;
+                }).Ease (Easing.QuadraticInOut);
+                
+            title.AnimateDouble ("HorizontalAlignment")
+                .From (0)
+                .To (1)
+                .Compose ((a, p) =>
+                    p <= 0.5 
+                        ? 2 * p
+                        : 1 - (2 * (p - 0.5)))
+                .Ease (Easing.QuadraticInOut);
+            
+            GLib.Timeout.Add (5000, () => {
+                title.Animate (fade).From (1).To (0);
+                return true;
+            });
+                                    
+            title.Text = strings[str_idx];
+            elapsed.Text = "0:35";
+            seek_to.Text = "1:59";
+            remaining.Text = "-3:18";
         }
     }
 }
