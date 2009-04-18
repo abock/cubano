@@ -127,24 +127,7 @@ namespace Cubano.Client
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", volume_button);
             
             var host = new CanvasHost ();
-            
-           /* var tile1 = new CanvasTestTile () { Width = 50, Height = 50 };
-            var tile2_1 = new CanvasTestTile () { Width = 50, Height = 50 };
-            var tile2_2 = new CanvasTestTile () { Width = 50, Height = 50, Expanded = true };
-            var tile2_3 = new CanvasTestTile () { Width = 50, Height = 50 };
-            var tile3 = new CanvasTestTile () { Width = 50, Height = 50 };
-            var tile4 = new CanvasTestTile () { Width = 50, Height = 50, Expanded = true };
-            
-            var tile2_box = new CanvasHBox () { BorderWidth = 20, Spacing = 20, Expanded = true };
-            tile2_box.Add (tile2_1);
-            tile2_box.Add (tile2_2);
-            tile2_box.Add (tile2_3);
-            
-            var container = new CanvasVBox () { BorderWidth = 10, Spacing = 10 };
-            container.Add (tile1);
-            container.Add (tile2_box);
-            container.Add (tile3);*/
-            
+
             this.Resize (500, 300);
 
             host.Add (new StackPanel () {
@@ -159,7 +142,7 @@ namespace Cubano.Client
                             new TestTile () { Margin = new Thickness (10) },
                             new TestTile () { Height = 75 },
                             new TextBlock () { 
-                                Markup = "Hello from the half-assed Silverlight written in just C# and Cairo, yay!",
+                                Text = "Hello from the half-assed Silverlight written in just C# and Cairo, yay!",
                                 Margin = new Thickness (5)
                             }
                         }
