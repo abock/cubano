@@ -54,12 +54,13 @@ namespace Hyena.Gui.Canvas
                 return;
             }
             
-            if (rect == Rect.Empty) {
+            //if (rect == Rect.Empty) {
                 widget.QueueDraw ();
                 return;
-            }
+           // }
             
-            double x = rect.X, y = rect.Y;
+            double x = widget.Allocation.X + rect.X;
+            double y = widget.Allocation.Y + rect.Y;
             CanvasItem parent = item;
             
             while (parent != null) {
