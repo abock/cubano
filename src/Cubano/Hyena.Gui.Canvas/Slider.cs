@@ -36,6 +36,11 @@ namespace Hyena.Gui.Canvas
     {
         public Slider ()
         {
+            Margin = new Thickness (3);
+            MarginStyle = new ShadowMarginStyle {
+                ShadowSize = 3,
+                ShadowOpacity = 0.25
+            };
         }
         
         private void SetPendingValueFromX (double x)
@@ -68,61 +73,26 @@ namespace Hyena.Gui.Canvas
         
         protected override void ClippedRender (Cairo.Context cr)
         {   
-            int steps = ShadowSize;
-        
-            double throbber_r = ThrobberSize / 2;
-            
-            double bar_x = throbber_r;
-            double bar_y = ThrobberSize <= BarSize ? 0 : Math.Round ((ThrobberSize - BarSize) / 2);
-            double bar_w = RenderSize.Width - 2 * throbber_r;
-            double bar_h = BarSize;
-            
-            double fill_x = bar_x + steps;
-            double fill_y = bar_y + steps;
-            double fill_w = bar_w * Value - 2 * steps;
-            double fill_h = bar_h - 2 * steps;
-            
-            if (fill_w < 0) {
-                fill_w = 0;
-            }
-            
-            cr.Translate (0, 0.5);
-            
-            double throbber_o = Math.Max (throbber_r, steps) + 1;
-            double throbber_x = throbber_o + (RenderSize.Width - 2 * throbber_o) * (IsValueUpdatePending ? PendingValue : Value);
-            double throbber_y = (BarSize <= ThrobberSize ? 0 : Math.Round ((BarSize - ThrobberSize) / 2)) + throbber_r;
-            
-            throbber_x = Math.Round (throbber_x);
-            fill_w = Math.Round (fill_w);
+            double throbber_r = ThrobberSize / 2.0;
+            double throbber_x = RenderSize.Width * (IsValueUpdatePending ? PendingValue : Value);
+            double throbber_y = (Allocation.Height - ThrobberSize) / 2.0 - Margin.Top + throbber_r;
+            double bar_w = RenderSize.Width * Value;
             
             Color color = Theme.Colors.GetWidgetColor (GtkColorClass.Dark, Gtk.StateType.Active);
-
-            for (int i = 0; i < steps; i++) {
-                CairoExtensions.RoundedRectangle (cr, bar_x + i, bar_y + i,
-                    bar_w - 2 * i, bar_h - 2 * i - 1, steps - i);
-                
-                color.A = i == steps - 1 
-                    ? 0.4
-                    : 0.075 + i * 0.09;
-                
-                cr.Color = color;
-                cr.LineWidth = 1.0;
-                cr.Stroke ();
-            }
             
-            cr.Translate (0, -0.5);
+            throbber_x = Math.Round (throbber_x);
             
             Color fill_color = CairoExtensions.ColorShade (color, 0.4);
-            Color light_fill_color = CairoExtensions.ColorShade (color, 0.8);
+            Color light_fill_color = CairoExtensions.ColorShade (color, 0.3);
             fill_color.A = 1.0;
             light_fill_color.A = 1.0;
             
-            LinearGradient fill = new LinearGradient (fill_x, fill_y, fill_x, fill_y + fill_h);
+            LinearGradient fill = new LinearGradient (0, 0, 0, RenderSize.Height);
             fill.AddColorStop (0, light_fill_color);
             fill.AddColorStop (0.5, fill_color);
             fill.AddColorStop (1, light_fill_color);
             
-            cr.Rectangle (fill_x, fill_y, fill_w + 1, fill_h);
+            cr.Rectangle (0, 0, bar_w, RenderSize.Height);
             cr.Pattern = fill;
             cr.Fill ();
             
@@ -133,18 +103,12 @@ namespace Hyena.Gui.Canvas
         
         public override Size Measure (Size available)
         {
-            Height = Math.Max (ThrobberSize, BarSize);
+            Height = BarSize;
             return DesiredSize = new Size (base.Measure (available).Width, 
                 Height + Margin.Top + Margin.Bottom);
         }
         
-        private int shadow_size = 4;
-        public virtual int ShadowSize {
-            get { return shadow_size; }
-            set { shadow_size = value; }
-        }
-        
-        private double bar_size = 11;
+        private double bar_size = 3;
         public virtual double BarSize {
             get { return bar_size; }
             set { bar_size = value; }
@@ -154,10 +118,6 @@ namespace Hyena.Gui.Canvas
         public virtual double ThrobberSize {
             get { return throbber_size; }
             set { throbber_size = value; }
-        }
-        
-        public double BarAlignment {
-            get { return ThrobberSize / 2 + ShadowSize; }
         }
         
         private double value;
