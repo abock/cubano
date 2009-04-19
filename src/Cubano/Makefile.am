@@ -16,10 +16,12 @@ SOURCES =  \
 	Cubano.Client/CubanoWindow.cs \
 	Cubano.Client/SeekableTrackInfoDisplay.cs \
 	Hyena.Gui.Canvas/AnimationManager.cs \
+	Hyena.Gui.Canvas/Brush.cs \
 	Hyena.Gui.Canvas/CanvasHost.cs \
 	Hyena.Gui.Canvas/CanvasItem.cs \
 	Hyena.Gui.Canvas/CanvasItemCollection.cs \
 	Hyena.Gui.Canvas/CanvasManager.cs \
+	Hyena.Gui.Canvas/FontWeight.cs \
 	Hyena.Gui.Canvas/Orientation.cs \
 	Hyena.Gui.Canvas/Panel.cs \
 	Hyena.Gui.Canvas/Rect.cs \
@@ -28,6 +30,7 @@ SOURCES =  \
 	Hyena.Gui.Canvas/StackPanel.cs \
 	Hyena.Gui.Canvas/TestTile.cs \
 	Hyena.Gui.Canvas/TextBlock.cs \
+	Hyena.Gui.Canvas/TextWrap.cs \
 	Hyena.Gui.Canvas/Thickness.cs
 
 REFERENCES_PACKAGES =  \
