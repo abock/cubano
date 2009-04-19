@@ -31,6 +31,9 @@ using System;
 using Hyena.Gui.Canvas;
 using Hyena.Gui.Theatrics;
 
+using Banshee.Collection;
+using Banshee.Sources;
+
 namespace Banshee.Gui.Widgets
 {
     public class SeekableTrackInfoDisplay : StackPanel
@@ -131,22 +134,65 @@ namespace Banshee.Gui.Widgets
             return true;
         }
         
-        private static string [] strings = {
-            "The Brighter side of Suffering",
-            "As Blood Runs Black",
-            "Allegiance"
-        };
-        
-        private void UpdateMetadataDisplay ()
+        public void UpdateMetadataDisplay ()
         {
-            display_metadata_index = (display_metadata_index + 1) % display_metadata_states;
-            title.Text = strings[display_metadata_index];
+            if (CurrentTrack == null) {
+                title.Text = String.Empty;
+                return;
+            }
+            
+            switch ((display_metadata_index = (display_metadata_index + 1) % display_metadata_states)) {
+                case 0: title.Text = CurrentTrack.DisplayTrackTitle; break;
+                case 1: title.Text = CurrentTrack.DisplayArtistName; break;
+                case 2: title.Text = CurrentTrack.DisplayAlbumTitle; break;
+            }
+        }
+        
+        private void UpdateTick ()
+        {
+            seek_bar.Value = Math.Max (0, Math.Min (1, Duration > 0 ? Position / Duration : 0)); 
+            
+            TimeSpan duration = TimeSpan.FromMilliseconds (Duration);
+            TimeSpan position = TimeSpan.FromMilliseconds (Position);
+            
+            elapsed.Text = DurationStatusFormatters.ConfusingPreciseFormatter (position);
+            remaining.Text = "-" + DurationStatusFormatters.ConfusingPreciseFormatter (duration - position);
         }
         
         public override void Arrange ()
         {
             base.Arrange ();
             time_bar.Margin = title.Margin = new Thickness (seek_bar.Margin.Left, 0, seek_bar.Margin.Right, 0);
+        }
+        
+        private TrackInfo current_track;
+        public TrackInfo CurrentTrack {
+            get { return current_track; }
+            set { current_track = value; }
+        }
+        
+        private TrackInfo incoming_track;
+        public TrackInfo IncomingTrack {
+            get { return incoming_track; }
+            set { incoming_track = value; }
+        }
+        
+        private double duration;
+        public double Duration {
+            get { return duration; }
+            set {
+                duration = value;
+                UpdateTick ();
+            }
+        }
+        
+        private double position;
+        public double Position {
+            get { return position; }
+            set { 
+                position = value; 
+                UpdateTick ();
+            }
         }
     }
 }
