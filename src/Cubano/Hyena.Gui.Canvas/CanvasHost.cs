@@ -132,7 +132,9 @@ namespace Hyena.Gui.Canvas
             foreach (Gdk.Rectangle damage in evnt.Region.GetRectangles ()) {
                 cr.Rectangle (damage.X, damage.Y, damage.Width, damage.Height);
                 cr.Clip ();
+                cr.Translate (Allocation.X, Allocation.Y);
                 canvas_child.Render (cr);
+                cr.Translate (-Allocation.X, -Allocation.Y);
                 cr.ResetClip ();
             }
             
