@@ -52,6 +52,7 @@ namespace Hyena.Gui.Canvas
             InstallProperty<Thickness> ("Margin", new Thickness (0));
             InstallProperty<Brush> ("Foreground", Brush.Black);
             InstallProperty<Brush> ("Background", Brush.White);
+            InstallProperty<MarginStyle> ("MarginStyle", MarginStyle.None);
         }
         
         public void InvalidateArrange ()
@@ -105,9 +106,31 @@ namespace Hyena.Gui.Canvas
         {
             if (ContentAllocation.Width > 0 && ContentAllocation.Height > 0) {
                 cr.Save ();
-                cr.Translate (Math.Round (ContentAllocation.X), Math.Round (ContentAllocation.Y));
+                
+                double opacity = Opacity;
+                if (opacity < 1.0) {
+                    cr.PushGroup ();
+                }
+                
+                MarginStyle margin_style = MarginStyle;
+                if (margin_style != null && margin_style != MarginStyle.None) {
+                    cr.Translate (Math.Round (Allocation.X), Math.Round (Allocation.Y));
+                    cr.Save ();
+                    margin_style.Apply (this, cr);
+                    cr.Restore ();
+                    cr.Translate (Math.Round (Margin.Left), Math.Round (Margin.Top));
+                } else {
+                    cr.Translate (Math.Round (ContentAllocation.X), Math.Round (ContentAllocation.Y));
+                }
+                
                 cr.Antialias = Cairo.Antialias.Default;
                 ClippedRender (cr);
+                
+                if (opacity < 1.0) {
+                    cr.PopGroupToSource ();
+                    cr.PaintWithAlpha (Opacity);
+                }
+                
                 cr.Restore ();
             }
         }
@@ -165,6 +188,11 @@ namespace Hyena.Gui.Canvas
         public Thickness Margin {
             get { return GetValue<Thickness> ("Margin"); }
             set { SetValue<Thickness> ("Margin", value); }
+        }
+        
+        public MarginStyle MarginStyle {
+            get { return GetValue<MarginStyle> ("MarginStyle"); }
+            set { SetValue<MarginStyle> ("MarginStyle", value); }
         }
         
         public double Width {
@@ -245,6 +273,7 @@ namespace Hyena.Gui.Canvas
                 case "Foreground":
                 case "Background":
                 case "Opacity":
+                case "MarginStyle":
                     InvalidateRender ();
                     return true;
                 /* case "Width":
@@ -271,12 +300,19 @@ namespace Hyena.Gui.Canvas
             set {
                 if (properties == null || !properties.ContainsKey (property)) {
                     throw new InvalidOperationException ("Property does not exist: " + property);
-                } else if (properties[property].GetType () != value.GetType ()) {
+                }
+                
+                object existing = properties[property];
+                
+                Type existing_type = existing.GetType ();
+                Type new_type = value.GetType ();
+                
+                if (existing_type != new_type && !new_type.IsSubclassOf (existing_type)) {
                     throw new InvalidOperationException ("Invalid value type " + 
                         value.GetType () + " for property: " + property);
                 }
                 
-                if (properties[property] != value) {
+                if (existing != value) {
                     properties[property] = value;
                     OnPropertyChange (property, value);
                 }
@@ -294,13 +330,6 @@ namespace Hyena.Gui.Canvas
             if (result == null) {
                 return fallback;
             }
-            
-            try {
-                result = Convert.ChangeType (result, typeof (T));
-            } catch {
-                return fallback;
-            }
-            
             return (T)result;
         }
         
