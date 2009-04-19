@@ -33,6 +33,8 @@ namespace Hyena.Gui.Canvas
     public class TextBlock : CanvasItem
     {
         private Pango.Layout layout;
+        private Rect text_alloc = Rect.Empty;
+        private Rect invalidation_rect = Rect.Empty;
     
         public TextBlock ()
         {
@@ -77,7 +79,7 @@ namespace Hyena.Gui.Canvas
             layout.FontDescription.Weight = GetPangoFontWeight (FontWeight);
             layout.SetMarkup (Text);
             layout.GetPixelSize (out text_w, out text_h);
-            
+
             DesiredSize = new Size (available.Width, text_h + Margin.Top + Margin.Bottom);
 
             // Hack, as this prevents the TextBlock from 
@@ -87,7 +89,7 @@ namespace Hyena.Gui.Canvas
             return DesiredSize;
         }
         
-        protected override void ClippedRender (Context cr)
+        public override void Arrange ()
         {
             if (!EnsureLayout ()) {
                 return;
@@ -102,21 +104,48 @@ namespace Hyena.Gui.Canvas
             
             int text_width, text_height;
             layout.GetPixelSize (out text_width, out text_height);
+
+            Rect new_alloc = new Rect (
+                Math.Round ((RenderSize.Width - text_width) * HorizontalAlignment),
+                Math.Round ((RenderSize.Height - text_height) * VerticalAlignment),
+                text_width,
+                text_height);
+            
+            if (text_alloc.IsEmpty) {
+                InvalidateRender (text_alloc);
+            } else {
+                invalidation_rect = text_alloc;
+                invalidation_rect.Union (new_alloc);
+                
+                // Some padding, likely because of the pen size for
+                // showing the actual text layout in the render pass
+                invalidation_rect.X -= 2;
+                invalidation_rect.Y -= 2;
+                invalidation_rect.Width += 4;
+                invalidation_rect.Height += 4;
+                
+                InvalidateRender (invalidation_rect);
+            }
+            
+            text_alloc = new_alloc;
+        }
+        
+        protected override void ClippedRender (Context cr)
+        {
+            if (!EnsureLayout ()) {
+                return;
+            }
             
             cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
             cr.Clip ();
             
-            bool fade = text_width > RenderSize.Width;
+            bool fade = text_alloc.Width > RenderSize.Width;
             
             if (fade) {
                 cr.PushGroup ();
             }
-                        
-            cr.MoveTo (
-                Math.Round ((RenderSize.Width - text_width) * HorizontalAlignment),
-                Math.Round ((RenderSize.Height - text_height) * VerticalAlignment)
-            );
             
+            cr.MoveTo (text_alloc.X, text_alloc.Y);
             Foreground.Apply (cr);
             Pango.CairoHelper.ShowLayout (cr, layout);
             cr.Fill ();
@@ -162,11 +191,22 @@ namespace Hyena.Gui.Canvas
                 case "Text":
                     if (layout != null) {
                         InvalidateMeasure ();
+                        InvalidateArrange ();
+                    }
+                    return true;
+                case "HorizontalAlignment":
+                case "VerticalAlignment":
+                    if (layout != null) {
+                        InvalidateArrange ();
                     }
                     return true;
             }
             
             return base.OnPropertyChange (property, value);
+        }
+        
+        protected override Rect InvalidationRect {
+            get { return invalidation_rect; }
         }
         
         public string Text {
