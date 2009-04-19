@@ -49,32 +49,12 @@ namespace Hyena.Gui.Canvas
         
         public void QueueRender (CanvasItem item, Rect rect)
         {
-            Gtk.Widget widget = Host as Gtk.Widget;
-            if (widget == null) {
+            CanvasHost host = Host as CanvasHost;
+            if (host == null) {
                 return;
             }
             
-            //if (rect == Rect.Empty) {
-                widget.QueueDraw ();
-                return;
-           // }
-            
-            double x = widget.Allocation.X + rect.X;
-            double y = widget.Allocation.Y + rect.Y;
-            CanvasItem parent = item;
-            
-            while (parent != null) {
-                x += parent.ContentAllocation.X;
-                y += parent.ContentAllocation.Y;
-                parent = parent.Parent;
-            }
-            
-            widget.QueueDrawArea (
-                (int)Math.Floor (x),
-                (int)Math.Floor (y),
-                (int)Math.Ceiling (rect.Width),
-                (int)Math.Ceiling (rect.Height)
-            );
+            host.QueueRender (item, rect);
         }
         
         public object Host {

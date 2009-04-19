@@ -38,6 +38,7 @@ namespace Hyena.Gui.Canvas
         private CanvasItem canvas_child;
         private Theme theme;
         private CanvasManager manager;
+        private bool debug = false;
     
         public CanvasHost ()
         {
@@ -121,6 +122,8 @@ namespace Hyena.Gui.Canvas
             }
         }
         
+        private Random rand;
+        
         protected override bool OnExposeEvent (Gdk.EventExpose evnt)
         {
             if (canvas_child == null || !canvas_child.Visible || !Visible || !IsMapped) {
@@ -132,15 +135,60 @@ namespace Hyena.Gui.Canvas
             foreach (Gdk.Rectangle damage in evnt.Region.GetRectangles ()) {
                 cr.Rectangle (damage.X, damage.Y, damage.Width, damage.Height);
                 cr.Clip ();
+                
                 cr.Translate (Allocation.X, Allocation.Y);
                 canvas_child.Render (cr);
                 cr.Translate (-Allocation.X, -Allocation.Y);
+                
+                if (Debug) {
+                    cr.LineWidth = 1.0;
+                    cr.Color = CairoExtensions.RgbToColor (
+                        (uint)(rand = rand ?? new Random ()).Next (0, 0xffffff));
+                    cr.Rectangle (damage.X + 0.5, damage.Y + 0.5, damage.Width - 1, damage.Height - 1);
+                    cr.Stroke ();
+                }
+                
                 cr.ResetClip ();
             }
             
             CairoExtensions.DisposeContext (cr);
             
             return true;
+        }
+        
+        public void QueueRender (CanvasItem item, Rect rect)
+        {
+            double x = Allocation.X;
+            double y = Allocation.Y;
+            double w, h; 
+            
+            if (rect.IsEmpty) {
+                w = item.Allocation.Width;
+                h = item.Allocation.Height;
+            } else {
+                x += rect.X;
+                y += rect.Y;
+                w = rect.Width;
+                h = rect.Height;
+            }
+            
+            while (item != null) {
+                if (rect.IsEmpty) {
+                    x += item.Allocation.X;
+                    y += item.Allocation.Y;
+                } else {
+                    x += item.ContentAllocation.X;
+                    y += item.ContentAllocation.Y;
+                }
+                item = item.Parent;
+            }
+            
+            QueueDrawArea (
+                (int)Math.Floor (x),
+                (int)Math.Floor (y),
+                (int)Math.Ceiling (w),
+                (int)Math.Ceiling (h)
+            );
         }
         
         private bool changing_style = false;
@@ -240,6 +288,11 @@ namespace Hyena.Gui.Canvas
                 QueueDraw ();
                 QueueResize ();
             }
+        }
+        
+        public bool Debug {
+            get { return debug; }
+            set { debug = value; }
         }
     }
 }
