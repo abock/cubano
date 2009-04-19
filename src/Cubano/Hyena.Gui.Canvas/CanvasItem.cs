@@ -36,10 +36,7 @@ namespace Hyena.Gui.Canvas
         private CanvasManager manager;
         private CanvasItem parent;
         private Theme theme;
-        private Thickness margin;
         private Size desired_size;
-        private double height = Double.NaN;
-        private double width = Double.NaN;
         private Dictionary<string, object> properties;
         private Rect allocation;
         private bool visible = true;
@@ -50,6 +47,11 @@ namespace Hyena.Gui.Canvas
         public CanvasItem ()
         {
             InstallProperty<double> ("Opacity", 1.0);
+            InstallProperty<double> ("Width", Double.NaN);
+            InstallProperty<double> ("Height", Double.NaN);
+            InstallProperty<Thickness> ("Margin", new Thickness (0));
+            InstallProperty<Brush> ("Foreground", Brush.Black);
+            InstallProperty<Brush> ("Background", Brush.White);
         }
         
         public void InvalidateArrange ()
@@ -155,24 +157,39 @@ namespace Hyena.Gui.Canvas
             set { theme = value; }
         }
         
-        public Thickness Margin {
-            get { return margin; }
-            set { margin = value; }
-        }
-        
         public Size DesiredSize {
             get { return desired_size; }
             protected set { desired_size = value; }
         }
         
+        public Thickness Margin {
+            get { return GetValue<Thickness> ("Margin"); }
+            set { SetValue<Thickness> ("Margin", value); }
+        }
+        
         public double Width {
-            get { return width; }
-            set { width = value; }
+            get { return GetValue<double> ("Width"); }
+            set { SetValue<double> ("Width", value); }
         }
         
         public double Height {
-            get { return height; }
-            set { height = value; }
+            get { return GetValue<double> ("Height"); }
+            set { SetValue<double> ("Height", value); }
+        }
+        
+        public double Opacity {
+            get { return GetValue<double> ("Opacity"); }
+            set { SetValue<double> ("Opacity", value); }
+        }
+        
+        public Brush Foreground {
+            get { return GetValue<Brush> ("Foreground"); }
+            set { SetValue<Brush> ("Foreground", value); }
+        }
+        
+        public Brush Background {
+            get { return GetValue<Brush> ("Background"); }
+            set { SetValue<Brush> ("Background", value); }
         }
 
         public Rect Allocation {
@@ -222,8 +239,23 @@ namespace Hyena.Gui.Canvas
             properties.Add (property, defaultValue);
         }
         
-        protected virtual void OnPropertyChange (string property, object value)
+        protected virtual bool OnPropertyChange (string property, object value)
         {
+            switch (property) {
+                case "Foreground":
+                case "Background":
+                case "Opacity":
+                    InvalidateRender ();
+                    return true;
+                /* case "Width":
+                case "Height":
+                case "Margin":
+                    InvalidateArrange ();
+                    InvalidateMeasure ();
+                    return true; */
+            }
+            
+            return false;
         }
          
         public object this[string property] {
@@ -247,7 +279,6 @@ namespace Hyena.Gui.Canvas
                 if (properties[property] != value) {
                     properties[property] = value;
                     OnPropertyChange (property, value);
-                    InvalidateRender ();
                 }
             }
         }
