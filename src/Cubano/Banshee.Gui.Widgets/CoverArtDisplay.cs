@@ -53,8 +53,8 @@ namespace Banshee.Gui.Widgets
                 Fill = Brush.White
             };
             
-            Children.Add (current = new Image () { Background = new ImageBrush ("/home/aaron/.cache/album-art/underoath-theyreonlychasingsafety.jpg") });
-            Children.Add (incoming = new Image () { Background = new ImageBrush ("/home/aaron/.cache/album-art/korn-issues.jpg"), Opacity = 0 });/*
+            Children.Add (current = new Image () { Background = new ImageBrush ("/home/aaron/.cache/album-art/reginaspektor-sovietkitsch.jpg") });
+            /* Children.Add (incoming = new Image () { Background = new ImageBrush ("/home/aaron/.cache/album-art/korn-issues.jpg"), Opacity = 0 });/*
             
             xfade
             incoming.AnimateDouble ("Opacity").From (0).To (1).Ease (Easing.QuadraticInOut).Repeat (1);*/
