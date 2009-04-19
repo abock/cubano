@@ -3,11 +3,11 @@ ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 ass:
 
 SOURCES =  \
-	Cubano.Client/ConnectedSeekableTrackInfoDisplay.cs \
-	Cubano.Client/CoverArtDisplay.cs \
+	Banshee.Gui.Widgets/ConnectedSeekableTrackInfoDisplay.cs \
+	Banshee.Gui.Widgets/CoverArtDisplay.cs \
+	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoWindow.cs \
-	Cubano.Client/SeekableTrackInfoDisplay.cs \
 	Hyena.Gui.Canvas/AnimationManager.cs \
 	Hyena.Gui.Canvas/Brush.cs \
 	Hyena.Gui.Canvas/CanvasHost.cs \

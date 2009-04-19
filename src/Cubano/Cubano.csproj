@@ -23,7 +23,6 @@
   <ItemGroup>
     <Compile Include="Cubano.Client\CubanoWindow.cs" />
     <Compile Include="Cubano.Client\CubanoClient.cs" />
-    <Compile Include="Cubano.Client\SeekableTrackInfoDisplay.cs" />
     <Compile Include="Hyena.Gui.Canvas\Thickness.cs" />
     <Compile Include="Hyena.Gui.Canvas\Size.cs" />
     <Compile Include="Hyena.Gui.Canvas\CanvasItem.cs" />
@@ -44,10 +43,11 @@
     <Compile Include="Hyena.Gui.Canvas\ImageBrush.cs" />
     <Compile Include="Hyena.Gui.Canvas\Image.cs" />
     <Compile Include="Hyena.Gui.Canvas\FixedPanel.cs" />
-    <Compile Include="Cubano.Client\CoverArtDisplay.cs" />
     <Compile Include="Hyena.Gui.Canvas\MarginStyle.cs" />
     <Compile Include="Hyena.Gui.Canvas\ShadowMarginStyle.cs" />
-    <Compile Include="Cubano.Client\ConnectedSeekableTrackInfoDisplay.cs" />
+    <Compile Include="Banshee.Gui.Widgets\ConnectedSeekableTrackInfoDisplay.cs" />
+    <Compile Include="Banshee.Gui.Widgets\CoverArtDisplay.cs" />
+    <Compile Include="Banshee.Gui.Widgets\SeekableTrackInfoDisplay.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
@@ -97,5 +97,6 @@
   </ProjectExtensions>
   <ItemGroup>
     <Folder Include="Hyena.Gui.Canvas\" />
+    <Folder Include="Banshee.Gui.Widgets\" />
   </ItemGroup>
 </Project>
