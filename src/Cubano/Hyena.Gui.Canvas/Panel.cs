@@ -39,20 +39,28 @@ namespace Hyena.Gui.Canvas
 
         public override Size Measure (Size available)
         {
-            Size size = new Size (0, 0);
+            Size result = new Size (0, 0);
             
             foreach (var child in Children) {
                 if (child.Visible) {
-                    var child_size = child.Measure (available);
-                    if (child_size.Width > size.Width) size.Width = child_size.Width;
-                    if (child_size.Height > size.Height) size.Height = child_size.Height;
+                    Size size = child.Measure (available);
+                    result.Width = Math.Max (result.Width, size.Width);
+                    result.Height = Math.Max (result.Height, size.Height);
                 }
             }
+
+            if (!Double.IsNaN (Width)) {
+                result.Width = Width;
+            }
+
+            if (!Double.IsNaN (Height)) {
+                result.Height = Height;
+            }
+
+            result.Width = Math.Min (result.Width, available.Width);
+            result.Height = Math.Min (result.Height, available.Height);
             
-            size.Width += Margin.Left + Margin.Right;
-            size.Height += Margin.Top + Margin.Bottom;
-            
-            return DesiredSize = size;
+            return DesiredSize = result;
         }
         
         public override void Arrange ()
@@ -65,7 +73,7 @@ namespace Hyena.Gui.Canvas
                 child.Allocation = new Rect (0, 0, 
                     Math.Min (ContentAllocation.Width, child.DesiredSize.Width), 
                     Math.Min (ContentAllocation.Height, child.DesiredSize.Height));
-                    
+                                    
                 child.Arrange ();
             }
         }
