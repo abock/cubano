@@ -73,7 +73,7 @@ namespace Hyena.Gui.Canvas
 
         protected void InvalidateRender ()
         {
-            InvalidateRender (Allocation);
+            InvalidateRender (InvalidationRect);
         }
 
         protected void InvalidateRender (Rect area)
@@ -236,6 +236,10 @@ namespace Hyena.Gui.Canvas
             }
         }
         
+        protected virtual Rect InvalidationRect {
+            get { return Rect.Empty; }
+        }
+        
         public Size ContentSize {
             get { return new Size (ContentAllocation.Width, ContentAllocation.Height); }
         }
@@ -272,8 +276,8 @@ namespace Hyena.Gui.Canvas
             switch (property) {
                 case "Foreground":
                 case "Background":
-                case "Opacity":
                 case "MarginStyle":
+                case "Opacity":
                     InvalidateRender ();
                     return true;
                 /* case "Width":
