@@ -245,10 +245,13 @@ namespace Hyena.Gui.Canvas
             double result = ComposeHandler == null
                 ? StartState + (ToValue * actor.Percent)
                 : ComposeHandler (this, actor.Percent);
+            
             result = Easing == Easing.Linear
                 ? result
                 : Choreographer.Compose (result, Easing);
+            
             Item.SetValue<double> (Property, result);
+            
             return true;
         }
     }
