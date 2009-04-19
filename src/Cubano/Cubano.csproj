@@ -50,6 +50,12 @@
     <Compile Include="Hyena.Gui.Canvas\Brush.cs" />
     <Compile Include="Hyena.Gui.Canvas\FontWeight.cs" />
     <Compile Include="Hyena.Gui.Canvas\TextWrap.cs" />
+    <Compile Include="Hyena.Gui.Canvas\ImageBrush.cs" />
+    <Compile Include="Hyena.Gui.Canvas\Image.cs" />
+    <Compile Include="Hyena.Gui.Canvas\FixedPanel.cs" />
+    <Compile Include="Cubano.Client\CoverArtDisplay.cs" />
+    <Compile Include="Hyena.Gui.Canvas\MarginStyle.cs" />
+    <Compile Include="Hyena.Gui.Canvas\ShadowMarginStyle.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
