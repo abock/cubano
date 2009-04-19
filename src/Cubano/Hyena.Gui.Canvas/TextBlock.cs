@@ -26,6 +26,8 @@
 
 using System;
 
+using Cairo;
+
 namespace Hyena.Gui.Canvas
 {
     public class TextBlock : CanvasItem
@@ -35,8 +37,10 @@ namespace Hyena.Gui.Canvas
         public TextBlock ()
         {
             InstallProperty<string> ("Text", String.Empty);
-            InstallProperty<double> ("HorizontalAlignment", 0.5);
+            InstallProperty<double> ("HorizontalAlignment", 0.0);
             InstallProperty<double> ("VerticalAlignment", 0.0);
+            InstallProperty<FontWeight> ("FontWeight", FontWeight.Normal);
+            InstallProperty<TextWrap> ("TextWrap", TextWrap.None);
         }
         
         private bool EnsureLayout ()
@@ -66,7 +70,11 @@ namespace Hyena.Gui.Canvas
             available = base.Measure (available);
             
             int text_w, text_h;
-            layout.Width = (int)(Pango.Scale.PangoScale * available.Width);
+            
+            TextWrap wrap = TextWrap;
+            layout.Width = wrap == TextWrap.None ? -1 : (int)(Pango.Scale.PangoScale * available.Width);
+            layout.Wrap = GetPangoWrapMode (wrap);
+            layout.FontDescription.Weight = GetPangoFontWeight (FontWeight);
             layout.SetMarkup (Text);
             layout.GetPixelSize (out text_w, out text_h);
             
@@ -79,13 +87,15 @@ namespace Hyena.Gui.Canvas
             return DesiredSize;
         }
         
-        protected override void ClippedRender (Cairo.Context cr)
+        protected override void ClippedRender (Context cr)
         {
             if (!EnsureLayout ()) {
                 return;
             }
             
-            int layout_width = (int)(Pango.Scale.PangoScale * ContentAllocation.Width);
+            int layout_width = TextWrap == TextWrap.None 
+                ? -1 
+                : (int)(Pango.Scale.PangoScale * ContentAllocation.Width);
             if (layout.Width != layout_width) {
                 layout.Width = layout_width;
             }
@@ -93,33 +103,85 @@ namespace Hyena.Gui.Canvas
             int text_width, text_height;
             layout.GetPixelSize (out text_width, out text_height);
             
+            cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
+            cr.Clip ();
+            
+            bool fade = text_width > RenderSize.Width;
+            
+            if (fade) {
+                cr.PushGroup ();
+            }
+                        
             cr.MoveTo (
                 Math.Round ((RenderSize.Width - text_width) * HorizontalAlignment),
                 Math.Round ((RenderSize.Height - text_height) * VerticalAlignment)
             );
             
-            Cairo.Color color = new Cairo.Color (1, 0, 0);
-            color.A = GetValue<double> ("Opacity", 1.0);
-            cr.Color = color;
+            Foreground.Apply (cr, Opacity);
             Pango.CairoHelper.ShowLayout (cr, layout);
             cr.Fill ();
+            
+            if (fade) {
+                LinearGradient mask = new LinearGradient (RenderSize.Width - 20, 0, RenderSize.Width, 0);
+                mask.AddColorStop (0, new Color (0, 0, 0, 1));
+                mask.AddColorStop (1, new Color (0, 0, 0, 0));
+                
+                cr.PopGroupToSource ();
+                cr.Mask (mask);
+                mask.Destroy ();
+            }
+            
+            cr.ResetClip ();
         }
         
-        protected override void OnPropertyChange (string property, object value)
+        private Pango.Weight GetPangoFontWeight (FontWeight weight)
+        {
+            switch (weight) {
+                case FontWeight.Bold: return Pango.Weight.Bold;
+                default: return Pango.Weight.Normal;
+            }
+        }
+        
+        private Pango.WrapMode GetPangoWrapMode (TextWrap wrap)
+        {
+            switch (wrap) {
+                case TextWrap.Char: return Pango.WrapMode.Char;
+                case TextWrap.WordChar: return Pango.WrapMode.WordChar;
+                case TextWrap.None:
+                case TextWrap.Word:
+                default:
+                    return Pango.WrapMode.Word;
+            }
+        }
+        
+        protected override bool OnPropertyChange (string property, object value)
         {
             switch (property) {
+                case "FontWeight":
+                case "TextWrap":
                 case "Text":
                     if (layout != null) {
-                        layout.SetMarkup ((string)value);
                         InvalidateMeasure ();
                     }
-                    break;
+                    return true;
             }
+            
+            return base.OnPropertyChange (property, value);
         }
         
         public string Text {
             get { return GetValue<string> ("Text"); }
             set { SetValue<string> ("Text", value); }
+        }
+        
+        public FontWeight FontWeight {
+            get { return GetValue<FontWeight> ("FontWeight"); }
+            set { SetValue<FontWeight> ("FontWeight", value); }
+        }
+        
+        public TextWrap TextWrap {
+            get { return GetValue<TextWrap> ("TextWrap"); }
+            set { SetValue<TextWrap> ("TextWrap", value); }
         }
         
         public double HorizontalAlignment {
