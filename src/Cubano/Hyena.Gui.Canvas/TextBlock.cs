@@ -117,7 +117,7 @@ namespace Hyena.Gui.Canvas
                 Math.Round ((RenderSize.Height - text_height) * VerticalAlignment)
             );
             
-            Foreground.Apply (cr, Opacity);
+            Foreground.Apply (cr);
             Pango.CairoHelper.ShowLayout (cr, layout);
             cr.Fill ();
             

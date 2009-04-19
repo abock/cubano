@@ -58,11 +58,9 @@ namespace Hyena.Gui.Canvas
             this.color = color;
         }
         
-        public virtual void Apply (Cairo.Context cr, double extraOpacity)
+        public virtual void Apply (Cairo.Context cr)
         {
-            Cairo.Color apply_color = color;
-            apply_color.A *= extraOpacity;
-            cr.Color = apply_color;
+            cr.Color = color;
         }
         
         public static readonly Brush Black = new Brush (0.0, 0.0, 0.0);
