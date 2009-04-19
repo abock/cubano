@@ -134,7 +134,7 @@ namespace Cubano.Client
                 Spacing = 5,
                 Margin = new Thickness (30),
                 Children = {
-                    new StackPanel () {
+                    /*new StackPanel () {
                         Orientation = Hyena.Gui.Canvas.Orientation.Vertical,
                         Spacing = 5,
                         Children = {
@@ -148,7 +148,7 @@ namespace Cubano.Client
                         }
                     },
                     new TestTile () { Width = 100 },
-                    new TestTile (),
+                    new TestTile (),*/
                     new SeekableTrackInfoDisplay ()
                 }
             });
