@@ -35,6 +35,8 @@ namespace Banshee.Gui.Widgets
 {
     public class SeekableTrackInfoDisplay : StackPanel
     {
+        private static double text_opacity = 0.6;
+    
         private TextBlock title;
         private Slider seek_bar;
         private StackPanel time_bar;
@@ -42,36 +44,49 @@ namespace Banshee.Gui.Widgets
         private TextBlock seek_to;
         private TextBlock remaining;
         
+        private DoubleAnimation transition_animation;
+        private uint transition_timeout;
+        
+        private int display_metadata_index;
+        private int display_metadata_states = 3;
+        
         public SeekableTrackInfoDisplay ()
         {
-            Spacing = 5;
+            Spacing = 3;
             Orientation = Orientation.Vertical;
             
-            Children.Add (title = new TextBlock ());
-            Children.Add (seek_bar = new Slider ());
+            Children.Add (title = new TextBlock () { Opacity = text_opacity });
+            Children.Add (seek_bar = new Slider () { Value = 0.28 });
             Children.Add (time_bar = new StackPanel () {
                 Spacing = 10,
                 Children = {
-                    (elapsed = new TextBlock ()   { HorizontalAlignment = 0.0 }),
-                    (seek_to = new TextBlock ()   { HorizontalAlignment = 0.5 }),
-                    (remaining = new TextBlock () { HorizontalAlignment = 1.0 })
+                    (elapsed = new TextBlock ()   { HorizontalAlignment = 0.0, Opacity = text_opacity + 0.25 }),
+                    (seek_to = new TextBlock ()   { HorizontalAlignment = 0.5, Opacity = text_opacity + 0.25 }),
+                    (remaining = new TextBlock () { HorizontalAlignment = 1.0, Opacity = text_opacity })
                 }
             });
-           
-            int str_idx = 0;
-            string [] strings = {
-                "The Brighter side of Suffering",
-                "As Blood Runs Black",
-                "Allegiance"
-            };
-              
-            var fade = new DoubleAnimation ("Opacity")
+            
+            seek_to.Visible = false;
+            
+            UpdateMetadataDisplay ();
+            BuildTransitionAnimation ();
+            StartTransitionTimeout ();
+            
+            elapsed.Text = "0:35";
+            seek_to.Text = "1:59";
+            remaining.Text = "-3:18";
+        }
+        
+        private void BuildTransitionAnimation ()
+        {
+            transition_animation = new DoubleAnimation ("Opacity");
+            transition_animation
                 .Throttle (500)
                 .Compose ((a, p) => {
                     var opacity = a.StartState == 0 ? p : 1 - p;
                     if (p == 1) {
                         if (a.StartState == 1) {
-                            title.Text = strings[(str_idx = (str_idx + 1) % strings.Length)];
+                            UpdateMetadataDisplay ();
                         }
                         
                         if (a.ToValue == 1) {
@@ -81,27 +96,49 @@ namespace Banshee.Gui.Widgets
                         }
                     }
 
-                    return opacity;
+                    return opacity * text_opacity;
                 }).Ease (Easing.QuadraticInOut);
-                
-            title.AnimateDouble ("HorizontalAlignment")
-                .From (0)
-                .To (1)
-                .Compose ((a, p) =>
-                    p <= 0.5 
-                        ? 2 * p
-                        : 1 - (2 * (p - 0.5)))
-                .Ease (Easing.QuadraticInOut);
+        }
+        
+        private void StartTransitionTimeout ()
+        {
+            if (transition_timeout > 0) {
+                StopTransitionTimeout ();
+            }
             
-            GLib.Timeout.Add (5000, () => {
-                title.Animate (fade).From (1).To (0);
-                return true;
-            });
-                                    
-            title.Text = strings[str_idx];
-            elapsed.Text = "0:35";
-            seek_to.Text = "1:59";
-            remaining.Text = "-3:18";
+            transition_timeout = GLib.Timeout.Add (5000, OnTransitionTimeout);
+        }
+        
+        private void StopTransitionTimeout ()
+        {
+            if (transition_timeout > 0) {
+                GLib.Source.Remove (transition_timeout);
+                transition_timeout = 0;
+            }
+        }
+        
+        private bool OnTransitionTimeout ()
+        {
+            title.Animate (transition_animation).From (1).To (0);
+            return true;
+        }
+        
+        private static string [] strings = {
+            "The Brighter side of Suffering",
+            "As Blood Runs Black",
+            "Allegiance"
+        };
+        
+        private void UpdateMetadataDisplay ()
+        {
+            display_metadata_index = (display_metadata_index + 1) % display_metadata_states;
+            title.Text = strings[display_metadata_index];
+        }
+        
+        public override void Arrange ()
+        {
+            base.Arrange ();
+            time_bar.Margin = title.Margin = new Thickness (seek_bar.BarAlignment, 0);
         }
     }
 }
