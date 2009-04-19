@@ -120,7 +120,7 @@ namespace Cubano.Client
             
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", 
                 new CanvasHost () {
-                    Child = new SeekableTrackInfoDisplay (),
+                    Child = new ConnectedSeekableTrackInfoDisplay (),
                     HeightRequest = 60,
                     Visible = true
                 }, true);
