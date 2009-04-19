@@ -71,6 +71,15 @@ namespace Hyena.Gui.Canvas
             base.OnPointerMotion (x, y);
         }*/
         
+        protected override Rect InvalidationRect {
+            get { return new Rect (
+                -Margin.Left - ThrobberSize / 2, 
+                -Margin.Top, 
+                Allocation.Width + ThrobberSize, 
+                Allocation.Height); 
+            }
+        }
+        
         protected override void ClippedRender (Cairo.Context cr)
         {   
             double throbber_r = ThrobberSize / 2.0;
