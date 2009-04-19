@@ -156,6 +156,10 @@ namespace Hyena.Gui.Canvas
             set { throbber_size = value; }
         }
         
+        public double BarAlignment {
+            get { return ThrobberSize / 2 + ShadowSize; }
+        }
+        
         private double value;
         public virtual double Value {
             get { return this.value; }
