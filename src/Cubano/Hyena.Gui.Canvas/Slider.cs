@@ -70,6 +70,32 @@ namespace Hyena.Gui.Canvas
         
             base.OnPointerMotion (x, y);
         }*/
+
+        private double last_invalidate_value = -1;
+
+        private void Invalidate ()
+        {
+            double current_value = (IsValueUpdatePending ? PendingValue : Value);
+
+            if (last_invalidate_value < 0) {
+                last_invalidate_value = current_value;
+                InvalidateRender ();
+                return;
+            }
+
+            double max = Math.Max (last_invalidate_value, current_value) * RenderSize.Width;
+            double min = Math.Min (last_invalidate_value, current_value) * RenderSize.Width;
+
+            Rect region = new Rect (
+                InvalidationRect.X + min,
+                InvalidationRect.Y,
+                (max - min) + 2 * ThrobberSize,
+                InvalidationRect.Height
+            );
+
+            last_invalidate_value = current_value;
+            InvalidateRender (region);
+        }
         
         protected override Rect InvalidationRect {
             get { return new Rect (
@@ -140,7 +166,7 @@ namespace Hyena.Gui.Canvas
                 }
                 
                 this.value = value;
-                InvalidateRender ();
+                Invalidate ();
             }
         }
         
