@@ -59,7 +59,7 @@ namespace Hyena.Gui.Canvas
                 return;
             }
             
-            double x = 0, y = 0;
+            double x = rect.X, y = rect.Y;
             CanvasItem parent = item;
             
             while (parent != null) {
