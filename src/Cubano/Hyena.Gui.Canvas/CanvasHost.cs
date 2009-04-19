@@ -32,6 +32,39 @@ using Hyena.Gui.Theming;
 
 namespace Hyena.Gui.Canvas
 {
+    public class FpsCalculator
+    {
+        private DateTime last_update;
+        private TimeSpan update_interval;
+        private int frame_count;
+        private double fps;
+
+        public FpsCalculator ()
+        {
+            update_interval = TimeSpan.FromSeconds (0.5);
+        }
+
+        public bool Update ()
+        {
+            bool updated = false;
+            DateTime current_time = DateTime.Now;
+            frame_count++;
+
+            if (current_time - last_update >= update_interval) {
+                fps = (double)frame_count / (current_time - last_update).TotalSeconds;
+                frame_count = 0;
+                updated = true;
+                last_update = current_time;
+            }
+
+            return updated;
+        }
+
+        public double FramesPerSecond {
+            get { return fps; }
+        }
+    }
+
     public class CanvasHost : Widget
     {
         private Gdk.Window event_window;
@@ -39,7 +72,8 @@ namespace Hyena.Gui.Canvas
         private Theme theme;
         private CanvasManager manager;
         private bool debug = false;
-    
+        private FpsCalculator fps = new FpsCalculator ();
+
         public CanvasHost ()
         {
             WidgetFlags |= WidgetFlags.NoWindow;
@@ -152,6 +186,10 @@ namespace Hyena.Gui.Canvas
             }
             
             CairoExtensions.DisposeContext (cr);
+            
+            if (fps.Update ()) {
+                // Console.WriteLine ("FPS: {0}", fps.FramesPerSecond);
+            }
             
             return true;
         }
