@@ -37,6 +37,8 @@ namespace Banshee.Gui.Widgets
     {
         private static double text_opacity = 0.6;
     
+        private CoverArtDisplay cover_art;
+        private StackPanel vbox;
         private TextBlock title;
         private Slider seek_bar;
         private StackPanel time_bar;
@@ -53,16 +55,22 @@ namespace Banshee.Gui.Widgets
         public SeekableTrackInfoDisplay ()
         {
             Spacing = 3;
-            Orientation = Orientation.Vertical;
             
-            Children.Add (title = new TextBlock () { Opacity = text_opacity });
-            Children.Add (seek_bar = new Slider () { Value = 0.28 });
-            Children.Add (time_bar = new StackPanel () {
-                Spacing = 10,
+            Children.Add (cover_art = new CoverArtDisplay ());
+            Children.Add (vbox = new StackPanel () {
+                Orientation = Orientation.Vertical,
+                Spacing = 4,
                 Children = {
-                    (elapsed = new TextBlock ()   { HorizontalAlignment = 0.0, Opacity = text_opacity + 0.25 }),
-                    (seek_to = new TextBlock ()   { HorizontalAlignment = 0.5, Opacity = text_opacity + 0.25 }),
-                    (remaining = new TextBlock () { HorizontalAlignment = 1.0, Opacity = text_opacity })
+                    (title = new TextBlock () { Opacity = text_opacity }),
+                    (seek_bar = new Slider () { Value = 0.28 }),
+                    (time_bar = new StackPanel () {
+                        Spacing = 10,
+                        Children = {
+                            (elapsed = new TextBlock ()   { HorizontalAlignment = 0.0, Opacity = text_opacity + 0.25 }),
+                            (seek_to = new TextBlock ()   { HorizontalAlignment = 0.5, Opacity = text_opacity + 0.25 }),
+                            (remaining = new TextBlock () { HorizontalAlignment = 1.0, Opacity = text_opacity })
+                        }
+                    })
                 }
             });
             
@@ -81,7 +89,7 @@ namespace Banshee.Gui.Widgets
         {
             transition_animation = new DoubleAnimation ("Opacity");
             transition_animation
-                .Throttle (500)
+                .Throttle (250)
                 .Compose ((a, p) => {
                     var opacity = a.StartState == 0 ? p : 1 - p;
                     if (p == 1) {
@@ -138,7 +146,7 @@ namespace Banshee.Gui.Widgets
         public override void Arrange ()
         {
             base.Arrange ();
-            time_bar.Margin = title.Margin = new Thickness (seek_bar.BarAlignment, 0);
+            time_bar.Margin = title.Margin = new Thickness (seek_bar.Margin.Left, 0, seek_bar.Margin.Right, 0);
         }
     }
 }
