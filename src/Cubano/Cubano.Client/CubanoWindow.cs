@@ -108,7 +108,7 @@ namespace Cubano.Client
             toolbar_alignment.Add (header_toolbar);
             toolbar_alignment.ShowAll ();
             
-           // primary_vbox.PackEnd (toolbar_alignment, false, false, 0);
+            primary_vbox.PackEnd (toolbar_alignment, false, false, 0);
             
             Widget next_button = new NextButton (ActionService);
             next_button.Show ();
@@ -118,43 +118,16 @@ namespace Cubano.Client
             //seek_slider.Show ();
             //ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
             
-            //SeekableTrackInfoDisplay track_info_display = new SeekableTrackInfoDisplay ();
-            //track_info_display.Show ();
-            //ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", track_info_display, true);
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", 
+                new CanvasHost () {
+                    Child = new SeekableTrackInfoDisplay (),
+                    HeightRequest = 60,
+                    Visible = true
+                }, true);
             
             ConnectedVolumeButton volume_button = new ConnectedVolumeButton ();
             volume_button.Show ();
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", volume_button);
-            
-            var host = new CanvasHost ();
-
-            this.Resize (500, 300);
-
-            host.Add (new StackPanel () {
-                Spacing = 5,
-                Margin = new Thickness (30),
-                Children = {
-                    /*new StackPanel () {
-                        Orientation = Hyena.Gui.Canvas.Orientation.Vertical,
-                        Spacing = 5,
-                        Children = {
-                            new TestTile () { Height = 50 },
-                            new TestTile () { Margin = new Thickness (10) },
-                            new TestTile () { Height = 75 },
-                            new TextBlock () { 
-                                Text = "Hello from the half-assed Silverlight written in just C# and Cairo, yay!",
-                                Margin = new Thickness (5)
-                            }
-                        }
-                    },
-                    new TestTile () { Width = 100 },
-                    new TestTile (),*/
-                    new SeekableTrackInfoDisplay ()
-                }
-            });
-            
-            primary_vbox.PackStart (host, true, true, 0);
-            host.Show ();
         }
         
 
