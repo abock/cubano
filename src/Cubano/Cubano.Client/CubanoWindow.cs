@@ -114,9 +114,9 @@ namespace Cubano.Client
             next_button.Show ();
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/NextArrowButton", next_button);
             
-            //ConnectedSeekSlider seek_slider = new ConnectedSeekSlider ();
-            //seek_slider.Show ();
-            //ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
+            ConnectedSeekSlider seek_slider = new ConnectedSeekSlider ();
+            seek_slider.Show ();
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
             
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", 
                 new CanvasHost () {
@@ -124,6 +124,7 @@ namespace Cubano.Client
                     HeightRequest = 60,
                     Visible = true
                 }, true);
+            
             
             ConnectedVolumeButton volume_button = new ConnectedVolumeButton ();
             volume_button.Show ();
