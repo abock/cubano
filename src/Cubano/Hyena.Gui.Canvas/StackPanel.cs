@@ -105,7 +105,7 @@ namespace Hyena.Gui.Canvas
             
             foreach (var child in Children) {
                 if (!child.Visible) {
-                    return;
+                    continue;
                 }
                 
                 double variable_size = 0;
