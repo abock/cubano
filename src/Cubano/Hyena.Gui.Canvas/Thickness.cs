@@ -35,7 +35,13 @@ namespace Hyena.Gui.Canvas
         private double right;
         private double bottom;
         
-        public Thickness (double uniformLength) : this (uniformLength, uniformLength, uniformLength, uniformLength)
+        public Thickness (double thickness) 
+            : this (thickness, thickness, thickness, thickness)
+        {
+        }
+        
+        public Thickness (double xthickness, double ythickness) 
+            : this (xthickness, ythickness, xthickness, ythickness)
         {
         }
         
