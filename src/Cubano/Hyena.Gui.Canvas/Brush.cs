@@ -58,6 +58,10 @@ namespace Hyena.Gui.Canvas
             this.color = color;
         }
         
+        public virtual bool IsValid {
+            get { return true; }
+        }
+        
         public virtual void Apply (Cairo.Context cr)
         {
             cr.Color = color;

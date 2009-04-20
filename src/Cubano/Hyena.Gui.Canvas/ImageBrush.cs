@@ -36,6 +36,10 @@ namespace Hyena.Gui.Canvas
         private ImageSurface surface;
         private bool surface_owner;
     
+        public ImageBrush ()
+        {
+        }
+    
         public ImageBrush (string path) : this (new Gdk.Pixbuf (path), true)
         {
         }
@@ -51,9 +55,20 @@ namespace Hyena.Gui.Canvas
             this.surface_owner = disposeSurface;
         }
         
+        protected ImageSurface Surface {
+            get { return surface; }
+            set { surface = value; }
+        }
+        
+        public override bool IsValid {
+            get { return surface != null; }
+        }
+        
         public override void Apply (Cairo.Context cr)
         {
-            cr.SetSource (surface);
+            if (surface != null) {
+                cr.SetSource (surface);
+            }
         }
     }
 }
