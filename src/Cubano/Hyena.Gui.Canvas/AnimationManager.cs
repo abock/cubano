@@ -31,6 +31,12 @@ namespace Hyena.Gui.Canvas
 {
     public abstract class Animation
     {
+        private Stage<Animation> stage;
+        internal protected Stage<Animation> Stage {
+            get { return stage; }
+            set { stage = value; }
+        }
+    
         private Actor<Animation> actor;
         internal protected Actor<Animation> Actor {
             get { return actor; }
@@ -76,11 +82,23 @@ namespace Hyena.Gui.Canvas
             get { return repeat_times; }
             set { repeat_times = value; }
         }
+        
+        public virtual void Start ()
+        {
+            if (Stage.Contains (this)) {
+                Actor.Reset (Duration);
+                return;
+            }
+            
+            Actor = Stage.Add (this, Duration);
+            IsExpired = false;
+            Actor.CanExpire = false;
+        }
             
         public virtual bool Step (Actor<Animation> actor)
         {
             if (RepeatTimes > 0 && actor.Percent == 1) {
-                if (iterations++ >= RepeatTimes) {
+                if (++iterations >= RepeatTimes) {
                     IsExpired = true;
                 }
             }
@@ -127,6 +145,15 @@ namespace Hyena.Gui.Canvas
         public T StartState {
             get { return start_state; }
             protected set { start_state = value; }
+        }
+        
+        public override void Start ()
+        {
+            T check_state = FromSet ? FromValue : (T)Item[Property];
+            
+            if (!check_state.Equals (ToValue)) {
+                base.Start ();
+            }
         }
         
         public Animation<T> ClearFromValue ()
@@ -238,10 +265,6 @@ namespace Hyena.Gui.Canvas
         
         public override bool Step (Actor<Animation> actor)
         {
-            if (!base.Step (actor)) {
-                return false;
-            }
-            
             double result = ComposeHandler == null
                 ? StartState + (ToValue * actor.Percent)
                 : ComposeHandler (this, actor.Percent);
@@ -252,7 +275,7 @@ namespace Hyena.Gui.Canvas
             
             Item.SetValue<double> (Property, result);
             
-            return true;
+            return base.Step (actor);
         }
     }
     
@@ -273,9 +296,7 @@ namespace Hyena.Gui.Canvas
         
         public void Animate (Animation animation)
         {
-            animation.Actor = stage.Add (animation, animation.Duration);
-            animation.IsExpired = false;
-            animation.Actor.CanExpire = false;
+            animation.Stage = stage;
         }
     }
 }
