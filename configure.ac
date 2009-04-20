@@ -30,14 +30,14 @@ AC_PATH_PROG(MCS, gmcs)
 BANSHEE_PATH=`pkg-config --variable=bansheedir banshee-1-core`
 AC_SUBST(BANSHEE_PATH)
 
-AC_ARG_WITH(moonlight-source, AC_HELP_STRING([--with-moonlight-source=<path>],
-	[Path to the top of the Moonlight source tree]),
-	[], [with_moonlight_source=$PWD/../moon])
-AC_SUBST([MOONLIGHT_SOURCE], ["$with_moonlight_source"])
+#AC_ARG_WITH(moonlight-source, AC_HELP_STRING([--with-moonlight-source=<path>],
+#	[Path to the top of the Moonlight source tree]),
+#	[], [with_moonlight_source=$PWD/../moon])
+#AC_SUBST([MOONLIGHT_SOURCE], ["$with_moonlight_source"])
 
-if ! grep -q "^PACKAGE_NAME='moonlight'$" $with_moonlight_source/configure; then
-	AC_ERROR([$with_moonlight_source does not appear to be a valid configured Moonlight source directory])
-fi
+#if ! grep -q "^PACKAGE_NAME='moonlight'$" $with_moonlight_source/configure; then
+#	AC_ERROR([$with_moonlight_source does not appear to be a valid configured Moonlight source directory])
+#fi
 
 AC_OUTPUT([
 Makefile
@@ -53,11 +53,12 @@ Cubano Configuration
 --------------------
 
   Install Prefix:       $prefix
-  Moonlight Source:     $MOONLIGHT_SOURCE
   Banshee Runtime Path: $BANSHEE_PATH
 
   Mono Runtime:         $MONO
   C# Compiler:          $MCS
 
 EOF
+
+#   Moonlight Source:     $MOONLIGHT_SOURCE
 
