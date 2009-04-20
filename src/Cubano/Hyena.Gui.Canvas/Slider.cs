@@ -34,6 +34,11 @@ namespace Hyena.Gui.Canvas
 {    
     public class Slider : CanvasItem
     {
+        private uint value_changed_inhibit_ref = 0;
+    
+        public event EventHandler<EventArgs> ValueChanged;
+        public event EventHandler<EventArgs> PendingValueChanged;
+    
         public Slider ()
         {
             Margin = new Thickness (3);
@@ -43,33 +48,65 @@ namespace Hyena.Gui.Canvas
             };
         }
         
+        protected virtual void OnValueChanged ()
+        {
+            if (value_changed_inhibit_ref != 0) {
+                return;
+            }
+            
+            var handler = ValueChanged;
+            if (handler != null) {
+                handler (this, EventArgs.Empty);
+            }
+        }
+        
+        protected virtual void OnPendingValueChanged ()
+        {
+            var handler = PendingValueChanged;
+            if (handler != null) {
+                handler (this, EventArgs.Empty);
+            }
+        }
+        
+        public void InhibitValueChangeEvent ()
+        {
+            value_changed_inhibit_ref++;
+        }
+        
+        public void UninhibitValueChangeEvent ()
+        {
+            value_changed_inhibit_ref--;
+        }
+        
         private void SetPendingValueFromX (double x)
         {
             IsValueUpdatePending = true;
-            PendingValue = x / Width;
+            PendingValue = Math.Max (0, Math.Min ((x - ThrobberSize / 2) / RenderSize.Width, 1));
         }
         
-        /*protected override void OnButtonPress (double x, double y, uint button)
+        public override void ButtonPress (double x, double y, uint button)
         {
-            SetPendingValueFromX (x);
-            base.OnButtonPress (x, y, button);
-        }
-
-        protected override void OnButtonRelease ()
-        {
-            Value = PendingValue;
-            IsValueUpdatePending = false;
-            base.OnButtonRelease ();
-        }
-        
-        protected override void OnPointerMotion (double x, double y)
-        {
-            if (ButtonPressed >= 0) {
+            if (button == 1) {
+                GrabPointer ();
                 SetPendingValueFromX (x);
             }
+        }
+
+        public override void ButtonRelease ()
+        {
+            if (IsPointerGrabbed) {
+                ReleasePointer ();
+                Value = PendingValue;
+                IsValueUpdatePending = false;
+            }
+        }
         
-            base.OnPointerMotion (x, y);
-        }*/
+        public override void PointerMotion (double x, double y)
+        {
+            if (IsPointerGrabbed) {
+                SetPendingValueFromX (x);
+            }
+        }
 
         private double last_invalidate_value = -1;
 
@@ -77,7 +114,10 @@ namespace Hyena.Gui.Canvas
         {
             double current_value = (IsValueUpdatePending ? PendingValue : Value);
 
-            if (last_invalidate_value < 0) {
+            // FIXME: Something is wrong with the updating below causing an
+            // invalid region when IsValueUpdatePending is true, so when
+            // that is the case for now, we trigger a full invalidation
+            if (last_invalidate_value < 0 || IsValueUpdatePending) {
                 last_invalidate_value = current_value;
                 InvalidateRender ();
                 return;
@@ -167,6 +207,7 @@ namespace Hyena.Gui.Canvas
                 
                 this.value = value;
                 Invalidate ();
+                OnValueChanged ();
             }
         }
         
@@ -187,7 +228,8 @@ namespace Hyena.Gui.Canvas
                 }
                 
                 pending_value = value;
-                InvalidateRender ();
+                Invalidate ();
+                OnPendingValueChanged ();
             }
         }
     }
