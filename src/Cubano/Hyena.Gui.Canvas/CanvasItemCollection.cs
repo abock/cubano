@@ -61,6 +61,14 @@ namespace Hyena.Gui.Canvas
             }
         }
         
+        public void Move (CanvasItem child, int position)
+        {
+            if (children.Remove (child)) {
+                children.Insert (position, child);
+                parent.InvalidateArrange ();
+            }
+        }
+        
         public void Clear ()
         {
             foreach (var child in children) {
@@ -79,6 +87,10 @@ namespace Hyena.Gui.Canvas
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
         {
             return GetEnumerator ();
+        }
+        
+        public CanvasItem this[int index] {
+            get { return children[index]; }
         }
         
         public CanvasItem Parent {
