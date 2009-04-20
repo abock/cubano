@@ -65,7 +65,7 @@ namespace Banshee.Gui.Widgets
                 Spacing = 4,
                 Children = {
                     (title = new TextBlock () { Opacity = text_opacity }),
-                    (seek_bar = new Slider () { Value = 0.28 }),
+                    (seek_bar = new Slider ()),
                     (time_bar = new StackPanel () {
                         Spacing = 10,
                         Children = {
@@ -82,10 +82,6 @@ namespace Banshee.Gui.Widgets
             UpdateMetadataDisplay ();
             BuildTransitionAnimation ();
             StartTransitionTimeout ();
-            
-            elapsed.Text = "0:35";
-            seek_to.Text = "1:59";
-            remaining.Text = "-3:18";
         }
         
         private void BuildTransitionAnimation ()
@@ -111,7 +107,12 @@ namespace Banshee.Gui.Widgets
                 }).Ease (Easing.QuadraticInOut);
         }
         
-        private void StartTransitionTimeout ()
+        public void ResetTransitionTimeout ()
+        {
+        
+        }
+        
+        public void StartTransitionTimeout ()
         {
             if (transition_timeout > 0) {
                 StopTransitionTimeout ();
@@ -120,7 +121,7 @@ namespace Banshee.Gui.Widgets
             transition_timeout = GLib.Timeout.Add (5000, OnTransitionTimeout);
         }
         
-        private void StopTransitionTimeout ()
+        public void StopTransitionTimeout ()
         {
             if (transition_timeout > 0) {
                 GLib.Source.Remove (transition_timeout);
@@ -130,7 +131,7 @@ namespace Banshee.Gui.Widgets
         
         private bool OnTransitionTimeout ()
         {
-            title.Animate (transition_animation).From (1).To (0);
+            title.Animate (transition_animation).From (1).To (0).Start ();
             return true;
         }
         
@@ -141,11 +142,13 @@ namespace Banshee.Gui.Widgets
                 return;
             }
             
-            switch ((display_metadata_index = (display_metadata_index + 1) % display_metadata_states)) {
+            switch (display_metadata_index % display_metadata_states) {
                 case 0: title.Text = CurrentTrack.DisplayTrackTitle; break;
                 case 1: title.Text = CurrentTrack.DisplayArtistName; break;
                 case 2: title.Text = CurrentTrack.DisplayAlbumTitle; break;
             }
+            
+            display_metadata_index++;
         }
         
         private void UpdateTick ()
@@ -165,16 +168,22 @@ namespace Banshee.Gui.Widgets
             time_bar.Margin = title.Margin = new Thickness (seek_bar.Margin.Left, 0, seek_bar.Margin.Right, 0);
         }
         
+        public void UpdateCurrentTrack (TrackInfo track)
+        {
+            if (current_track != track) {
+                current_track = track;
+            }
+            
+            cover_art.UpdateCurrentTrack (track);
+            display_metadata_index = 1;
+            
+            OnTransitionTimeout ();
+            ResetTransitionTimeout ();
+        }
+        
         private TrackInfo current_track;
         public TrackInfo CurrentTrack {
             get { return current_track; }
-            set { current_track = value; }
-        }
-        
-        private TrackInfo incoming_track;
-        public TrackInfo IncomingTrack {
-            get { return incoming_track; }
-            set { incoming_track = value; }
         }
         
         private double duration;
