@@ -136,6 +136,11 @@ namespace Hyena.Gui.Canvas
                 return;
             }
             
+            Brush foreground = Foreground;
+            if (!foreground.IsValid) {
+                return;
+            }
+            
             cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
             cr.Clip ();
             

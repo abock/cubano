@@ -36,10 +36,15 @@ namespace Hyena.Gui.Canvas
         
         protected override void ClippedRender (Cairo.Context cr)
         {
+            Brush brush = Background;
+            if (!brush.IsValid) {
+                return;
+            }
+        
             cr.Antialias = Cairo.Antialias.None;
             cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
             cr.ClipPreserve ();
-            Background.Apply (cr);
+            brush.Apply (cr);
             cr.Fill ();
         }
     }
