@@ -244,7 +244,7 @@ namespace Hyena.Gui.Canvas
             base.OnStyleSet (old_style);
         }
         
-        /*protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
+        protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
         {
             if (canvas_child != null) {
                 canvas_child.ButtonPress (evnt.X, evnt.Y, evnt.Button);
@@ -266,7 +266,7 @@ namespace Hyena.Gui.Canvas
                 canvas_child.PointerMotion (evnt.X, evnt.Y);
             }
             return true;
-        }*/
+        }
         
         public void Add (CanvasItem child)
         {
