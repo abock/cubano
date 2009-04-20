@@ -104,35 +104,38 @@ namespace Hyena.Gui.Canvas
         
         public virtual void Render (Cairo.Context cr)
         {
-            if (ContentAllocation.Width > 0 && ContentAllocation.Height > 0) {
-                cr.Save ();
-                
-                double opacity = Opacity;
-                if (opacity < 1.0) {
-                    cr.PushGroup ();
-                }
-                
-                MarginStyle margin_style = MarginStyle;
-                if (margin_style != null && margin_style != MarginStyle.None) {
-                    cr.Translate (Math.Round (Allocation.X), Math.Round (Allocation.Y));
-                    cr.Save ();
-                    margin_style.Apply (this, cr);
-                    cr.Restore ();
-                    cr.Translate (Math.Round (Margin.Left), Math.Round (Margin.Top));
-                } else {
-                    cr.Translate (Math.Round (ContentAllocation.X), Math.Round (ContentAllocation.Y));
-                }
-                
-                cr.Antialias = Cairo.Antialias.Default;
-                ClippedRender (cr);
-                
-                if (opacity < 1.0) {
-                    cr.PopGroupToSource ();
-                    cr.PaintWithAlpha (Opacity);
-                }
-                
-                cr.Restore ();
+            double opacity = Opacity;
+            
+            if (ContentAllocation.Width <= 0 || ContentAllocation.Height <= 0 || opacity <= 0) {
+                return;
             }
+            
+            cr.Save ();
+            
+            if (opacity < 1.0) {
+                cr.PushGroup ();
+            }
+            
+            MarginStyle margin_style = MarginStyle;
+            if (margin_style != null && margin_style != MarginStyle.None) {
+                cr.Translate (Math.Round (Allocation.X), Math.Round (Allocation.Y));
+                cr.Save ();
+                margin_style.Apply (this, cr);
+                cr.Restore ();
+                cr.Translate (Math.Round (Margin.Left), Math.Round (Margin.Top));
+            } else {
+                cr.Translate (Math.Round (ContentAllocation.X), Math.Round (ContentAllocation.Y));
+            }
+            
+            cr.Antialias = Cairo.Antialias.Default;
+            ClippedRender (cr);
+            
+            if (opacity < 1.0) {
+                cr.PopGroupToSource ();
+                cr.PaintWithAlpha (Opacity);
+            }
+            
+            cr.Restore ();
         }
         
         protected virtual void ClippedRender (Cairo.Context cr)
