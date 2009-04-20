@@ -48,6 +48,7 @@
     <Compile Include="Banshee.Gui.Widgets\ConnectedSeekableTrackInfoDisplay.cs" />
     <Compile Include="Banshee.Gui.Widgets\CoverArtDisplay.cs" />
     <Compile Include="Banshee.Gui.Widgets\SeekableTrackInfoDisplay.cs" />
+    <Compile Include="Banshee.Gui.Widgets\CoverArtBrush.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">

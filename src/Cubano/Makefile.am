@@ -4,6 +4,7 @@ ass:
 
 SOURCES =  \
 	Banshee.Gui.Widgets/ConnectedSeekableTrackInfoDisplay.cs \
+	Banshee.Gui.Widgets/CoverArtBrush.cs \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
 	Cubano.Client/CubanoClient.cs \
