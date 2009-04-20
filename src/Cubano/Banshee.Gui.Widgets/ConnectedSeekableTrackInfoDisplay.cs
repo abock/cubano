@@ -59,6 +59,16 @@ namespace Banshee.Gui.Widgets
             }
         }
         
+#region UI Interaction
+
+        protected override void OnSeekValueChanged (double value)
+        {
+            base.OnSeekValueChanged (value);
+            ServiceManager.PlayerEngine.Position = (uint)Math.Round (TimeFromPercent (value));
+        }
+
+#endregion
+        
 #region State / Event / Timing Handlers
         
         private void OnPlayerEvent (PlayerEventArgs args)
