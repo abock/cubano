@@ -87,6 +87,58 @@ namespace Hyena.Gui.Canvas
             }
         }
         
+        protected CanvasItem FindChildAt (double x, double y, bool grabHasPriority)
+        {
+            foreach (var child in Children) {
+                if (child.IsPointerGrabbed || (child.Visible && child.Allocation.Contains (x, y))) {
+                    return child;
+                }
+            }
+            
+            return null;
+        }
+        
+        protected delegate void CanvasItemHandler (CanvasItem item);
+        
+        protected void WithPointerGrabChild (CanvasItemHandler handler)
+        {
+            WithChildAt (-1, -1, true, handler);
+        }
+        
+        protected void WithChildAt (double x, double y, CanvasItemHandler handler)
+        {
+            WithChildAt (x, y, true, handler);
+        }
+        
+        protected void WithChildAt (double x, double y, bool grabHasPriority, CanvasItemHandler handler)
+        {
+            CanvasItem child = FindChildAt (x, y, grabHasPriority);
+            if (child != null) {
+                handler (child);
+            }
+        }
+
+        public override void ButtonPress (double x, double y, uint button)
+        {
+            WithChildAt (x, y, (item) => item.ButtonPress (
+                x - item.Allocation.X, y - item.Allocation.Y, button));
+        }
+        
+        public override void ButtonRelease ()
+        {
+            WithPointerGrabChild ((item) => item.ButtonRelease ());
+        }
+
+        public override void PointerMotion (double x, double y)
+        {
+            WithChildAt (x, y, (item) => item.PointerMotion (
+                x - item.Allocation.X, y - item.Allocation.Y));
+        }
+        
+        public override bool IsPointerGrabbed {
+            get { return base.IsPointerGrabbed || FindChildAt (-1, -1, true) != null; }
+        }
+        
         public CanvasItemCollection Children {
             get { return children; }
         }
