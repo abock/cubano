@@ -113,11 +113,7 @@ namespace Cubano.Client
             Widget next_button = new NextButton (ActionService);
             next_button.Show ();
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/NextArrowButton", next_button);
-            
-            ConnectedSeekSlider seek_slider = new ConnectedSeekSlider ();
-            seek_slider.Show ();
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/SeekSlider", seek_slider);
-            
+
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", 
                 new CanvasHost () {
                     Child = new ConnectedSeekableTrackInfoDisplay (),
