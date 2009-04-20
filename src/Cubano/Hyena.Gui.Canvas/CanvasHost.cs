@@ -211,13 +211,8 @@ namespace Hyena.Gui.Canvas
             }
             
             while (item != null) {
-                if (rect.IsEmpty) {
-                    x += item.Allocation.X;
-                    y += item.Allocation.Y;
-                } else {
-                    x += item.ContentAllocation.X;
-                    y += item.ContentAllocation.Y;
-                }
+                x += item.ContentAllocation.X;
+                y += item.ContentAllocation.Y;
                 item = item.Parent;
             }
             
