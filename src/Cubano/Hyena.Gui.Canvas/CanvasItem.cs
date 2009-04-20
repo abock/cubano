@@ -356,5 +356,37 @@ namespace Hyena.Gui.Canvas
         {
             return Animate (new DoubleAnimation (property));
         }
+        
+#region Input Events
+
+        private bool pointer_grabbed;
+        public virtual bool IsPointerGrabbed {
+            get { return pointer_grabbed; }
+        }
+        
+        protected void GrabPointer ()
+        {
+            pointer_grabbed = true;
+        }
+        
+        protected void ReleasePointer ()
+        {
+            pointer_grabbed = false;
+        }
+
+        public virtual void ButtonPress (double x, double y, uint button)
+        {
+        }
+
+        public virtual void ButtonRelease ()
+        {
+        }
+        
+        public virtual void PointerMotion (double x, double y)
+        {
+        }
+
+#endregion
+
     }
 }
