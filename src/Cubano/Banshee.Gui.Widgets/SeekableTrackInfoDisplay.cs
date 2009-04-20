@@ -50,6 +50,7 @@ namespace Banshee.Gui.Widgets
         private TextBlock remaining;
         
         private DoubleAnimation transition_animation;
+        private DoubleAnimation seek_to_animation;
         private uint transition_timeout;
         
         private int display_metadata_index;
@@ -77,7 +78,12 @@ namespace Banshee.Gui.Widgets
                 }
             });
             
-            seek_to.Visible = false;
+            seek_to.Opacity = 0;
+            seek_to_animation = new DoubleAnimation ("Opacity");
+            seek_to_animation.Repeat (1);
+            
+            seek_bar.PendingValueChanged += (o, e) => OnSeekPendingValueChanged (seek_bar.PendingValue);
+            seek_bar.ValueChanged += (o, e) => OnSeekValueChanged (seek_bar.Value);
             
             UpdateMetadataDisplay ();
             BuildTransitionAnimation ();
@@ -151,9 +157,16 @@ namespace Banshee.Gui.Widgets
             display_metadata_index++;
         }
         
+        protected double TimeFromPercent (double percent)
+        {
+            return Duration * Math.Max (0, Math.Min (1, percent));
+        }
+        
         private void UpdateTick ()
         {
+            seek_bar.InhibitValueChangeEvent ();
             seek_bar.Value = Math.Max (0, Math.Min (1, Duration > 0 ? Position / Duration : 0)); 
+            seek_bar.UninhibitValueChangeEvent ();
             
             TimeSpan duration = TimeSpan.FromMilliseconds (Duration);
             TimeSpan position = TimeSpan.FromMilliseconds (Position);
@@ -179,6 +192,31 @@ namespace Banshee.Gui.Widgets
             
             OnTransitionTimeout ();
             ResetTransitionTimeout ();
+        }
+        
+        protected virtual void OnSeekPendingValueChanged (double value)
+        {
+            seek_to.Text = DurationStatusFormatters.ConfusingPreciseFormatter (
+                TimeSpan.FromMilliseconds (TimeFromPercent (value)));
+                
+            ShowSeekToLabel ();
+        }
+        
+        protected virtual void OnSeekValueChanged (double value)
+        {
+            HideSeekToLabel ();
+        }
+        
+        private void ShowSeekToLabel ()
+        {
+            if (seek_bar.IsValueUpdatePending) {
+                seek_to.Opacity = 1;
+            }
+        }
+        
+        private void HideSeekToLabel ()
+        {
+            seek_to.Opacity = 0;
         }
         
         private TrackInfo current_track;
