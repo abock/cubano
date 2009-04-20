@@ -33,13 +33,30 @@ using Hyena.Gui.Canvas;
 using Hyena.Gui.Theming;
 using Hyena.Gui.Theatrics;
 
+using Banshee.Collection;
+using Banshee.Collection.Gui;
+using Banshee.ServiceStack;
+
 namespace Banshee.Gui.Widgets
 {
     public class CoverArtDisplay : FixedPanel
     {
-        private Image incoming;
-        private Image current;
-        private DoubleAnimation fade;
+        private class CoverArtImage : Image
+        {
+            private CoverArtBrush brush;
+            public CoverArtBrush Brush {
+                get { return brush; }
+                set { Background = brush = value; }
+            }
+            
+            public CoverArtImage ()
+            {
+                Opacity = 1;
+                Brush = new CoverArtBrush ();
+            }
+        }
+    
+        private TrackInfo current_track;
         
         public CoverArtDisplay ()
         {
@@ -53,11 +70,9 @@ namespace Banshee.Gui.Widgets
                 Fill = Brush.White
             };
             
-            Children.Add (current = new Image () { Background = new ImageBrush ("/home/aaron/.cache/album-art/reginaspektor-sovietkitsch.jpg") });
-            /* Children.Add (incoming = new Image () { Background = new ImageBrush ("/home/aaron/.cache/album-art/korn-issues.jpg"), Opacity = 0 });/*
-            
-            xfade
-            incoming.AnimateDouble ("Opacity").From (0).To (1).Ease (Easing.QuadraticInOut).Repeat (1);*/
+            for (int i = 0; i < 2; i++) {
+                Children.Add (new CoverArtImage ());
+            }
         }
         
         protected override void ClippedRender (Cairo.Context cr)
@@ -68,6 +83,35 @@ namespace Banshee.Gui.Widgets
             cr.LineWidth = 1.0;
             cr.Rectangle (0.5, 0.5, RenderSize.Width - 1, RenderSize.Height - 1);
             cr.Stroke ();
+        }
+        
+        public void UpdateCurrentTrack (TrackInfo track)
+        {
+            if (track == null) {
+                current_track = null;
+                foreach (var image in Children) {
+                    
+                    /*image.Opacity = 0;
+                    image.Brush.Clear ();*/
+                }
+                return;
+            }
+            
+            CoverArtImage update_image = (CoverArtImage)Children[0];
+            CoverArtImage current_image = (CoverArtImage)Children[1];
+            int image_size = (int)Math.Ceiling (ImageSize);
+            
+            if (current_image.Brush.ShouldUpdate (track, image_size)) {
+                update_image.Brush.Load (track, image_size);
+                Children.Move (update_image, 1);
+                
+                update_image.AnimateDouble ("Opacity").From (0).To (1).Repeat (1).Compose ((a, p) => {
+                    if (p == 1) {
+                        current_image.Opacity = 0;
+                    }
+                    return Choreographer.Compose (p, Easing.QuadraticInOut);
+                }).Start ();
+            }
         }
         
         private void UpdateImageSize ()
