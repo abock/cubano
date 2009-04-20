@@ -41,7 +41,6 @@ namespace Banshee.Gui.Widgets
         private static double text_opacity = 0.6;
     
         private CoverArtDisplay cover_art;
-        private StackPanel vbox;
         private TextBlock title;
         private Slider seek_bar;
         private StackPanel time_bar;
@@ -61,7 +60,7 @@ namespace Banshee.Gui.Widgets
             Spacing = 3;
             
             Children.Add (cover_art = new CoverArtDisplay ());
-            Children.Add (vbox = new StackPanel () {
+            Children.Add (new StackPanel () {
                 Orientation = Orientation.Vertical,
                 Spacing = 4,
                 Children = {

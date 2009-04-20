@@ -55,8 +55,6 @@ namespace Banshee.Gui.Widgets
                 Brush = new CoverArtBrush ();
             }
         }
-    
-        private TrackInfo current_track;
         
         public CoverArtDisplay ()
         {
@@ -88,11 +86,10 @@ namespace Banshee.Gui.Widgets
         public void UpdateCurrentTrack (TrackInfo track)
         {
             if (track == null) {
-                current_track = null;
-                foreach (var image in Children) {
-                    
-                    /*image.Opacity = 0;
-                    image.Brush.Clear ();*/
+                foreach (var child in Children) {
+                    CoverArtImage image = (CoverArtImage)child;
+                    image.Opacity = 0;
+                    image.Brush.Clear ();
                 }
                 return;
             }
