@@ -44,6 +44,8 @@ namespace Banshee.Gui.Widgets
                 PlayerEvent.TrackInfoUpdated |
                 PlayerEvent.StartOfStream |
                 PlayerEvent.StateChange);
+                
+                Opacity = 0;
         }
         
         public void Dispose ()
@@ -64,81 +66,75 @@ namespace Banshee.Gui.Widgets
             switch (args.Event) {
                 case PlayerEvent.StartOfStream:
                 case PlayerEvent.TrackInfoUpdated:
-                    LoadCurrentTrack ();
+                    EnterTrackInfoChangedState ();
                     break;
 
                 case PlayerEvent.StateChange:
-                    if (IncomingTrack != null /* || incoming_image != null*/) {
-                        PlayerEventStateChangeArgs state = (PlayerEventStateChangeArgs)args;
-                        if (state.Current == PlayerState.Idle) {
-                            if (idle_timeout_id > 0) {
-                                GLib.Source.Remove (idle_timeout_id);
-                            } else {
-                                GLib.Timeout.Add (100, IdleTimeout);
-                            }
-                        }
+                    switch (((PlayerEventStateChangeArgs)args).Current) {
+                        case PlayerState.Contacting:
+                        case PlayerState.Loading:
+                            break;
+                        case PlayerState.Idle:
+                            StartIdleTimeout ();
+                            break;
                     }
+                    
                     break;
 
                 case PlayerEvent.Iterate:
                     OnPlayerEngineTick ();
                     break;
-                /*case PlayerEvent.StartOfStream:
-                    stream_position_label.StreamState = StreamLabelState.Playing;
-                    seek_slider.CanSeek = ServiceManager.PlayerEngine.CanSeek;
-                    break;
-                case PlayerEvent.Buffering:
-                    PlayerEventBufferingArgs buffering = (PlayerEventBufferingArgs)args;
-                    if (buffering.Progress >= 1.0) {
-                        stream_position_label.StreamState = StreamLabelState.Playing;
-                        break;
-                    }
-                    
-                    stream_position_label.StreamState = StreamLabelState.Buffering;
-                    stream_position_label.BufferingProgress = buffering.Progress;
-                    seek_slider.SetIdle ();
-                    break;
-                case PlayerEvent.StateChange:
-                    switch (((PlayerEventStateChangeArgs)args).Current) {
-                        case PlayerState.Contacting:
-                            transitioning = false;
-                            stream_position_label.StreamState = StreamLabelState.Contacting;
-                            seek_slider.SetIdle ();
-                            break;
-                        case PlayerState.Loading:
-                            transitioning = false;
-                            if (((PlayerEventStateChangeArgs)args).Previous == PlayerState.Contacting) {
-                                stream_position_label.StreamState = StreamLabelState.Loading;
-                                seek_slider.SetIdle ();
-                            }
-                            break;
-                        case PlayerState.Idle:
-                            seek_slider.CanSeek = false;
-                            if (!transitioning) {
-                                stream_position_label.StreamState = StreamLabelState.Idle;
-                                seek_slider.Duration = 0;
-                                seek_slider.SeekValue = 0;
-                                seek_slider.SetIdle ();
-                            }
-                            break;
-                        default:
-                            transitioning = false;
-                            break;
-                    }
-                    break;*/
             }
         }
         
-        private bool IdleTimeout ()
+        private void Show ()
+        {
+            AnimateDouble ("Opacity").To (1).Repeat (1).Start ();
+        }
+        
+        private void Hide ()
+        {
+            AnimateDouble ("Opacity").To (0).Repeat (1).Start ();
+        }
+        
+        private void StartIdleTimeout ()
+        {
+            CancelIdleTimeout ();
+            idle_timeout_id = GLib.Timeout.Add (500, OnIdleTimeout);
+        }
+        
+        private void CancelIdleTimeout ()
+        {
+            if (idle_timeout_id > 0) {
+                GLib.Source.Remove (idle_timeout_id);
+                idle_timeout_id = 0;
+            }
+        }
+        
+        private bool OnIdleTimeout ()
         {
             if (ServiceManager.PlayerEngine.CurrentTrack == null || 
                 ServiceManager.PlayerEngine.CurrentState == PlayerState.Idle) {
-                // incoming_track = null;
-                // incoming_image = null;
+                EnterIdleState ();
             }
             
-            idle_timeout_id = 0;
             return false;
+        }
+        
+        private void EnterIdleState ()
+        {
+            Position = 0;
+            Duration = 0;
+            UpdateCurrentTrack (null);
+        }
+        
+        private void EnterTrackInfoChangedState ()
+        {
+            if (Opacity != 1) {
+                Show ();
+            }
+            
+            UpdateCurrentTrack (ServiceManager.PlayerEngine.CurrentTrack);
         }
         
         private void OnPlayerEngineTick ()
@@ -149,61 +145,6 @@ namespace Banshee.Gui.Widgets
             
             Duration = ServiceManager.PlayerEngine.Length;
             Position = ServiceManager.PlayerEngine.Position;
-        }
-        
-#endregion
-
-#region Data / Display
-        
-        private void LoadCurrentTrack ()
-        {
-            TrackInfo track = ServiceManager.PlayerEngine.CurrentTrack;
-
-            if (track == CurrentTrack /* && !IsMissingImage (current_image)*/) {
-                return;
-            } else if (track == null) {
-                IncomingTrack = null;
-                // incoming_image = null;
-                return;
-            }
-
-            IncomingTrack = track;
-            
-            // LoadImage (track);
-
-            // if (stage.Actor == null) {
-            //     stage.Reset ();
-            // }
-            
-            OnIteration ();
-        }
-        
-        private void OnIteration ()
-        {
-            /*Invalidate ();
-            
-            if (stage.Actor != null) {
-                last_fps = stage.Actor.FramesPerSecond;
-                return;
-            }
-            
-            InvalidateCache ();
-            
-            if (ApplicationContext.Debugging) {
-                Log.DebugFormat ("TrackInfoDisplay RenderAnimation: {0:0.00} FPS", last_fps);
-            }
-            
-            if (current_image != null && current_image != incoming_image && !IsMissingImage (current_image)) {
-                current_image.Destroy ();
-            }*/
-            
-            // current_image = incoming_image;
-            CurrentTrack = IncomingTrack;
-            IncomingTrack = null;
-            
-            UpdateMetadataDisplay ();
-            
-            // OnArtworkChanged ();
         }
         
 #endregion
