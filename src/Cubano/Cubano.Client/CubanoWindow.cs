@@ -1,36 +1,41 @@
 // 
 // CubanoWindow.cs
-//  
+//
 // Author:
-//       Aaron Bockover <abockover@novell.com>
-// 
-// Copyright 2009 Aaron Bockover
-// 
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+//   Aaron Bockover <abockover@novell.com>
+//
+// Copyright (C) 2009 Novell, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 
 using System;
+using System.Collections.Generic;
+using Mono.Unix;
 using Gtk;
 
 using Hyena.Gui;
 using Hyena.Data;
 using Hyena.Data.Gui;
 using Hyena.Widgets;
+using Hyena.Gui.Canvas;
 
 using Banshee.Base;
 using Banshee.ServiceStack;
@@ -48,21 +53,46 @@ using Banshee.Widgets;
 using Banshee.Collection.Gui;
 using Banshee.Sources.Gui;
 
-using Hyena.Gui.Canvas;
-
 namespace Cubano.Client
 {
-    public class CubanoWindow : BaseClientWindow, IClientWindow, IDBusObjectName, IService, IDisposable
+    public class CubanoWindow : BaseClientWindow, IClientWindow, IDBusObjectName, IService, IDisposable /*, IHasSourceView */
     {
-        private Toolbar header_toolbar;
+        // Major Layout Components
         private VBox primary_vbox;
+        private Alignment header_box;
+        private Alignment view_box;
+        private Toolbar header_toolbar;
+        private Toolbar footer_toolbar;
+        private HBox footer;
+        private ViewContainer view_container;
+        private SearchEntry search_box;
+        private MainMenu main_menu;
         
+        // Major Interaction Components
+        private LtrTrackSourceContents composite_view;
+        private ObjectListSourceContents object_view;
+        private Label status_label;
+
         protected CubanoWindow (IntPtr ptr) : base (ptr)
         {
         }
         
         public CubanoWindow () : base ("Cubano", "cubano.window", 1000, 500)
         {
+        }
+        
+        protected override void Initialize ()
+        {
+            ConfigureTheme ();
+        
+            BuildPrimaryLayout ();
+            ConnectEvents ();
+
+            // ActionService.SourceActions.SourceView = this;
+            
+            composite_view.TrackView.HasFocus = true;
+            
+            InitialShowPresent ();
         }
         
 #region System Overrides 
@@ -75,58 +105,57 @@ namespace Cubano.Client
                 Gtk.Application.Quit ();
             }
         }
-
-#endregion     
-
-        protected override void Initialize ()
-        {
-            BuildInterface ();
-            ConnectEvents ();
-            InitialShowPresent ();
-        }
+        
+#endregion        
 
 #region Interface Construction
-
-        private void BuildInterface ()
+        
+        private void BuildPrimaryLayout ()
         {
             primary_vbox = new VBox ();
-
+            
+            main_menu = new MainMenu ();
+            main_menu.Hide ();
+            primary_vbox.PackStart (main_menu, false, false, 0);
+           
             BuildHeader ();
-
+            BuildViews ();
+            BuildFooter ();
+            
+            ConfigureMargins (false);
+            
             primary_vbox.Show ();
             Add (primary_vbox);
         }
-
+        
         private void BuildHeader ()
         {
-            Alignment toolbar_alignment = new Alignment (0.0f, 0.0f, 1.0f, 1.0f);
-            
-            header_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/HeaderToolbar");
+            var header_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/HeaderToolbar");
+            header_toolbar.ExposeEvent += OnCubanoToolbarExposeEvent;
             header_toolbar.ShowArrow = false;
             header_toolbar.ToolbarStyle = ToolbarStyle.BothHoriz;
             
-            toolbar_alignment.Add (header_toolbar);
-            toolbar_alignment.ShowAll ();
+            var children = header_toolbar.Children;
             
-            primary_vbox.PackEnd (toolbar_alignment, false, false, 0);
+            header_toolbar.Insert (new GenericToolItem<Widget> (new RepeatActionButton ()), 0);
             
-            Widget next_button = new NextButton (ActionService);
-            next_button.Show ();
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/NextArrowButton", next_button);
-
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", 
-                new CanvasHost () {
-                    Child = new ConnectedSeekableTrackInfoDisplay (),
-                    HeightRequest = 60,
-                    Visible = true
-                }, true);
+            var filler = new Alignment (0.5f, 0.5f, 0.0f, 0.0f);
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", filler, true);
             
+            var search_hack = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 12 };
+            search_hack.Add (search_box = new SearchEntry ());
+            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", search_hack, false);
             
-            ConnectedVolumeButton volume_button = new ConnectedVolumeButton ();
-            volume_button.Show ();
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", volume_button);
+            header_box = new Alignment (0.0f, 0.0f, 1.0f, 1.0f);
+            header_box.Add (header_toolbar);
+            header_box.ShowAll ();
+            
+            for (int i = 0; i < children.Length; i++) {
+                children[i].Visible = false;
+            }
+            
+            primary_vbox.PackStart (header_box, false, false, 0);
         }
-        
 
         // NOTE: this is copied from GtkBaseClient, it was added in 
         // r5063 for 1.5.x, but I am aiming to make Cubano work on 1.4.x
@@ -144,15 +173,139 @@ namespace Cubano.Client
             }
         }
 
-#endregion
+        private void BuildViews ()
+        {
+            VBox source_box = new VBox ();
+            source_box.PackStart (new UserJobTileHost (), false, false, 0);
+            
+            view_container = new ViewContainer ();
+            composite_view = new LtrTrackSourceContents ();     
+            composite_view.TrackView.HeaderVisible = false;
+            view_container.Content = composite_view;
+            view_container.Show ();
+            
+            view_box = new Alignment (0.0f, 0.0f, 1.0f, 1.0f);
+            view_box.Add (view_container);
+            view_box.ShowAll ();
+            
+            primary_vbox.PackStart (view_box, true, true, 0);
+        }
 
+        private void BuildFooter ()
+        {
+        
+            status_label = new Label ();
+            
+            /*footer_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/FooterToolbar");
+            footer_toolbar.ShowArrow = false;
+            footer_toolbar.ToolbarStyle = ToolbarStyle.BothHoriz;
+
+            Widget task_status = new Banshee.Gui.Widgets.TaskStatusIcon ();
+
+            EventBox status_event_box = new EventBox ();
+            status_event_box.ButtonPressEvent += OnStatusBoxButtonPress;
+            
+            status_event_box.Add (status_label);
+
+            HBox status_hbox = new HBox (true, 0);
+            status_hbox.PackStart (status_event_box, false, false, 0);
+            
+            Alignment status_align = new Alignment (0.5f, 0.5f, 1.0f, 1.0f);
+            status_align.Add (status_hbox);
+
+            RepeatActionButton repeat_button = new RepeatActionButton ();
+            repeat_button.SizeAllocated += delegate (object o, Gtk.SizeAllocatedArgs args) {
+                status_align.LeftPadding = (uint)args.Allocation.Width;
+            };
+
+          //  ActionService.PopulateToolbarPlaceholder (footer_toolbar, "/FooterToolbar/TaskStatus", task_status, false);
+            ActionService.PopulateToolbarPlaceholder (footer_toolbar, "/FooterToolbar/StatusBar", status_align, true);
+            ActionService.PopulateToolbarPlaceholder (footer_toolbar, "/FooterToolbar/RepeatButton", repeat_button);
+
+            footer_toolbar.ShowAll ();
+            primary_vbox.PackStart (footer_toolbar, false, true, 0);*/
+            
+            footer = new HBox ();
+            
+            var source_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
+            var source_box = new HBox ();
+            var source_combo = new SourceComboBox ();
+            /*source_combo.ExposeEvent += (o, e) => {
+                RenderBackground (e.Event.Window, e.Event.Region);
+                source_combo.Cells[0].Render (e.Event.Window, source_combo, 
+                    source_combo.Allocation, 
+                    source_combo.Allocation,
+                    source_combo.Allocation,
+                    CellRendererState.Focused);
+            };*/
+            source_box.PackStart (source_combo, false, false, 0);
+            source_align.Add (source_box);
+            
+            var track_info_box = new HBox (true, 0);
+            var track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {
+                TopPadding = 20,
+                BottomPadding = 12
+            };
+            track_info_align.Add (new CanvasHost () {
+                Child = new ConnectedSeekableTrackInfoDisplay (),
+                HeightRequest = 60,
+                WidthRequest = 300,
+                Visible = true,
+            });
+            
+            footer.PackStart (source_align, false, false, 0);
+            footer.PackStart (track_info_align, true, true, 0);
+            
+            var actions = ServiceManager.Get<InterfaceActionService> ().PlaybackActions;
+            
+            var playback_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { RightPadding = 20 };
+            var playback_box = new HBox ();
+            playback_box.PackStart (actions["PreviousAction"].CreateToolItem (), false, false, 0);
+            playback_box.PackStart (actions["PlayPauseAction"].CreateToolItem (), false, false, 0);
+            playback_box.PackStart (new NextButton (ActionService), false, false, 0);
+            playback_box.PackStart (new ConnectedVolumeButton (), false, false, 10);
+            playback_align.Add (playback_box);
+            footer.PackEnd (playback_align, false, false, 0);
+            
+            footer.ShowAll ();
+            primary_vbox.PackStart (footer, false, true, 0);
+        }
+
+        private void OnStatusBoxButtonPress (object o, ButtonPressEventArgs args) 
+        {
+            Source source = ServiceManager.SourceManager.ActiveSource;
+            if (source != null) {
+                source.CycleStatusFormat ();
+                UpdateSourceInformation ();
+            }
+        }
+        
+        private void ConfigureMargins (bool zero)
+        {
+            if (zero) {
+                view_box.LeftPadding 
+                    = view_box.RightPadding
+                    = header_box.TopPadding
+                    = header_box.BottomPadding
+                    = header_box.LeftPadding 
+                    = header_box.RightPadding = 0;
+            } else {
+                view_box.LeftPadding = view_box.RightPadding = 25;
+                header_box.TopPadding = 15;
+                header_box.BottomPadding = 20;
+                header_box.LeftPadding = header_box.RightPadding = 25;
+            }
+        }
+
+#endregion
+        
 #region Events and Logic Setup
         
         protected override void ConnectEvents ()
         {
             base.ConnectEvents ();
 
-            /*// Service events
+            // Service events
             ServiceManager.SourceManager.ActiveSourceChanged += OnActiveSourceChanged;
             ServiceManager.SourceManager.SourceUpdated += OnSourceUpdated;
             
@@ -160,45 +313,369 @@ namespace Cubano.Client
             ActionService.TrackActions ["SearchForSameAlbumAction"].Activated += OnProgrammaticSearch;
 
             // UI events
-            view_container.SearchEntry.Changed += OnSearchEntryChanged;
-            views_pane.SizeRequested += delegate {
-                SourceViewWidth.Set (views_pane.Position);
-            };
-            
-            source_view.RowActivated += delegate {
-                Source source = ServiceManager.SourceManager.ActiveSource;
-                if (source is ITrackModelSource) {
-                    ServiceManager.PlaybackController.NextSource = (ITrackModelSource)source;
-                    // Allow changing the play source without stopping the current song by
-                    // holding ctrl when activating a source. After the song is done, playback will
-                    // continue from the new source.
-                    if (GtkUtilities.NoImportantModifiersAreSet (Gdk.ModifierType.ControlMask)) {
-                        ServiceManager.PlaybackController.Next ();
-                    }
-                }
-            };*/
-            
-            header_toolbar.ExposeEvent += OnToolbarExposeEvent;
-            //footer_toolbar.ExposeEvent += OnToolbarExposeEvent;
+            search_box.Entry.Changed += OnSearchEntryChanged;
         }
         
 #endregion
 
-#region Service/Export Implementation
+#region Service Event Handlers
+
+        private void OnProgrammaticSearch (object o, EventArgs args)
+        {
+            Source source = ServiceManager.SourceManager.ActiveSource;
+            search_box.Entry.Ready = false;
+            search_box.Entry.Query = source.FilterQuery;
+            search_box.Entry.Ready = true;
+        }
+        
+        private Source previous_source = null;
+        private TrackListModel previous_track_model = null;
+        private void OnActiveSourceChanged (SourceEventArgs args)
+        {
+            Banshee.Base.ThreadAssist.ProxyToMain (delegate {
+                Source source = ServiceManager.SourceManager.ActiveSource;
+    
+                search_box.SearchSensitive = source != null && source.CanSearch;
+                
+                if (source == null) {
+                    return;
+                }
+                
+                search_box.Entry.Ready = false;
+                search_box.Entry.CancelSearch ();
+    
+                if (source.FilterQuery != null) {
+                    search_box.Entry.Query = source.FilterQuery;
+                    search_box.Entry.ActivateFilter ((int)source.FilterType);
+                }
+    
+                if (view_container.Content != null) {
+                    view_container.Content.ResetSource ();
+                }
+    
+                if (previous_track_model != null) {
+                    previous_track_model.Reloaded -= HandleTrackModelReloaded;
+                    previous_track_model = null;
+                }
+    
+                if (source is ITrackModelSource) {
+                    previous_track_model = (source as ITrackModelSource).TrackModel;
+                    previous_track_model.Reloaded += HandleTrackModelReloaded;
+                }
+                
+                if (previous_source != null) {
+                    previous_source.Properties.PropertyChanged -= OnSourcePropertyChanged;
+                }
+                
+                previous_source = source;
+                previous_source.Properties.PropertyChanged += OnSourcePropertyChanged;
+                
+                UpdateSourceContents (source);
+                
+                UpdateSourceInformation ();
+                search_box.Entry.Ready = true;
+            });
+        }
+        
+        private void OnSourcePropertyChanged (object o, PropertyChangeEventArgs args)
+        {
+            if (args.PropertyName == "Nereid.SourceContents") {
+                Banshee.Base.ThreadAssist.ProxyToMain (delegate {
+                    UpdateSourceContents (previous_source);
+                });
+            }
+        }
+        
+        private void UpdateSourceContents (Source source)
+        {
+            if (source == null) {
+                return;
+            }
+            
+            // Connect the source models to the views if possible
+            ISourceContents contents = source.GetProperty<ISourceContents> ("Nereid.SourceContents",
+                source.GetInheritedProperty<bool> ("Nereid.SourceContentsPropagate"));
+                
+            bool remove_margins = false;
+                
+            view_container.ClearFooter ();
+            
+            if (contents != null) {
+                if (view_container.Content != contents) {
+                    view_container.Content = contents;
+                }
+                view_container.Content.SetSource (source);
+                view_container.Show ();
+             
+                remove_margins = contents.GetType ().FullName == "Banshee.NowPlaying.NowPlayingInterface";
+            } else if (source is ITrackModelSource) {
+                view_container.Content = composite_view;
+                view_container.Content.SetSource (source);
+                view_container.Show ();
+            } else if (source is Hyena.Data.IObjectListModel) {
+                if (object_view == null) {
+                    object_view = new ObjectListSourceContents ();
+                }
+                
+                view_container.Content = object_view;
+                view_container.Content.SetSource (source);
+                view_container.Show ();
+            } else {
+                view_container.Hide ();
+            }
+
+            // Associate the view with the model
+            if (view_container.Visible && view_container.Content is ITrackModelSourceContents) {
+                ITrackModelSourceContents track_content = view_container.Content as ITrackModelSourceContents;
+                source.Properties.Set<IListView<TrackInfo>>  ("Track.IListView", track_content.TrackView);
+            }
+
+            header_box.Visible = source.Properties.Contains ("Nereid.SourceContents.HeaderVisible") ?
+                source.Properties.Get<bool> ("Nereid.SourceContents.HeaderVisible") : true;
+
+            Widget footer_widget = null;
+            if (source.Properties.Contains ("Nereid.SourceContents.FooterWidget")) {
+                footer_widget = source.Properties.Get<Widget> ("Nereid.SourceContents.FooterWidget");
+            }
+            
+            if (footer_widget != null) {
+                view_container.SetFooter (footer_widget);
+            }
+            
+            ConfigureMargins (remove_margins);
+        }
+
+        private void OnSourceUpdated (SourceEventArgs args)
+        {
+            if (args.Source == ServiceManager.SourceManager.ActiveSource) {
+                Banshee.Base.ThreadAssist.ProxyToMain (delegate {
+                    UpdateSourceInformation ();
+                });
+            }
+        }
+
+#endregion
+
+#region UI Event Handlers
+        
+        private void OnSearchEntryChanged (object o, EventArgs args)
+        {
+            Source source = ServiceManager.SourceManager.ActiveSource;
+            if (source == null)
+                return;
+            
+            source.FilterType = (TrackFilterType)search_box.Entry.ActiveFilterID;
+            source.FilterQuery = search_box.Entry.Query;
+        }
+        
+#endregion
+
+#region Implement Interfaces
+/*
+        // IHasSourceView
+        public Source HighlightedSource {
+            get { return source_view.HighlightedSource; }
+        }
+
+        public void BeginRenameSource (Source source)
+        {
+            source_view.BeginRenameSource (source);
+        }
+        
+        public void ResetHighlight ()
+        {
+            source_view.ResetHighlight ();
+        }*/
+
+        public override Box ViewContainer {
+            get { return view_container; }
+        }
+
+#endregion
+        
+#region Gtk.Window Overrides
+
+        private bool accel_group_active = true;
+
+        private void OnEntryFocusOutEvent (object o, FocusOutEventArgs args)
+        {
+            if (!accel_group_active) {
+                AddAccelGroup (ActionService.UIManager.AccelGroup);
+                accel_group_active = true;
+            }
+
+            (o as Widget).FocusOutEvent -= OnEntryFocusOutEvent;
+        }
+        
+        protected override bool OnKeyPressEvent (Gdk.EventKey evnt)
+        {
+            bool focus_search = false;
+            
+            if (Focus is Gtk.Entry && (GtkUtilities.NoImportantModifiersAreSet () && 
+                evnt.Key != Gdk.Key.Control_L && evnt.Key != Gdk.Key.Control_R)) {
+                if (accel_group_active) {
+                    RemoveAccelGroup (ActionService.UIManager.AccelGroup);
+                    accel_group_active = false;
+
+                    // Reinstate the AccelGroup as soon as the focus leaves the entry
+                    Focus.FocusOutEvent += OnEntryFocusOutEvent;
+                 }
+            } else {
+                if (!accel_group_active) {
+                    AddAccelGroup (ActionService.UIManager.AccelGroup);
+                    accel_group_active = true;
+                }
+            }
+            
+            switch (evnt.Key) {
+                case Gdk.Key.f:
+                    if (Gdk.ModifierType.ControlMask == (evnt.State & Gdk.ModifierType.ControlMask)) {
+                        focus_search = true;
+                    }
+                    break;
+
+                case Gdk.Key.S:  case Gdk.Key.s:
+                case Gdk.Key.F3: case Gdk.Key.slash:
+                    focus_search = true;
+                    break;
+                case Gdk.Key.F11:
+                    ActionService.ViewActions["FullScreenAction"].Activate ();
+                    break;
+                case Gdk.Key.F4:
+                    main_menu.Visible = !main_menu.Visible;
+                    break;
+            }
+
+            if (focus_search/* && !search_box.Entry.HasFocus && !source_view.EditingRow*/) {
+                search_box.Entry.HasFocus = true;
+                return true;
+            }
+            
+            return base.OnKeyPressEvent (evnt);
+        }
+
+#endregion
+
+#region Helper Functions
+
+        private void HandleTrackModelReloaded (object sender, EventArgs args)
+        {
+            Banshee.Base.ThreadAssist.ProxyToMain (UpdateSourceInformation);
+        }
+
+        private void UpdateSourceInformation ()
+        {
+            Source source = ServiceManager.SourceManager.ActiveSource;
+            if (source == null) {
+                status_label.Text = String.Empty;
+                return;
+            }
+
+            status_label.Text = source.GetStatusText ();
+        }
+
+#endregion
+
+#region Cubano Theme/UI
+
+        private void ConfigureTheme ()
+        {
+            // Banshee 1.4.3 and older does not provide a way for Hyena controls
+            // to use any other theme except the GtkTheme; a hack was added for 1.4.3+
+            // that allows reflection to be used to specify a theme provider; this allows
+            // Cubano to run on 1.4.x but will look different on 1.4.3 or older;
+            // This is the client side of the hack. Sigh.
+            
+            var asm = typeof (Hyena.Gui.Theming.Theme).Assembly;
+            var engine_type = asm.GetType ("Hyena.Gui.Theming.ThemeEngine");
+            if (engine_type != null) {
+                var provider_method = engine_type.GetMethod ("SetProvider");
+                if (provider_method != null) {
+                    provider_method.Invoke (null, new object [] { new EventHandler (OnProvideTheme) });
+                }
+            }
+        }
+        
+        private void OnProvideTheme (object o, EventArgs args)
+        {
+            var type = args.GetType ();
+            var theme_prop = type.GetProperty ("Theme");
+            var widget_prop = type.GetProperty ("Widget");
+            if (theme_prop != null && widget_prop != null) {
+                theme_prop.SetValue (args, new CubanoTheme ((Widget)widget_prop.GetValue (args, null)), null);
+            }
+        }
+        
+        private void OnCubanoToolbarExposeEvent (object o, ExposeEventArgs args)
+        {
+            Toolbar toolbar = (Toolbar)o;
+
+            // This forces the toolbar to look like it's just a regular part
+            // of the window since the stock toolbar look makes Banshee look ugly.
+            RenderBackground (toolbar.GdkWindow, args.Event.Region);
+
+            // Manually expose all the toolbar's children
+            foreach (Widget child in toolbar.Children) {
+                toolbar.PropagateExpose (child, args.Event);
+            }
+        }
+        
+        protected override bool OnExposeEvent (Gdk.EventExpose evnt)
+        {
+            if (!Visible || !IsMapped) {
+                return true;
+            }
+            
+            RenderBackground (evnt.Window, evnt.Region);
+            PropagateExpose (Child, evnt);
+            return true;
+        }
+        
+        private bool render_gradient = Environment.GetEnvironmentVariable ("CUBANO_DISABLE_BACKGROUND") == null;
+        
+        private void RenderBackground (Gdk.Window window, Gdk.Region region)
+        {   
+            Cairo.Context cr = Gdk.CairoHelper.Create (window);
+
+            foreach (Gdk.Rectangle damage in region.GetRectangles ()) {
+                cr.Rectangle (damage.X, damage.Y, damage.Width, damage.Height);
+                cr.Clip ();
+                
+                cr.Translate (Allocation.X, Allocation.Y);
+                cr.Rectangle (0, 0, Allocation.Width, Allocation.Height);
+                
+                if (render_gradient) {
+                    var grad = new Cairo.LinearGradient (0, 0, 0, Allocation.Height);
+                    grad.AddColorStop (0.00, new Cairo.Color (210 / 255.0, 210 / 255.0, 210 / 255.0));
+                    grad.AddColorStop (0.20, new Cairo.Color (245 / 255.0, 245 / 255.0, 245 / 255.0));
+                    grad.AddColorStop (0.78, new Cairo.Color (253 / 255.0, 253 / 255.0, 253 / 255.0));
+                    grad.AddColorStop (1.00, new Cairo.Color (250 / 255.0, 250 / 255.0, 250 / 255.0));
+                    cr.Pattern = grad;
+                    cr.Fill ();
+                    grad.Destroy ();
+                } else {
+                    cr.Color = new Cairo.Color (1, 1, 1);
+                    cr.Fill ();
+               }
+                
+                cr.ResetClip ();
+            }
+            
+            CairoExtensions.DisposeContext (cr);
+        }
+        
+#endregion
 
         IDBusExportable IDBusExportable.Parent {
             get { return null; }
         }
         
         string IDBusObjectName.ExportObjectName {
-            get { return "ClientWindow"; }
+            get { return "CubanoWindow"; }
         }
 
         string IService.ServiceName {
             get { return "CubanoPlayerInterface"; }
         }
-
-#endregion
-
     }
 }
