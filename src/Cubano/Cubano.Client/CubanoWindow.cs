@@ -67,6 +67,11 @@ namespace Cubano.Client
         private ViewContainer view_container;
         private SearchEntry search_box;
         private MainMenu main_menu;
+        private ToolButton forward_button;
+        private ToolButton back_button;
+        private Alignment playback_align;
+        private Alignment source_align;
+        private Alignment track_info_align;
         
         // Major Interaction Components
         private LtrTrackSourceContents composite_view;
@@ -123,6 +128,7 @@ namespace Cubano.Client
             BuildFooter ();
             
             ConfigureMargins (false);
+            UpdateSourceHistory (null, null);
             
             primary_vbox.Show ();
             Add (primary_vbox);
@@ -227,7 +233,8 @@ namespace Cubano.Client
             
             footer = new HBox ();
             
-            var source_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
+            source_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
+            source_align.SizeAllocated += OnFooterGroupSizeAllocated;
             var source_box = new HBox ();
             var source_combo = new SourceComboBox ();
             /*source_combo.ExposeEvent += (o, e) => {
@@ -238,19 +245,23 @@ namespace Cubano.Client
                     source_combo.Allocation,
                     CellRendererState.Focused);
             };*/
+            source_box.PackStart (back_button = new Gtk.ToolButton (Stock.GoBack), false, false, 0);
             source_box.PackStart (source_combo, false, false, 0);
+            forward_button = new Gtk.ToolButton (Stock.GoForward);
+            //source_box.PackStart (forward_button = new Gtk.ToolButton (Stock.GoForward), false, false, 0);
             source_align.Add (source_box);
             
-            var track_info_box = new HBox (true, 0);
-            var track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {
+            track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {
                 TopPadding = 20,
-                BottomPadding = 12
+                BottomPadding = 12,
+                RightPadding = 10,
+                LeftPadding = 10
             };
             track_info_align.Add (new CanvasHost () {
                 Child = new ConnectedSeekableTrackInfoDisplay (),
                 HeightRequest = 60,
                 WidthRequest = 300,
-                Visible = true,
+                Visible = true
             });
             
             footer.PackStart (source_align, false, false, 0);
@@ -258,7 +269,8 @@ namespace Cubano.Client
             
             var actions = ServiceManager.Get<InterfaceActionService> ().PlaybackActions;
             
-            var playback_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { RightPadding = 20 };
+            playback_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { RightPadding = 20 };
+            playback_align.SizeAllocated += OnFooterGroupSizeAllocated;
             var playback_box = new HBox ();
             playback_box.PackStart (actions["PreviousAction"].CreateToolItem (), false, false, 0);
             playback_box.PackStart (actions["PlayPauseAction"].CreateToolItem (), false, false, 0);
@@ -295,6 +307,13 @@ namespace Cubano.Client
                 header_box.BottomPadding = 20;
                 header_box.LeftPadding = header_box.RightPadding = 25;
             }
+        }
+        
+        private void OnFooterGroupSizeAllocated (object o, SizeAllocatedArgs args)
+        {
+            //track_info_align.Xalign = 1.0f -
+            //    (float)Math.Min (source_align.Allocation.Width, playback_align.Allocation.Width) /
+            //    (float)Math.Max (source_align.Allocation.Width, playback_align.Allocation.Width);
         }
 
 #endregion
@@ -366,6 +385,8 @@ namespace Cubano.Client
                 if (previous_source != null) {
                     previous_source.Properties.PropertyChanged -= OnSourcePropertyChanged;
                 }
+                
+                UpdateSourceHistory (previous_source, source);
                 
                 previous_source = source;
                 previous_source.Properties.PropertyChanged += OnSourcePropertyChanged;
@@ -664,6 +685,63 @@ namespace Cubano.Client
             CairoExtensions.DisposeContext (cr);
         }
         
+#endregion
+
+#region Source History
+
+        private Hyena.UndoManager source_history;
+
+        private void UpdateSourceHistory (Source oldSource, Source newSource)
+        {
+            if (source_history == null) {
+                source_history = new Hyena.UndoManager ();
+                forward_button.Clicked += (o, e) => source_history.Redo ();
+                back_button.Clicked += (o, e) => source_history.Undo ();
+            }
+            
+            if (newSource != null && oldSource != null) {
+                source_history.AddUndoAction (new SourceUndoAction (oldSource, newSource));
+            }
+            
+            forward_button.Sensitive = source_history.CanRedo;
+            back_button.Sensitive = source_history.CanUndo;
+        }
+        
+        private class SourceUndoAction : Hyena.IUndoAction
+        {
+            private Source new_source;
+            private Source old_source;
+            
+            public SourceUndoAction (Source oldSource, Source newSource)
+            {
+                this.new_source = newSource;
+                this.old_source = oldSource;
+            }
+            
+            public void Undo ()
+            {
+                if (ServiceManager.SourceManager.ContainsSource (old_source)) {
+                    ServiceManager.SourceManager.SetActiveSource (old_source);
+                }
+            }
+            
+            public void Redo ()
+            {
+                if (ServiceManager.SourceManager.ContainsSource (new_source)) {
+                    ServiceManager.SourceManager.SetActiveSource (new_source);
+                }
+            }
+            
+            public bool CanMerge (Hyena.IUndoAction action)
+            {
+                return false;
+            }
+            
+            public void Merge (Hyena.IUndoAction action)
+            {
+            }
+        }
+
 #endregion
 
         IDBusExportable IDBusExportable.Parent {
