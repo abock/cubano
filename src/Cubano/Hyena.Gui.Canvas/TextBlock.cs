@@ -77,7 +77,7 @@ namespace Hyena.Gui.Canvas
             layout.Width = wrap == TextWrap.None ? -1 : (int)(Pango.Scale.PangoScale * available.Width);
             layout.Wrap = GetPangoWrapMode (wrap);
             layout.FontDescription.Weight = GetPangoFontWeight (FontWeight);
-            layout.SetMarkup (Text);
+            layout.SetText (Text);
             layout.GetPixelSize (out text_w, out text_h);
 
             DesiredSize = new Size (available.Width, text_h + Margin.Top + Margin.Bottom);
