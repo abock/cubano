@@ -39,9 +39,12 @@ namespace Cubano.Client
     {
         private Cairo.Color rule_color;
         private Cairo.Color border_color;
+        
+        private Widget widget;
 
         public CubanoTheme (Widget widget) : base (widget)
         {
+            this.widget = widget;
         }
 
         protected override void OnColorsRefreshed ()
@@ -71,12 +74,32 @@ namespace Cubano.Client
         
         public override void DrawFrameBorder (Cairo.Context cr, Gdk.Rectangle alloc)
         {
-            /*cr.LineWidth = BorderWidth;
+            cr.LineWidth = BorderWidth;
+            border_color.A = 0.3;
             cr.Color = border_color;
+            
             double offset = (double)BorderWidth / 2.0;
-            CairoExtensions.RoundedRectangle (cr, alloc.X + offset, alloc.Y + offset,
-                alloc.Width - BorderWidth, alloc.Height - BorderWidth, Context.Radius, CairoCorners.All);
-            cr.Stroke();*/
+            double w = Math.Max (0, alloc.Width * 0.75);
+            double x = alloc.X + (alloc.Width - w) * 0.5 + offset;
+            double y = alloc.Y + alloc.Height + offset;
+            
+            LinearGradient g = new LinearGradient (x, y, x + w, y);
+            
+            Color transparent = border_color;
+            transparent.A = 0.0;
+            
+            g.AddColorStop (0, transparent);
+            g.AddColorStop (0.4, border_color);
+            g.AddColorStop (0.6, border_color);
+            g.AddColorStop (1, transparent);
+            
+            cr.Pattern = g;
+            
+            cr.MoveTo (x, y);
+            cr.LineTo (x + w, y);
+            cr.Stroke ();
+            
+            g.Destroy ();
         }
         
         public override void DrawColumnHighlight (Cairo.Context cr, Gdk.Rectangle alloc, Cairo.Color color)

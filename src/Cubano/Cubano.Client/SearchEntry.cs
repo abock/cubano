@@ -87,7 +87,7 @@ namespace Cubano.Client
             AddSearchFilter (TrackFilterType.Genre, "genre", Catalog.GetString ("Genre"));
             AddSearchFilter (TrackFilterType.Year, "year", Catalog.GetString ("Year"));
 
-            SetSizeRequest (250, -1);
+            SetSizeRequest (300, -1);
 
             foreach (SearchFilter filter in search_filters.Values) {
                 AddFilterOption (filter.Id, filter.Title);
