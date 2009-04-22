@@ -8,7 +8,14 @@ SOURCES =  \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
 	Cubano.Client/CubanoClient.cs \
+	Cubano.Client/CubanoSourceContents.cs \
+	Cubano.Client/CubanoTheme.cs \
+	Cubano.Client/CubanoTitleCell.cs \
+	Cubano.Client/CubanoTrackTitleView.cs \
 	Cubano.Client/CubanoWindow.cs \
+	Cubano.Client/LtrTrackSourceContents.cs \
+	Cubano.Client/SearchEntry.cs \
+	Cubano.Client/ViewContainer.cs \
 	Hyena.Gui.Canvas/AnimationManager.cs \
 	Hyena.Gui.Canvas/Brush.cs \
 	Hyena.Gui.Canvas/CanvasHost.cs \

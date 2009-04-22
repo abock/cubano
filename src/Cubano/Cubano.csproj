@@ -49,6 +49,13 @@
     <Compile Include="Banshee.Gui.Widgets\CoverArtDisplay.cs" />
     <Compile Include="Banshee.Gui.Widgets\SeekableTrackInfoDisplay.cs" />
     <Compile Include="Banshee.Gui.Widgets\CoverArtBrush.cs" />
+    <Compile Include="Cubano.Client\ViewContainer.cs" />
+    <Compile Include="Cubano.Client\LtrTrackSourceContents.cs" />
+    <Compile Include="Cubano.Client\CubanoSourceContents.cs" />
+    <Compile Include="Cubano.Client\SearchEntry.cs" />
+    <Compile Include="Cubano.Client\CubanoTheme.cs" />
+    <Compile Include="Cubano.Client\CubanoTrackTitleView.cs" />
+    <Compile Include="Cubano.Client\CubanoTitleCell.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
