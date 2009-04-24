@@ -45,6 +45,12 @@ namespace Cubano.Client
             get { return height; }
             set { height = value; }
         }
+
+        private int width = 160;
+        public int Width {
+            get { return width; }
+            set { width = value; }
+        }
     
         public CubanoVisualizer ()
         {
@@ -82,7 +88,9 @@ namespace Cubano.Client
         {
             last_pcm_data = pcm;
             last_spectrum_data = spectrum;
-            OnRenderRequest ();
+            Banshee.Base.ThreadAssist.ProxyToMain (delegate {
+                OnRenderRequest ();
+            });
         }
         
         public void Render (Context cr)
@@ -90,6 +98,14 @@ namespace Cubano.Client
             if (last_pcm_data == null && last_spectrum_data == null) {
                 return;
             }
+
+            cr.MoveTo (0, Height);
+            for (int i = 0; i < last_spectrum_data[0].Length; i+=2) {
+                cr.LineTo (i, Height - (Height * 1.5 * last_spectrum_data[0][i]));
+            }
+            cr.Color = new Color (1, 0, 0, 0.5);
+            cr.LineTo (0, Height);
+            cr.Fill ();
         }
     }
 }

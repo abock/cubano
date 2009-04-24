@@ -691,6 +691,7 @@ namespace Cubano.Client
                 if (visualizer != null) {
                     cr.Save ();
                     cr.Translate (0, Allocation.Height - visualizer.Height);
+                    visualizer.Width = Allocation.Width;
                     visualizer.Render (cr);
                     cr.Restore ();
                 }
