@@ -56,6 +56,7 @@
     <Compile Include="Cubano.Client\CubanoTheme.cs" />
     <Compile Include="Cubano.Client\CubanoTrackTitleView.cs" />
     <Compile Include="Cubano.Client\CubanoTitleCell.cs" />
+    <Compile Include="Cubano.Client\CubanoVisualizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">

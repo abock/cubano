@@ -12,6 +12,7 @@ SOURCES =  \
 	Cubano.Client/CubanoTheme.cs \
 	Cubano.Client/CubanoTitleCell.cs \
 	Cubano.Client/CubanoTrackTitleView.cs \
+	Cubano.Client/CubanoVisualizer.cs \
 	Cubano.Client/CubanoWindow.cs \
 	Cubano.Client/LtrTrackSourceContents.cs \
 	Cubano.Client/SearchEntry.cs \

@@ -72,6 +72,7 @@ namespace Cubano.Client
         private Alignment playback_align;
         private Alignment source_align;
         private Alignment track_info_align;
+        private CubanoVisualizer visualizer;
         
         // Major Interaction Components
         private LtrTrackSourceContents composite_view;
@@ -98,6 +99,14 @@ namespace Cubano.Client
             composite_view.TrackView.HasFocus = true;
             
             InitialShowPresent ();
+            
+            visualizer = new CubanoVisualizer ();
+            visualizer.RenderRequest += (o, e) => QueueDrawArea (
+                0, 
+                Allocation.Height - visualizer.Height, 
+                Allocation.Width, 
+                visualizer.Height
+            );
         }
         
 #region System Overrides 
@@ -677,7 +686,14 @@ namespace Cubano.Client
                 } else {
                     cr.Color = new Cairo.Color (1, 1, 1);
                     cr.Fill ();
-               }
+                }
+               
+                if (visualizer != null) {
+                    cr.Save ();
+                    cr.Translate (0, Allocation.Height - visualizer.Height);
+                    visualizer.Render (cr);
+                    cr.Restore ();
+                }
                 
                 cr.ResetClip ();
             }
