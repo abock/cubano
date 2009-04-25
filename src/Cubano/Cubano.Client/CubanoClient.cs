@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 
 using Banshee.Base;
 using Banshee.ServiceStack;
@@ -10,9 +11,17 @@ namespace Cubano.Client
     {
         public static void Main (string [] args)
         {
-            AddinManager.Initialize (ApplicationContext.CommandLine.Contains ("uninstalled") 
-                ? "." : Paths.Combine (Paths.ApplicationData, "cubano"),
-                typeof (ServiceManager).Assembly);
+            string addin_path = ApplicationContext.CommandLine.Contains ("uninstalled") 
+                ? "." : Paths.Combine (Paths.ApplicationData, "cubano");
+
+            MethodInfo method = typeof (AddinManager).GetMethod ("Initialize", 
+                new Type [] { typeof (string), typeof (Assembly) });
+            if (method != null) {
+                method.Invoke (null, new object [] { addin_path, typeof (ServiceManager).Assembly });
+            } else {
+                typeof (AddinManager).GetMethod ("Initialize", 
+                    new Type [] { typeof (string) }).Invoke (null, new object [] { addin_path });
+            }
 
             Startup<CubanoClient> (args);
         }
