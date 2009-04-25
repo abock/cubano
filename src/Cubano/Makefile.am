@@ -1,7 +1,5 @@
 ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 
-ass:
-
 SOURCES =  \
 	Banshee.Gui.Widgets/ConnectedSeekableTrackInfoDisplay.cs \
 	Banshee.Gui.Widgets/CoverArtBrush.cs \
@@ -50,14 +48,16 @@ REFERENCES_PACKAGES =  \
 	-pkg:gtk-sharp-2.0 \
 	-r:Mono.Cairo
 
-REFERENCES_ASSEMBLIES = -r:../../bin/Mono.Addins.dll
+REFERENCES_ASSEMBLIES =
+REFERENCES_ASSEMBLIES_BUILD = $(foreach ref, $(REFERENCES_ASSEMBLIES), \
+	-r:$(srcdir)/$(ref))
 
-REFERENCES_BUILD = $(REFERENCES_PACKAGES) $(REFERENCES_ASSEMBLIES)
+REFERENCES_BUILD = $(BANSHEE_LIBS) $(REFERENCES_ASSEMBLIES_BUILD)
 
 all: $(ASSEMBLY)
 
 $(ASSEMBLY): $(SOURCES)
-	$(MCS) -out:$@ -debug $(REFERENCES_BUILD) $(SOURCES)
+	$(MCS) -out:$@ -debug $(REFERENCES_BUILD) $(addprefix $(srcdir)/, $(SOURCES))
 
 run:
 	@(cd $(top_builddir)/bin; make run)

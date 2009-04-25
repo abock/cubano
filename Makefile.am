@@ -1,6 +1,6 @@
 SUBDIRS = \
-	bin \
 	src \
+	bin \
 	po
 
 run:

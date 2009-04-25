@@ -2,7 +2,7 @@ AC_PREREQ(2.52)
 
 m4_define(cubano_version_major, 1)
 m4_define(cubano_version_minor, 0)
-m4_define(cubano_version_micro, 0)
+m4_define(cubano_version_micro, 0alpha1)
 
 AC_INIT([cubano],
 	[cubano_version_major.cubano_version_minor.cubano_version_micro])
@@ -24,6 +24,7 @@ IT_PROG_INTLTOOL([0.40.0])
 
 PKG_CHECK_EXISTS(MONO, mono >= 2.0)
 PKG_CHECK_MODULES(BANSHEE, banshee-1-thickclient >= 1.4.1)
+AC_SUBST(BANSHEE_LIBS)
 AC_PATH_PROG(MONO, mono)
 AC_PATH_PROG(MCS, gmcs)
 

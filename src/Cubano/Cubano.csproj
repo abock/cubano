@@ -98,8 +98,8 @@
           <ResourcesVar />
           <OthersVar />
           <GacRefVar Sync="true" Name="REFERENCES_PACKAGES" Prefix="-r:" />
-          <AsmRefVar Sync="true" Name="REFERENCES_ASSEMBLIES" Prefix="-r:" />
-          <ProjectRefVar Sync="true" Name="REFERENCES_ASSEMBLIES" Prefix="-r:" />
+          <AsmRefVar Sync="true" Name="REFERENCES_ASSEMBLIES" Prefix="" />
+          <ProjectRefVar Sync="true" Name="REFERENCES_ASSEMBLIES" Prefix="" />
         </MonoDevelop.Autotools.MakefileInfo>
       </Properties>
     </MonoDevelop>
