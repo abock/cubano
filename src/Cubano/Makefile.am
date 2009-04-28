@@ -12,9 +12,11 @@ SOURCES =  \
 	Cubano.Client/CubanoTrackTitleView.cs \
 	Cubano.Client/CubanoVisualizer.cs \
 	Cubano.Client/CubanoWindow.cs \
+	Cubano.Client/CubanoWindowDecorator.cs \
 	Cubano.Client/LtrTrackSourceContents.cs \
 	Cubano.Client/SearchEntry.cs \
 	Cubano.Client/ViewContainer.cs \
+	Cubano.Client/WindowDecorator.cs \
 	Hyena.Gui.Canvas/AnimationManager.cs \
 	Hyena.Gui.Canvas/Brush.cs \
 	Hyena.Gui.Canvas/CanvasHost.cs \
@@ -48,7 +50,7 @@ REFERENCES_PACKAGES =  \
 	-pkg:gtk-sharp-2.0 \
 	-r:Mono.Cairo
 
-REFERENCES_ASSEMBLIES =
+REFERENCES_ASSEMBLIES = ../../bin/Mono.Addins.dll
 REFERENCES_ASSEMBLIES_BUILD = $(foreach ref, $(REFERENCES_ASSEMBLIES), \
 	-r:$(srcdir)/$(ref))
 

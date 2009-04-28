@@ -73,6 +73,7 @@ namespace Cubano.Client
         private Alignment source_align;
         private Alignment track_info_align;
         private CubanoVisualizer visualizer;
+        private CubanoWindowDecorator window_decorator;
         
         // Major Interaction Components
         private LtrTrackSourceContents composite_view;
@@ -126,6 +127,8 @@ namespace Cubano.Client
         
         private void BuildPrimaryLayout ()
         {
+            window_decorator = new CubanoWindowDecorator (this);
+        
             primary_vbox = new VBox ();
             
             main_menu = new MainMenu ();
@@ -694,6 +697,10 @@ namespace Cubano.Client
                     visualizer.Width = Allocation.Width;
                     visualizer.Render (cr);
                     cr.Restore ();
+                }
+                
+                if (window_decorator != null) {
+                    window_decorator.Render (cr);
                 }
                 
                 cr.ResetClip ();
