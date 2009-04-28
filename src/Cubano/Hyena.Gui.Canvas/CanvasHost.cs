@@ -108,6 +108,9 @@ namespace Hyena.Gui.Canvas
             
             event_window = new Gdk.Window (GdkWindow, attributes, attributes_mask);
             event_window.UserData = Handle;
+            
+            AllocateChild ();
+            QueueResize ();
         }
         
         protected override void OnUnrealized ()
@@ -139,20 +142,16 @@ namespace Hyena.Gui.Canvas
             
             if (IsRealized) {
                 event_window.MoveResize (allocation);
-            }
-            
-            if (canvas_child != null) {
-                canvas_child.Allocation = new Rect (0, 0, Allocation.Width, Allocation.Height);
-                canvas_child.Arrange ();
+                AllocateChild ();
             }
         }
         
         protected override void OnSizeRequested (ref Gtk.Requisition requisition)
         {
             if (canvas_child != null) {
-                Size size = canvas_child.Measure (new Size (requisition.Width, requisition.Height));
-                requisition.Width = (int)Math.Ceiling (size.Width);
-                requisition.Height = (int)Math.Ceiling (size.Height);
+                Size size = canvas_child.Measure (Size.Empty);
+                requisition.Width = size.Width <= 0 ? -1 : (int)Math.Ceiling (size.Width);
+                requisition.Height = size.Height <= 0 ? -1 : (int)Math.Ceiling (size.Height);
             }
         }
         
@@ -192,6 +191,15 @@ namespace Hyena.Gui.Canvas
             }
             
             return true;
+        }
+        
+        private void AllocateChild ()
+        {
+            if (canvas_child != null) {
+                canvas_child.Allocation = new Rect (0, 0, Allocation.Width, Allocation.Height);
+                canvas_child.Measure (new Size (Allocation.Width, Allocation.Height));
+                canvas_child.Arrange ();
+            }
         }
         
         public void QueueRender (CanvasItem item, Rect rect)
@@ -293,7 +301,6 @@ namespace Hyena.Gui.Canvas
         
         private void OnCanvasChildSizeChanged (object o, EventArgs args)
         {
-            QueueDraw ();
             QueueResize ();
         }
         
@@ -318,8 +325,7 @@ namespace Hyena.Gui.Canvas
                     canvas_child.SizeChanged += OnCanvasChildSizeChanged;
                 }
                 
-                QueueDraw ();
-                QueueResize ();
+                AllocateChild ();
             }
         }
         

@@ -65,8 +65,10 @@ namespace Hyena.Gui.Canvas
                 result.Height = Height;
             }
 
-            result.Width = Math.Min (result.Width, available.Width);
-            result.Height = Math.Min (result.Height, available.Height);
+            if (!available.IsEmpty) {
+                result.Width = Math.Min (result.Width, available.Width);
+                result.Height = Math.Min (result.Height, available.Height);
+            }
             
             return DesiredSize = result;
         }
