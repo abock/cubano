@@ -149,14 +149,15 @@ namespace Hyena.Gui.Canvas
         protected override void ClippedRender (Cairo.Context cr)
         {   
             double throbber_r = ThrobberSize / 2.0;
-            double throbber_x = RenderSize.Width * (IsValueUpdatePending ? PendingValue : Value);
+            double throbber_x = Math.Round (RenderSize.Width * (IsValueUpdatePending ? PendingValue : Value));
             double throbber_y = (Allocation.Height - ThrobberSize) / 2.0 - Margin.Top + throbber_r;
             double bar_w = RenderSize.Width * Value;
             
+            cr.Color = Theme.Colors.GetWidgetColor (GtkColorClass.Base, Gtk.StateType.Normal);
+            cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
+            cr.Fill ();
+            
             Color color = Theme.Colors.GetWidgetColor (GtkColorClass.Dark, Gtk.StateType.Active);
-            
-            throbber_x = Math.Round (throbber_x);
-            
             Color fill_color = CairoExtensions.ColorShade (color, 0.4);
             Color light_fill_color = CairoExtensions.ColorShade (color, 0.3);
             fill_color.A = 1.0;
