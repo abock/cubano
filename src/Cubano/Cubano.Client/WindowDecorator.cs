@@ -33,6 +33,7 @@ namespace Hyena.Gui
     public class WindowDecorator : IDisposable
     {
         private Cursor [] cursors;
+        private bool default_cursor = true;
         private Gtk.Window window;
         private bool resizing = false;
         private WindowEdge last_edge;
@@ -200,12 +201,21 @@ namespace Hyena.Gui
         
         private void SetCursor (CursorType type)
         {
-            window.GdkWindow.Cursor = GetCursor (type);
+            Gdk.Cursor cursor = GetCursor (type);
+            if (cursor == null) {
+                ResetCursor ();
+            } else {
+                default_cursor = false;
+                window.GdkWindow.Cursor = cursor;
+            }
         }
         
         private void ResetCursor ()
         {
-            window.GdkWindow.Cursor = null;
+            if (!default_cursor) {
+                window.GdkWindow.Cursor = null;
+                default_cursor = true;
+            }
         }
         
         private void DestroyCursors ()
