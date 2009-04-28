@@ -52,12 +52,14 @@ namespace Hyena.Gui
             window.ButtonReleaseEvent += OnButtonReleaseEvent;
             window.SizeAllocated += OnSizeAllocated;
             
-            window.Events |= 
-                EventMask.ButtonPressMask | 
-                EventMask.ButtonReleaseMask |
-                EventMask.EnterNotifyMask |
-                EventMask.LeaveNotifyMask |
-                EventMask.PointerMotionMask;
+            if (!window.IsRealized) {
+                window.Events |= 
+                    EventMask.ButtonPressMask | 
+                    EventMask.ButtonReleaseMask |
+                    EventMask.EnterNotifyMask |
+                    EventMask.LeaveNotifyMask |
+                    EventMask.PointerMotionMask;
+            }
         }
         
         public void Dispose ()
@@ -76,7 +78,8 @@ namespace Hyena.Gui
             window.ButtonReleaseEvent -= OnButtonReleaseEvent;
             window.SizeAllocated -= OnSizeAllocated;
             
-            window.Decorated = false;
+            window.Decorated = true;
+            window.QueueDraw ();
             window = null;
         }
         
@@ -86,7 +89,7 @@ namespace Hyena.Gui
         
         private void OnSizeAllocated (object o, SizeAllocatedArgs args)
         {
-            Window.QueueDraw ();
+            window.QueueDraw ();
         }
         
         private void OnMotionNotifyEvent (object o, MotionNotifyEventArgs args)
