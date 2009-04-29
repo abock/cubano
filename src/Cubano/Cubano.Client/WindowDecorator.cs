@@ -94,21 +94,31 @@ namespace Hyena.Gui
         
         private void OnMotionNotifyEvent (object o, MotionNotifyEventArgs args)
         {
-            UpdateCursor (args.Event.X, args.Event.Y, false);
+            if (args.Event.Window == window.GdkWindow) {
+                UpdateCursor (args.Event.X, args.Event.Y, false);
+            }
         }
         
         private void OnEnterNotifyEvent (object o, EnterNotifyEventArgs args)
         {
-            UpdateCursor (args.Event.X, args.Event.Y, false);
+            if (args.Event.Window == window.GdkWindow) {
+                UpdateCursor (args.Event.X, args.Event.Y, false);
+            }
         }
         
         private void OnLeaveNotifyEvent (object o, LeaveNotifyEventArgs args)
         {
-            ResetCursor ();
+            if (args.Event.Window == window.GdkWindow) {
+                ResetCursor ();
+            }
         }
         
         private void OnButtonPressEvent (object o, ButtonPressEventArgs args)
         {
+            if (args.Event.Window != window.GdkWindow) {
+                return;
+            }
+        
             int x_root = (int)args.Event.XRoot;
             int y_root = (int)args.Event.YRoot;
             
@@ -124,7 +134,7 @@ namespace Hyena.Gui
         
         private void OnButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
         {
-            if (resizing) {
+            if (resizing && args.Event.Window == window.GdkWindow) {
                 UpdateCursor (args.Event.X, args.Event.Y, true);
             }
         }
