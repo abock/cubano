@@ -59,6 +59,7 @@
     <Compile Include="Cubano.Client\CubanoVisualizer.cs" />
     <Compile Include="Cubano.Client\WindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoWindowDecorator.cs" />
+    <Compile Include="Cubano.Client\CubanoMainMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">

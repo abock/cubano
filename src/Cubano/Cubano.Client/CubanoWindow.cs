@@ -134,7 +134,7 @@ namespace Cubano.Client
             main_menu = new MainMenu ();
             main_menu.Hide ();
             primary_vbox.PackStart (main_menu, false, false, 0);
-           
+            
             BuildHeader ();
             BuildViews ();
             BuildFooter ();
@@ -148,29 +148,43 @@ namespace Cubano.Client
         
         private void BuildHeader ()
         {
+            // Header Bar
+            var title_box = new HBox ();
+            title_box.Spacing = 15;
+            title_box.PackEnd (new CanvasHost () { Child = new CubanoMainMenu () }, false, false, 0);
+            title_box.PackEnd (search_box = new SearchEntry (), false, false, 0);
+            title_box.ShowAll ();
+            
+            // Tool Bar
             var header_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/HeaderToolbar");
             header_toolbar.ExposeEvent += OnCubanoToolbarExposeEvent;
             header_toolbar.ShowArrow = false;
             header_toolbar.ToolbarStyle = ToolbarStyle.BothHoriz;
             
             var children = header_toolbar.Children;
-            
             header_toolbar.Insert (new GenericToolItem<Widget> (new RepeatActionButton ()), 0);
             
             var filler = new Alignment (0.5f, 0.5f, 0.0f, 0.0f);
             ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", filler, true);
             
-            var search_hack = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 12 };
-            search_hack.Add (search_box = new SearchEntry ());
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/VolumeButton", search_hack, false);
-            
-            header_box = new Alignment (0.0f, 0.0f, 1.0f, 1.0f);
-            header_box.Add (header_toolbar);
-            header_box.ShowAll ();
-            
+            header_toolbar.ShowAll ();
             for (int i = 0; i < children.Length; i++) {
                 children[i].Visible = false;
             }
+            
+            // Pack it in
+            var box = new VBox ();
+            box.Show ();
+            box.PackStart (title_box, false, false, 0);
+            box.PackStart (header_toolbar, false, false, 0);
+            
+            header_box = new Alignment (0.0f, 0.0f, 1.0f, 1.0f) {
+                LeftPadding = 10,
+                RightPadding = 10,
+                TopPadding = 10
+            };
+            header_box.Add (box);
+            header_box.Show ();
             
             primary_vbox.PackStart (header_box, false, false, 0);
         }
