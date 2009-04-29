@@ -39,6 +39,10 @@ namespace Cubano.Client
         
         public override void Render (Context cr)
         {
+            if (!CanResize) {
+                return;
+            }
+        
             var selected_color = CairoExtensions.GdkColorToCairoColor (Window.Style.Background (StateType.Selected));
             var grad = new LinearGradient (0, 0, 0, Allocation.Height);
             

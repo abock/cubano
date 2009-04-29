@@ -94,28 +94,28 @@ namespace Hyena.Gui
         
         private void OnMotionNotifyEvent (object o, MotionNotifyEventArgs args)
         {
-            if (args.Event.Window == window.GdkWindow) {
+            if (CanResize && args.Event.Window == window.GdkWindow) {
                 UpdateCursor (args.Event.X, args.Event.Y, false);
             }
         }
         
         private void OnEnterNotifyEvent (object o, EnterNotifyEventArgs args)
         {
-            if (args.Event.Window == window.GdkWindow) {
+            if (CanResize && args.Event.Window == window.GdkWindow) {
                 UpdateCursor (args.Event.X, args.Event.Y, false);
             }
         }
         
         private void OnLeaveNotifyEvent (object o, LeaveNotifyEventArgs args)
         {
-            if (args.Event.Window == window.GdkWindow) {
+            if (CanResize && args.Event.Window == window.GdkWindow) {
                 ResetCursor ();
             }
         }
         
         private void OnButtonPressEvent (object o, ButtonPressEventArgs args)
         {
-            if (args.Event.Window != window.GdkWindow) {
+            if (!CanResize || args.Event.Window != window.GdkWindow) {
                 return;
             }
         
@@ -259,6 +259,18 @@ namespace Hyena.Gui
         public int TopMoveHeight {
             get { return top_move_height; }
             set { top_move_height = value; }
+        }
+        
+        protected bool IsMaximized {
+            get { return (window.GdkWindow.State & Gdk.WindowState.Maximized) != 0; }
+        }
+        
+        protected bool IsFullscreen {
+            get { return (window.GdkWindow.State & Gdk.WindowState.Fullscreen) != 0; }
+        }
+        
+        protected bool CanResize {
+            get { return !IsMaximized && !IsFullscreen; }
         }
         
         public int ResizeWidth {
