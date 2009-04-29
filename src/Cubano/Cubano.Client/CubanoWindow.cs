@@ -593,7 +593,7 @@ namespace Cubano.Client
                     break;
             }
 
-            if (focus_search/* && !search_box.Entry.HasFocus && !source_view.EditingRow*/) {
+            if (focus_search && !search_box.Entry.HasFocus/* && !source_view.EditingRow*/) {
                 search_box.Entry.HasFocus = true;
                 return true;
             }
