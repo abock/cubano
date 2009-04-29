@@ -43,6 +43,7 @@ namespace Hyena.Gui.Canvas
             InstallProperty<double> ("VerticalAlignment", 0.0);
             InstallProperty<FontWeight> ("FontWeight", FontWeight.Normal);
             InstallProperty<TextWrap> ("TextWrap", TextWrap.None);
+            InstallProperty<bool> ("ForceSize", false);
         }
         
         private bool EnsureLayout ()
@@ -80,11 +81,22 @@ namespace Hyena.Gui.Canvas
             layout.SetText (Text);
             layout.GetPixelSize (out text_w, out text_h);
 
-            DesiredSize = new Size (available.Width, text_h + Margin.Top + Margin.Bottom);
+            double width = text_w;
+            if (!available.IsEmpty && available.Width > 0) {
+                width = available.Width;
+            }
+
+            DesiredSize = new Size (
+                width + Margin.Left + Margin.Right, 
+                text_h + Margin.Top + Margin.Bottom);
 
             // Hack, as this prevents the TextBlock from 
             // being flexible in a Vertical StackPanel 
             Height = DesiredSize.Height;
+            
+            if (ForceSize) {
+                Width = DesiredSize.Width;
+            }
             
             return DesiredSize;
         }
@@ -194,6 +206,7 @@ namespace Hyena.Gui.Canvas
                 case "FontWeight":
                 case "TextWrap":
                 case "Text":
+                case "ForceSize":
                     if (layout != null) {
                         InvalidateMeasure ();
                         InvalidateArrange ();
@@ -227,6 +240,11 @@ namespace Hyena.Gui.Canvas
         public TextWrap TextWrap {
             get { return GetValue<TextWrap> ("TextWrap"); }
             set { SetValue<TextWrap> ("TextWrap", value); }
+        }
+        
+        public bool ForceSize {
+            get { return GetValue<bool> ("ForceSize"); }
+            set { SetValue<bool> ("ForceSize", value); }
         }
         
         public double HorizontalAlignment {

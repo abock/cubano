@@ -70,6 +70,12 @@ namespace Hyena.Gui.Canvas
                 result.Height = Math.Min (result.Height, available.Height);
             }
             
+            if (Orientation == Orientation.Vertical) {
+                result.Height += Spacing * (Children.Count - 1);
+            } else {
+                result.Width += Spacing * (Children.Count - 1);
+            }
+            
             return DesiredSize = result;
         }
         

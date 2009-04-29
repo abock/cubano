@@ -150,8 +150,14 @@ namespace Hyena.Gui.Canvas
         {
             if (canvas_child != null) {
                 Size size = canvas_child.Measure (Size.Empty);
-                requisition.Width = size.Width <= 0 ? -1 : (int)Math.Ceiling (size.Width);
-                requisition.Height = size.Height <= 0 ? -1 : (int)Math.Ceiling (size.Height);
+                
+                if (size.Width > 0) {
+                    requisition.Width = (int)Math.Ceiling (size.Width);
+                }
+                
+                if (size.Height > 0) {
+                    requisition.Height = (int)Math.Ceiling (size.Height);
+                }
             }
         }
         
