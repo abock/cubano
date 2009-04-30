@@ -36,10 +36,20 @@ namespace Cubano.Client
 {
     public class CubanoVisualizer : IDisposable
     {
+        public class RenderRequestArgs : EventArgs
+        {
+            private Gdk.Rectangle damage;
+            public Gdk.Rectangle Damage {
+                get { return damage; }
+                set { damage = value; }
+            }
+        }
+    
         private object render_points_mutext = new object ();
         private Queue<float []> points = new Queue<float []> ();
+        private Gdk.Rectangle render_damage;
         
-        public EventHandler<EventArgs> RenderRequest;
+        public EventHandler<RenderRequestArgs> RenderRequest;
         
         private float [] render_points;
         protected float [] RenderPoints {
@@ -121,9 +131,9 @@ namespace Cubano.Client
         
         protected virtual void OnRenderRequest ()
         {
-            EventHandler<EventArgs> handler = RenderRequest;
+            var handler = RenderRequest;
             if (handler != null) {
-                handler (this, EventArgs.Empty);
+                handler (this, new RenderRequestArgs () { Damage = render_damage });
             }
         }
         
@@ -246,12 +256,29 @@ namespace Cubano.Client
             double max_r = Height / 2;
             double x_ofs = Width / RenderPoints.Length;
             double xc = 0, yc = Height;
+            double r;
+            
+            double min_x = Width, max_x = 0, min_y = Height, max_y = yc;
             
             for (int i = 0, n = RenderPoints.Length; i < n; i++) {
                 xc += x_ofs;
+                r = Height * RenderPoints[i];
                 cr.MoveTo (xc, yc);
-                cr.Arc (xc, yc, Height * RenderPoints[i], 0, 2 * Math.PI);
+                cr.Arc (xc, yc, r, 0, 2 * Math.PI);
+                
+                if (r > 0) {
+                    min_x = Math.Min (min_x, xc - r);
+                    max_x = Math.Max (max_x, xc + r);
+                    min_y = Math.Min (min_y, yc - r);
+                }
             }
+            
+            render_damage = new Gdk.Rectangle (
+                (int)Math.Floor (min_x),
+                (int)Math.Floor (min_y),
+                (int)Math.Ceiling (max_x - min_x),
+                (int)Math.Ceiling (max_y - min_y)
+            );
             
             cr.ClosePath ();
             
@@ -266,6 +293,10 @@ namespace Cubano.Client
             
             cr.Pattern = grad;
             cr.Fill ();
+            
+            //cr.Color = new Color (1, 0, 0);
+            //cr.Rectangle (render_damage.X + 0.5, render_damage.Y + 0.5, render_damage.Width - 1, render_damage.Height - 1);
+            //cr.Stroke ();
             
             grad.Destroy ();
         }

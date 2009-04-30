@@ -102,12 +102,24 @@ namespace Cubano.Client
             InitialShowPresent ();
             
             visualizer = new CubanoVisualizer ();
-            visualizer.RenderRequest += (o, e) => QueueDrawArea (
-                0, 
-                Allocation.Height - visualizer.Height, 
-                Allocation.Width, 
-                visualizer.Height
-            );
+            visualizer.RenderRequest += (o, e) => {
+                var damage = e.Damage;
+                if (damage.Width == 0 || damage.Height == 0) {
+                    damage = new Gdk.Rectangle (
+                        0,
+                        0, 
+                        Allocation.Width, 
+                        visualizer.Height
+                    );
+                }
+                
+                QueueDrawArea (
+                    damage.X,
+                    Allocation.Height - damage.Height,
+                    damage.Width,
+                    damage.Height
+                );
+            };
         }
         
 #region System Overrides 
@@ -679,6 +691,8 @@ namespace Cubano.Client
         }
         
         private bool render_gradient = Environment.GetEnvironmentVariable ("CUBANO_DISABLE_BACKGROUND") == null;
+        private bool render_debug = Environment.GetEnvironmentVariable ("CUBANO_RENDER_DEBUG") != null;
+        private Random rand;
         
         private void RenderBackground (Gdk.Window window, Gdk.Region region)
         {   
@@ -715,6 +729,14 @@ namespace Cubano.Client
                 
                 if (window_decorator != null) {
                     window_decorator.Render (cr);
+                }
+                
+                if (render_debug) {
+                    cr.LineWidth = 1.0;
+                    cr.Color = CairoExtensions.RgbToColor (
+                        (uint)(rand = rand ?? new Random ()).Next (0, 0xffffff));
+                    cr.Rectangle (damage.X + 0.5, damage.Y + 0.5, damage.Width - 1, damage.Height - 1);
+                    cr.Stroke ();
                 }
                 
                 cr.ResetClip ();
