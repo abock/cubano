@@ -88,6 +88,8 @@ namespace Cubano.Client
         {
         }
         
+        private Gdk.Rectangle prev_vis_damage;
+        
         protected override void Initialize ()
         {
             ConfigureTheme ();
@@ -104,14 +106,12 @@ namespace Cubano.Client
             visualizer = new CubanoVisualizer ();
             visualizer.RenderRequest += (o, e) => {
                 var damage = e.Damage;
-                if (damage.Width == 0 || damage.Height == 0) {
-                    damage = new Gdk.Rectangle (
-                        0,
-                        0, 
-                        Allocation.Width, 
-                        visualizer.Height
-                    );
+                if (damage.IsEmpty) {
+                    damage = new Gdk.Rectangle (0, 0, Allocation.Width, visualizer.Height);
                 }
+                
+                damage.Union (prev_vis_damage);
+                prev_vis_damage = damage;
                 
                 QueueDrawArea (
                     damage.X,

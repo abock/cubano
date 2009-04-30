@@ -140,6 +140,7 @@ namespace Cubano.Client
         private void RequestRender ()
         {
             Banshee.Base.ThreadAssist.ProxyToMain (delegate {
+                InnerRender ();
                 OnRenderRequest ();
             });
         }
@@ -239,14 +240,38 @@ namespace Cubano.Client
             }
         }
         
+        private Cairo.ImageSurface surface;
+        
         public void Render (Context cr)
+        {
+            if (surface == null) {
+                return;
+            }
+            
+            cr.SetSource (surface);
+            cr.Paint ();
+        }
+        
+        private void InnerRender ()
         {
             lock (render_points_mutext) {
                 if (render_points == null) {
                     return;
                 }
                 
-                RenderGoo (cr);
+                if (surface == null || surface.Width != Width || surface.Height != Height) {
+                    surface = new ImageSurface (Format.Argb32, Width, Height);
+                }
+                
+                using (var cr = new Context (surface)) {
+                    cr.Save ();
+                    cr.Operator = Operator.Clear;
+                    cr.Paint ();
+                    cr.Restore ();
+                
+                    RenderGoo (cr);
+                }
+                
                 // RenderDebug (cr);
             }
         }
