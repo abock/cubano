@@ -83,9 +83,11 @@ namespace Banshee.Gui.Widgets
                     switch (((PlayerEventStateChangeArgs)args).Current) {
                         case PlayerState.Contacting:
                         case PlayerState.Loading:
+                            StartTransitionTimeout ();
                             break;
                         case PlayerState.Idle:
                             StartIdleTimeout ();
+                            StopTransitionTimeout ();
                             break;
                     }
                     

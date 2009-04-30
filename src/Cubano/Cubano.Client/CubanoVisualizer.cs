@@ -294,10 +294,6 @@ namespace Cubano.Client
             cr.Pattern = grad;
             cr.Fill ();
             
-            //cr.Color = new Color (1, 0, 0);
-            //cr.Rectangle (render_damage.X + 0.5, render_damage.Y + 0.5, render_damage.Width - 1, render_damage.Height - 1);
-            //cr.Stroke ();
-            
             grad.Destroy ();
         }
     }

@@ -86,7 +86,6 @@ namespace Banshee.Gui.Widgets
             
             UpdateMetadataDisplay ();
             BuildTransitionAnimation ();
-            StartTransitionTimeout ();
         }
         
         private void BuildTransitionAnimation ()
