@@ -11,7 +11,7 @@ namespace Cubano.Client
     {
         public static void Main (string [] args)
         {
-            string addin_path = ApplicationContext.CommandLine.Contains ("uninstalled") 
+            /*string addin_path = ApplicationContext.CommandLine.Contains ("uninstalled") 
                 ? "." : Paths.Combine (Paths.ApplicationData, "cubano");
 
             MethodInfo method = typeof (AddinManager).GetMethod ("Initialize", 
@@ -23,7 +23,9 @@ namespace Cubano.Client
                     new Type [] { typeof (string) }).Invoke (null, new object [] { addin_path });
             }
 
-            Startup<CubanoClient> (args);
+            Startup<CubanoClient> (args);*/
+            
+            CubanoWindowClutter.Start (args);
         }
         
         protected override void OnRegisterServices ()

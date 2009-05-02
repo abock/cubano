@@ -5,6 +5,17 @@ SOURCES =  \
 	Banshee.Gui.Widgets/CoverArtBrush.cs \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
+	Clutter.Gtk/Embed.cs \
+	Clutter.Gtk/IconNameTexture.cs \
+	Clutter/Actor.cs \
+	Clutter/Application.cs \
+	Clutter/CairoTexture.cs \
+	Clutter/Color.cs \
+	Clutter/Group.cs \
+	Clutter/IContainer.cs \
+	Clutter/Rectangle.cs \
+	Clutter/Stage.cs \
+	Clutter/Texture.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoMainMenu.cs \
 	Cubano.Client/CubanoSourceContents.cs \
@@ -13,6 +24,7 @@ SOURCES =  \
 	Cubano.Client/CubanoTrackTitleView.cs \
 	Cubano.Client/CubanoVisualizer.cs \
 	Cubano.Client/CubanoWindow.cs \
+	Cubano.Client/CubanoWindowClutter.cs \
 	Cubano.Client/CubanoWindowDecorator.cs \
 	Cubano.Client/LtrTrackSourceContents.cs \
 	Cubano.Client/SearchEntry.cs \
@@ -59,8 +71,9 @@ REFERENCES_BUILD = $(BANSHEE_LIBS) $(REFERENCES_ASSEMBLIES_BUILD)
 
 all: $(ASSEMBLY)
 
-$(ASSEMBLY): $(SOURCES)
+$(ASSEMBLY): $(SOURCES) $(notdir $(ASSEMBLY)).config
 	$(MCS) -out:$@ -debug $(REFERENCES_BUILD) $(addprefix $(srcdir)/, $(SOURCES))
+	cp $(notdir $(ASSEMBLY)).config $(top_builddir)/bin
 
 run:
 	@(cd $(top_builddir)/bin; make run)

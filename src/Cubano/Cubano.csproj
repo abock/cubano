@@ -60,6 +60,18 @@
     <Compile Include="Cubano.Client\WindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoWindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoMainMenu.cs" />
+    <Compile Include="Clutter\Actor.cs" />
+    <Compile Include="Clutter\Color.cs" />
+    <Compile Include="Clutter\Group.cs" />
+    <Compile Include="Clutter\Stage.cs" />
+    <Compile Include="Clutter\Texture.cs" />
+    <Compile Include="Clutter.Gtk\Embed.cs" />
+    <Compile Include="Cubano.Client\CubanoWindowClutter.cs" />
+    <Compile Include="Clutter.Gtk\IconNameTexture.cs" />
+    <Compile Include="Clutter\Rectangle.cs" />
+    <Compile Include="Clutter\CairoTexture.cs" />
+    <Compile Include="Clutter\Application.cs" />
+    <Compile Include="Clutter\IContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
@@ -110,5 +122,6 @@
   <ItemGroup>
     <Folder Include="Hyena.Gui.Canvas\" />
     <Folder Include="Banshee.Gui.Widgets\" />
+    <Folder Include="Clutter\" />
   </ItemGroup>
 </Project>
