@@ -60,18 +60,8 @@
     <Compile Include="Cubano.Client\WindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoWindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoMainMenu.cs" />
-    <Compile Include="Clutter\Actor.cs" />
-    <Compile Include="Clutter\Color.cs" />
-    <Compile Include="Clutter\Group.cs" />
-    <Compile Include="Clutter\Stage.cs" />
-    <Compile Include="Clutter\Texture.cs" />
-    <Compile Include="Clutter.Gtk\Embed.cs" />
-    <Compile Include="Cubano.Client\CubanoWindowClutter.cs" />
-    <Compile Include="Clutter.Gtk\IconNameTexture.cs" />
-    <Compile Include="Clutter\Rectangle.cs" />
-    <Compile Include="Clutter\CairoTexture.cs" />
-    <Compile Include="Clutter\Application.cs" />
-    <Compile Include="Clutter\IContainer.cs" />
+    <Compile Include="Cubano.NowPlaying\NowPlayingSource.cs" />
+    <Compile Include="Cubano.NowPlaying\NowPlayingInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
@@ -103,6 +93,8 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="clutter-gtk-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
+    <Reference Include="clutter-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -110,7 +102,7 @@
         <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile.am" ExecuteTargetName="run" SyncReferences="true" RelativeConfigureInPath="../..">
           <BuildFilesVar Sync="true" Name="SOURCES" />
           <DeployFilesVar />
-          <ResourcesVar />
+          <ResourcesVar Sync="true" Name="RESOURCES" />
           <OthersVar />
           <GacRefVar Sync="true" Name="REFERENCES_PACKAGES" Prefix="-r:" />
           <AsmRefVar Sync="true" Name="REFERENCES_ASSEMBLIES" />
@@ -123,5 +115,19 @@
     <Folder Include="Hyena.Gui.Canvas\" />
     <Folder Include="Banshee.Gui.Widgets\" />
     <Folder Include="Clutter\" />
+    <Folder Include="Cubano.NowPlaying\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Clutter\Application.cs" />
+    <None Include="Clutter\Actor.cs" />
+    <None Include="Clutter\Color.cs" />
+    <None Include="Clutter\Group.cs" />
+    <None Include="Clutter\Stage.cs" />
+    <None Include="Clutter\Texture.cs" />
+    <None Include="Clutter.Gtk\Embed.cs" />
+    <None Include="Clutter.Gtk\IconNameTexture.cs" />
+    <None Include="Clutter\Rectangle.cs" />
+    <None Include="Clutter\CairoTexture.cs" />
+    <None Include="Clutter\IContainer.cs" />
   </ItemGroup>
 </Project>

@@ -29,7 +29,7 @@ cubano: cubano.in
 	chmod +x $@
 
 run: cubano
-	./$< --debug
+	./$< --debug --uninstalled
 
 EXTRA_DIST = \
 	cubano.in \

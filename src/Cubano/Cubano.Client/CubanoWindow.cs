@@ -72,7 +72,6 @@ namespace Cubano.Client
         private Alignment playback_align;
         private Alignment source_align;
         private Alignment track_info_align;
-        private CubanoVisualizer visualizer;
         private CubanoWindowDecorator window_decorator;
         
         // Major Interaction Components
@@ -88,10 +87,13 @@ namespace Cubano.Client
         {
         }
         
-        private Gdk.Rectangle prev_vis_damage;
-        
+        Clutter.Embed embed;
+        Clutter.Texture video_texture;
+                
         protected override void Initialize ()
         {
+            new Cubano.NowPlaying.NowPlayingSource ();
+        
             ConfigureTheme ();
         
             BuildPrimaryLayout ();
@@ -102,24 +104,6 @@ namespace Cubano.Client
             composite_view.TrackView.HasFocus = true;
             
             InitialShowPresent ();
-            
-            visualizer = new CubanoVisualizer ();
-            visualizer.RenderRequest += (o, e) => {
-                var damage = e.Damage;
-                if (damage.IsEmpty) {
-                    damage = new Gdk.Rectangle (0, 0, Allocation.Width, visualizer.Height);
-                }
-                
-                damage.Union (prev_vis_damage);
-                prev_vis_damage = damage;
-                
-                QueueDrawArea (
-                    damage.X,
-                    Allocation.Height - damage.Height,
-                    damage.Width,
-                    damage.Height
-                );
-            };
         }
         
 #region System Overrides 
@@ -466,7 +450,8 @@ namespace Cubano.Client
                 view_container.Content.SetSource (source);
                 view_container.Show ();
              
-                remove_margins = contents.GetType ().FullName == "Banshee.NowPlaying.NowPlayingInterface";
+                remove_margins = contents is Cubano.NowPlaying.NowPlayingInterface || 
+                    contents.GetType ().FullName == "Banshee.NowPlaying.NowPlayingInterface";
             } else if (source is ITrackModelSource) {
                 view_container.Content = composite_view;
                 view_container.Content.SetSource (source);
@@ -718,15 +703,7 @@ namespace Cubano.Client
                     cr.Color = new Cairo.Color (1, 1, 1);
                     cr.Fill ();
                 }
-               
-                if (visualizer != null) {
-                    cr.Save ();
-                    cr.Translate (0, Allocation.Height - visualizer.Height);
-                    visualizer.Width = Allocation.Width;
-                    visualizer.Render (cr);
-                    cr.Restore ();
-                }
-                
+
                 if (window_decorator != null) {
                     window_decorator.Render (cr);
                 }
