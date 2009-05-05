@@ -44,6 +44,8 @@ po/stamp-it
 *.userprefs
 *.usertasks
 
+bin/addin*/
+
 # Dist
 *.tar.bz2
 *.tar.gz
