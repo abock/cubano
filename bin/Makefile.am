@@ -31,6 +31,9 @@ cubano: cubano.in
 run: cubano
 	./$< --debug --uninstalled
 
+valgrind: cubano
+	./$< --valgrind --debug --uninstalled
+
 EXTRA_DIST = \
 	cubano.in \
 	Mono.Addins.dll \

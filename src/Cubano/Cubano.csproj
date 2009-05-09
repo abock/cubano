@@ -114,20 +114,6 @@
   <ItemGroup>
     <Folder Include="Hyena.Gui.Canvas\" />
     <Folder Include="Banshee.Gui.Widgets\" />
-    <Folder Include="Clutter\" />
     <Folder Include="Cubano.NowPlaying\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Clutter\Application.cs" />
-    <None Include="Clutter\Actor.cs" />
-    <None Include="Clutter\Color.cs" />
-    <None Include="Clutter\Group.cs" />
-    <None Include="Clutter\Stage.cs" />
-    <None Include="Clutter\Texture.cs" />
-    <None Include="Clutter.Gtk\Embed.cs" />
-    <None Include="Clutter.Gtk\IconNameTexture.cs" />
-    <None Include="Clutter\Rectangle.cs" />
-    <None Include="Clutter\CairoTexture.cs" />
-    <None Include="Clutter\IContainer.cs" />
   </ItemGroup>
 </Project>
