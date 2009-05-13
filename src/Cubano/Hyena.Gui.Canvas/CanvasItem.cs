@@ -359,6 +359,8 @@ namespace Hyena.Gui.Canvas
         
 #region Input Events
 
+        public event EventHandler<EventArgs> Clicked;
+
         private bool pointer_grabbed;
         public virtual bool IsPointerGrabbed {
             get { return pointer_grabbed; }
@@ -376,14 +378,25 @@ namespace Hyena.Gui.Canvas
 
         public virtual void ButtonPress (double x, double y, uint button)
         {
+            GrabPointer ();
         }
 
         public virtual void ButtonRelease ()
         {
+            ReleasePointer ();
+            OnClicked ();
         }
         
         public virtual void PointerMotion (double x, double y)
         {
+        }
+        
+        protected virtual void OnClicked ()
+        {
+            var handler = Clicked;
+            if (handler != null) {
+                handler (this, EventArgs.Empty);
+            }
         }
 
 #endregion

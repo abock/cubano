@@ -64,7 +64,8 @@ namespace Cubano.NowPlaying
                 video_texture.SizeChange += OnVideoTextureSizeChange;
                 video_texture.SyncSize = false;
                 
-                visualizer_texture = new Rectangle (new Color (1.0, 0, 0, 0.5));
+                visualizer_texture = new Rectangle (new Color (0, 0, 0, 0));
+                visualizer_texture.Painted += OnVisualizerPaintEvent;
                 
                 enable_clutter.Invoke (engine, new object [] { video_texture.Handle });
         
@@ -159,7 +160,24 @@ namespace Cubano.NowPlaying
             }
             
             Hide ();
-        }       
+        }      
+        
+#region Visualizer
+
+        private void OnVisualizerPaintEvent (object o, System.EventArgs args)
+        {
+            Cogl.General.PushMatrix ();
+
+            Cogl.Path.RoundRectangle (0, 0, visualizer_texture.Width, visualizer_texture.Height, 10, 5);
+            
+            Cogl.Path.Ellipse (0, 0, 60, 40);
+            Cogl.General.SetSourceColor4ub (200, 0, 0, 128);
+            Cogl.Path.Fill ();
+
+            Cogl.General.PopMatrix ();
+        }
+
+#endregion
         
 #region ISourceContents
         

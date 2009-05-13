@@ -25,31 +25,35 @@
 // THE SOFTWARE.
 
 using System;
+using Gtk;
 
-using Hyena.Gui.Canvas;
+using Banshee.Gui;
+using Banshee.ServiceStack;
 
 namespace Cubano.Client
 {
-    public class CubanoMainMenu : StackPanel
+    public class CubanoMainMenu : HBox
     {
         public CubanoMainMenu ()
         {
-            Orientation = Orientation.Horizontal;
+            var action_service = ServiceManager.Get<InterfaceActionService> ();
             
-            Spacing = 10;
-            Children.Add (new MenuLabel ("Import"));
-            Children.Add (new MenuLabel ("|"));
-            Children.Add (new MenuLabel ("Preferences"));
-        }
-        
-        private class MenuLabel : TextBlock
-        {
-            public MenuLabel (string text)
-            {
-                Text = text;
-                ForceSize = true;
-                Opacity = 0.7;
-            }
+            var import_button = new Button () {
+                Image = new Image (Stock.Open, IconSize.Menu),
+                Relief = ReliefStyle.None
+            };
+            
+            var preferences_button = new Button (new Image (Stock.Preferences, IconSize.Menu)) {
+                Relief = ReliefStyle.None
+            };
+            
+            preferences_button.ShowAll ();
+            
+            PackStart (import_button, false, false, 0);
+            PackStart (preferences_button, false, false, 0);
+            
+            action_service.GlobalActions["ImportAction"].ConnectProxy (import_button);
+            action_service.GlobalActions["PreferencesAction"].ConnectProxy (preferences_button);
         }
     }
 }

@@ -147,7 +147,7 @@ namespace Cubano.Client
             // Header Bar
             var title_box = new HBox ();
             title_box.Spacing = 15;
-            title_box.PackEnd (new CanvasHost () { Child = new CubanoMainMenu () }, false, false, 0);
+            title_box.PackEnd (new CubanoMainMenu (), false, false, 0);
             title_box.PackEnd (search_box = new SearchEntry (), false, false, 0);
             title_box.ShowAll ();
             
