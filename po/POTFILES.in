@@ -1,1 +1,3 @@
+src/Cubano/Cubano.Client/CunanoHeader.cs
 src/Cubano/Cubano.Client/SearchEntry.cs
+src/Cubano/Cubano.NowPlaying/NowPlayingSource.cs
