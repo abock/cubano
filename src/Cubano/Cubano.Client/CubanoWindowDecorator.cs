@@ -43,7 +43,7 @@ namespace Cubano.Client
                 return;
             }
         
-            var selected_color = CairoExtensions.GdkColorToCairoColor (Window.Style.Background (StateType.Selected));
+            var selected_color = CairoExtensions.GdkColorToCairoColor (Window.Style.Dark (StateType.Active));
             var grad = new LinearGradient (0, 0, 0, Allocation.Height);
             
             selected_color.A = 0.4;

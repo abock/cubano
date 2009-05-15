@@ -59,7 +59,7 @@
     <Compile Include="Cubano.Client\CubanoVisualizer.cs" />
     <Compile Include="Cubano.Client\WindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoWindowDecorator.cs" />
-    <Compile Include="Cubano.Client\CubanoMainMenu.cs" />
+    <Compile Include="Cubano.Client\CunanoHeader.cs" />
     <Compile Include="Cubano.NowPlaying\NowPlayingSource.cs" />
     <Compile Include="Cubano.NowPlaying\NowPlayingInterface.cs" />
   </ItemGroup>

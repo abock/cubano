@@ -39,6 +39,7 @@ namespace Hyena.Gui
         private WindowEdge last_edge;
         private int resize_width = 4;
         private int top_move_height = 80;
+        private bool check_window = true;
     
         public WindowDecorator (Gtk.Window window)
         {
@@ -94,48 +95,59 @@ namespace Hyena.Gui
         
         private void OnMotionNotifyEvent (object o, MotionNotifyEventArgs args)
         {
-            if (CanResize && args.Event.Window == window.GdkWindow) {
-                UpdateCursor (args.Event.X, args.Event.Y, false);
+            int x, y;
+            TranslatePosition (args.Event.Window, args.Event.X, args.Event.Y, out x, out y);
+            
+            if (CanResize) {
+                UpdateCursor (x, y, false);
             }
         }
         
         private void OnEnterNotifyEvent (object o, EnterNotifyEventArgs args)
         {
-            if (CanResize && args.Event.Window == window.GdkWindow) {
-                UpdateCursor (args.Event.X, args.Event.Y, false);
+            int x, y;
+            TranslatePosition (args.Event.Window, args.Event.X, args.Event.Y, out x, out y);
+            
+            if (CanResize) {
+                UpdateCursor (x, y, false);
             }
         }
         
         private void OnLeaveNotifyEvent (object o, LeaveNotifyEventArgs args)
         {
-            if (CanResize && args.Event.Window == window.GdkWindow) {
+            if (CanResize) {
                 ResetCursor ();
             }
         }
         
         private void OnButtonPressEvent (object o, ButtonPressEventArgs args)
         {
-            if (!CanResize || args.Event.Window != window.GdkWindow) {
+            if (!CanResize) {
                 return;
             }
         
             int x_root = (int)args.Event.XRoot;
             int y_root = (int)args.Event.YRoot;
             
-            UpdateCursor (args.Event.X, args.Event.Y, true);
+            int x, y;
+            TranslatePosition (args.Event.Window, args.Event.X, args.Event.Y, out x, out y);
+            UpdateCursor (x, y, true);
             
             if (resizing && args.Event.Button == 1) {
                 window.BeginResizeDrag (last_edge, 1, x_root, y_root, args.Event.Time);
             } else if ((resizing && args.Event.Button == 2) || 
-                (args.Event.Button == 1 && args.Event.Y <= TopMoveHeight)) {
+                (args.Event.Button == 1 && y <= TopMoveHeight)) {
                 window.BeginMoveDrag ((int)args.Event.Button, x_root, y_root, args.Event.Time);
             }
         }
         
         private void OnButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
         {
-            if (resizing && args.Event.Window == window.GdkWindow) {
-                UpdateCursor (args.Event.X, args.Event.Y, true);
+            int x, y;
+            TranslatePosition (args.Event.Window, args.Event.X, args.Event.Y, out x, out y);
+
+            if (resizing) {
+                UpdateCursor (x, y, true);
             }
         }
         
@@ -246,7 +258,26 @@ namespace Hyena.Gui
             cursors = null;
         }
         
+        private void TranslatePosition (Gdk.Window current, double eventX, double eventY, out int x, out int y)
+        {
+            x = (int)eventX;
+            y = (int)eventY;
+            
+            while (current != window.GdkWindow) {
+                int cx, cy, cw, ch, cd;
+                current.GetGeometry (out cx, out cy, out cw, out ch, out cd);
+                x += cx;
+                y += cy;
+                current = current.Parent;
+            }
+        }
+        
 #endregion
+
+        public bool CheckWindow {
+            get { return check_window; }
+            set { check_window = value; }
+        }
 
         protected Gtk.Window Window {
             get { return window; }

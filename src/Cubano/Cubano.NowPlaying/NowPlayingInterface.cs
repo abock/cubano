@@ -64,8 +64,8 @@ namespace Cubano.NowPlaying
                 video_texture.SizeChange += OnVideoTextureSizeChange;
                 video_texture.SyncSize = false;
                 
-                visualizer_texture = new Rectangle (new Color (0, 0, 0, 0));
-                visualizer_texture.Painted += OnVisualizerPaintEvent;
+                //visualizer_texture = new Rectangle (new Color (0, 0, 0, 0));
+                //visualizer_texture.Painted += OnVisualizerPaintEvent;
                 
                 enable_clutter.Invoke (engine, new object [] { video_texture.Handle });
         
@@ -123,8 +123,8 @@ namespace Cubano.NowPlaying
                 ReallocateVideoTexture (texture_width, texture_height);
             }
             
-            visualizer_texture.SetSize (allocation.Width, 100);
-            visualizer_texture.SetPosition (0, (int)(allocation.Height - visualizer_texture.Height));
+            //visualizer_texture.SetSize (allocation.Width, 100);
+            //visualizer_texture.SetPosition (0, (int)(allocation.Height - visualizer_texture.Height));
         }
         
         public void ActivateDisplay ()
@@ -137,7 +137,7 @@ namespace Cubano.NowPlaying
             stage = display.Stage;
             stage.Color = new Color (0, 0, 0);
             stage.Add (video_texture);
-            stage.Add (visualizer_texture);
+            //stage.Add (visualizer_texture);
             
             PackStart (display, true, true, 0);
             
@@ -149,7 +149,7 @@ namespace Cubano.NowPlaying
         {
             if (stage != null) {
                 stage.Remove (video_texture);
-                stage.Remove (visualizer_texture);
+                //stage.Remove (visualizer_texture);
                 stage = null;
             }
             

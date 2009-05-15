@@ -57,15 +57,13 @@ namespace Cubano.Client
 {
     public class CubanoWindow : BaseClientWindow, IClientWindow, IDBusObjectName, IService, IDisposable /*, IHasSourceView */
     {
-        // Major Layout Components
         private VBox primary_vbox;
-        private Alignment header_box;
+        private CubanoHeader header;
+    
+        // Major Layout Components
         private Alignment view_box;
-        private Toolbar header_toolbar;
-        private Toolbar footer_toolbar;
         private HBox footer;
         private ViewContainer view_container;
-        private SearchEntry search_box;
         private MainMenu main_menu;
         private ToolButton forward_button;
         private ToolButton back_button;
@@ -124,7 +122,6 @@ namespace Cubano.Client
         private void BuildPrimaryLayout ()
         {
             window_decorator = new CubanoWindowDecorator (this);
-        
             primary_vbox = new VBox ();
             
             main_menu = new MainMenu ();
@@ -138,51 +135,16 @@ namespace Cubano.Client
             ConfigureMargins (false);
             UpdateSourceHistory (null, null);
             
+            
             primary_vbox.Show ();
             Add (primary_vbox);
         }
         
         private void BuildHeader ()
         {
-            // Header Bar
-            var title_box = new HBox ();
-            title_box.Spacing = 15;
-            title_box.PackEnd (new CubanoMainMenu (), false, false, 0);
-            title_box.PackEnd (search_box = new SearchEntry (), false, false, 0);
-            title_box.ShowAll ();
-            
-            // Tool Bar
-            var header_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/HeaderToolbar");
-            header_toolbar.ExposeEvent += OnCubanoToolbarExposeEvent;
-            header_toolbar.ShowArrow = false;
-            header_toolbar.ToolbarStyle = ToolbarStyle.BothHoriz;
-            
-            var children = header_toolbar.Children;
-            header_toolbar.Insert (new GenericToolItem<Widget> (new RepeatActionButton ()), 0);
-            
-            var filler = new Alignment (0.5f, 0.5f, 0.0f, 0.0f);
-            ActionService.PopulateToolbarPlaceholder (header_toolbar, "/HeaderToolbar/TrackInfoDisplay", filler, true);
-            
-            header_toolbar.ShowAll ();
-            for (int i = 0; i < children.Length; i++) {
-                children[i].Visible = false;
-            }
-            
-            // Pack it in
-            var box = new VBox ();
-            box.Show ();
-            box.PackStart (title_box, false, false, 0);
-            box.PackStart (header_toolbar, false, false, 0);
-            
-            header_box = new Alignment (0.0f, 0.0f, 1.0f, 1.0f) {
-                LeftPadding = 10,
-                RightPadding = 10,
-                TopPadding = 10
-            };
-            header_box.Add (box);
-            header_box.Show ();
-            
-            primary_vbox.PackStart (header_box, false, false, 0);
+            primary_vbox.PackStart (header = new CubanoHeader (), false, false, 0);
+            header.Toolbar.ButtonPressEvent += (o, e) => window_decorator.CheckWindow = false;
+            header.Toolbar.ExposeEvent += OnCubanoToolbarExposeEvent;
         }
 
         // NOTE: this is copied from GtkBaseClient, it was added in 
@@ -319,15 +281,15 @@ namespace Cubano.Client
             if (zero) {
                 view_box.LeftPadding 
                     = view_box.RightPadding
-                    = header_box.TopPadding
-                    = header_box.BottomPadding
-                    = header_box.LeftPadding 
-                    = header_box.RightPadding = 0;
+                    = header.TopPadding
+                    = header.BottomPadding
+                    = header.LeftPadding 
+                    = header.RightPadding = 0;
             } else {
                 view_box.LeftPadding = view_box.RightPadding = 25;
-                header_box.TopPadding = 15;
-                header_box.BottomPadding = 20;
-                header_box.LeftPadding = header_box.RightPadding = 25;
+                header.TopPadding = 15;
+                header.BottomPadding = 20;
+                header.LeftPadding = header.RightPadding = 25;
             }
         }
         
@@ -354,7 +316,7 @@ namespace Cubano.Client
             ActionService.TrackActions ["SearchForSameAlbumAction"].Activated += OnProgrammaticSearch;
 
             // UI events
-            search_box.Entry.Changed += OnSearchEntryChanged;
+            header.SearchEntry.Entry.Changed += OnSearchEntryChanged;
         }
         
 #endregion
@@ -364,9 +326,9 @@ namespace Cubano.Client
         private void OnProgrammaticSearch (object o, EventArgs args)
         {
             Source source = ServiceManager.SourceManager.ActiveSource;
-            search_box.Entry.Ready = false;
-            search_box.Entry.Query = source.FilterQuery;
-            search_box.Entry.Ready = true;
+            header.SearchEntry.Entry.Ready = false;
+            header.SearchEntry.Entry.Query = source.FilterQuery;
+            header.SearchEntry.Entry.Ready = true;
         }
         
         private Source previous_source = null;
@@ -376,18 +338,18 @@ namespace Cubano.Client
             Banshee.Base.ThreadAssist.ProxyToMain (delegate {
                 Source source = ServiceManager.SourceManager.ActiveSource;
     
-                search_box.SearchSensitive = source != null && source.CanSearch;
+                header.SearchEntry.SearchSensitive = source != null && source.CanSearch;
                 
                 if (source == null) {
                     return;
                 }
                 
-                search_box.Entry.Ready = false;
-                search_box.Entry.CancelSearch ();
+                header.SearchEntry.Entry.Ready = false;
+                header.SearchEntry.Entry.CancelSearch ();
     
                 if (source.FilterQuery != null) {
-                    search_box.Entry.Query = source.FilterQuery;
-                    search_box.Entry.ActivateFilter ((int)source.FilterType);
+                    header.SearchEntry.Entry.Query = source.FilterQuery;
+                    header.SearchEntry.Entry.ActivateFilter ((int)source.FilterType);
                 }
     
                 if (view_container.Content != null) {
@@ -416,7 +378,7 @@ namespace Cubano.Client
                 UpdateSourceContents (source);
                 
                 UpdateSourceInformation ();
-                search_box.Entry.Ready = true;
+                header.SearchEntry.Entry.Ready = true;
             });
         }
         
@@ -474,7 +436,7 @@ namespace Cubano.Client
                 source.Properties.Set<IListView<TrackInfo>>  ("Track.IListView", track_content.TrackView);
             }
 
-            header_box.Visible = source.Properties.Contains ("Nereid.SourceContents.HeaderVisible") ?
+            header.Visible = source.Properties.Contains ("Nereid.SourceContents.HeaderVisible") ?
                 source.Properties.Get<bool> ("Nereid.SourceContents.HeaderVisible") : true;
 
             Widget footer_widget = null;
@@ -508,8 +470,8 @@ namespace Cubano.Client
             if (source == null)
                 return;
             
-            source.FilterType = (TrackFilterType)search_box.Entry.ActiveFilterID;
-            source.FilterQuery = search_box.Entry.Query;
+            source.FilterType = (TrackFilterType)header.SearchEntry.Entry.ActiveFilterID;
+            source.FilterQuery = header.SearchEntry.Entry.Query;
         }
         
 #endregion
@@ -590,8 +552,8 @@ namespace Cubano.Client
                     break;
             }
 
-            if (focus_search && !search_box.Entry.HasFocus/* && !source_view.EditingRow*/) {
-                search_box.Entry.HasFocus = true;
+            if (focus_search && !header.SearchEntry.Entry.HasFocus/* && !source_view.EditingRow*/) {
+                header.SearchEntry.Entry.HasFocus = true;
                 return true;
             }
             
@@ -692,15 +654,22 @@ namespace Cubano.Client
                 
                 if (render_gradient) {
                     var grad = new Cairo.LinearGradient (0, 0, 0, Allocation.Height);
-                    grad.AddColorStop (0.00, new Cairo.Color (210 / 255.0, 210 / 255.0, 210 / 255.0));
-                    grad.AddColorStop (0.20, new Cairo.Color (245 / 255.0, 245 / 255.0, 245 / 255.0));
-                    grad.AddColorStop (0.78, new Cairo.Color (253 / 255.0, 253 / 255.0, 253 / 255.0));
-                    grad.AddColorStop (1.00, new Cairo.Color (250 / 255.0, 250 / 255.0, 250 / 255.0));
+                    grad.AddColorStop (0.7, CairoExtensions.GdkColorToCairoColor (Style.Base (StateType.Normal)));
+                    grad.AddColorStop (1, CairoExtensions.GdkColorToCairoColor (Style.Background (StateType.Normal)));
+                    
                     cr.Pattern = grad;
                     cr.Fill ();
                     grad.Destroy ();
                 } else {
                     cr.Color = new Cairo.Color (1, 1, 1);
+                    cr.Fill ();
+                }
+                     
+                if (render_gradient) {
+                    var height = header.Allocation.Height - (header.BottomPadding / 2) - 5;
+                    CairoExtensions.RoundedRectangle (cr, 5, 5, Allocation.Width - 10, height, 3);
+                    
+                    cr.Color = CairoExtensions.GdkColorToCairoColor (Style.Background (StateType.Normal));
                     cr.Fill ();
                 }
 

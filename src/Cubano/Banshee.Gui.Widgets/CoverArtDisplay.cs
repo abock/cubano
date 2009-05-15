@@ -53,6 +53,23 @@ namespace Banshee.Gui.Widgets
             {
                 Opacity = 1;
                 Brush = new CoverArtBrush ();
+                XAlign = 0.5;
+                YAlign = 0.5;
+            }
+            
+            protected override void ClippedRender (Cairo.Context cr)
+            {
+                LinearGradient grad = new LinearGradient (0, 0, RenderSize.Width, RenderSize.Height);
+                grad.AddColorStop (0, new Color (0.5, 0.5, 0.5));
+                grad.AddColorStop (1, new Color (0, 0, 0));
+                cr.Pattern = grad;
+                
+                cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
+                cr.Fill ();
+                
+                grad.Destroy ();
+            
+                base.ClippedRender (cr);
             }
         }
         

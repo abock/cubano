@@ -40,7 +40,7 @@ namespace Banshee.Gui.Widgets
     {
         private ImageSurface missing_audio_surface;
         private ImageSurface missing_video_surface;
-        private int missing_artwork_size;
+        private int missing_artwork_size = 48;
     
         private string artwork_id;
         private int artwork_size;

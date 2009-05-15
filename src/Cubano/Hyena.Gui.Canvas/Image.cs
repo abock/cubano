@@ -40,12 +40,28 @@ namespace Hyena.Gui.Canvas
             if (!brush.IsValid) {
                 return;
             }
-        
-            cr.Antialias = Cairo.Antialias.None;
+            
+            double x = Double.IsNaN (brush.Width)
+                ? 0
+                : (RenderSize.Width - brush.Width) * XAlign;
+            
+            double y = Double.IsNaN (brush.Height)
+                ? 0
+                : (RenderSize.Height - brush.Height) * YAlign;
+            
             cr.Rectangle (0, 0, RenderSize.Width, RenderSize.Height);
             cr.ClipPreserve ();
+            
+            if (x != 0 || y != 0) {
+                cr.Translate (x, y);
+            }
+            
+            cr.Antialias = Cairo.Antialias.None;
             brush.Apply (cr);
             cr.Fill ();
         }
+        
+        public double XAlign { get; set; }
+        public double YAlign { get; set; }
     }
 }

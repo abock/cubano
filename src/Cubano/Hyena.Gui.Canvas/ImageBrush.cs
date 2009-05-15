@@ -70,5 +70,13 @@ namespace Hyena.Gui.Canvas
                 cr.SetSource (surface);
             }
         }
+        
+        public override double Width {
+            get { return surface == null ? 0 : surface.Width; }
+        }
+ 
+        public override double Height {
+            get { return surface == null ? 0 : surface.Height; }
+        }
     }
 }

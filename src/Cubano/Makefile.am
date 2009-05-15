@@ -6,7 +6,6 @@ SOURCES =  \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
 	Cubano.Client/CubanoClient.cs \
-	Cubano.Client/CubanoMainMenu.cs \
 	Cubano.Client/CubanoSourceContents.cs \
 	Cubano.Client/CubanoTheme.cs \
 	Cubano.Client/CubanoTitleCell.cs \
@@ -14,6 +13,7 @@ SOURCES =  \
 	Cubano.Client/CubanoVisualizer.cs \
 	Cubano.Client/CubanoWindow.cs \
 	Cubano.Client/CubanoWindowDecorator.cs \
+	Cubano.Client/CunanoHeader.cs \
 	Cubano.Client/LtrTrackSourceContents.cs \
 	Cubano.Client/SearchEntry.cs \
 	Cubano.Client/ViewContainer.cs \
