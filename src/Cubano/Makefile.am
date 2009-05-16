@@ -9,6 +9,7 @@ SOURCES =  \
 	Banshee.Gui.Widgets/ShapedPopupWindow.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoSourceContents.cs \
+	Cubano.Client/CubanoSourcePopupWindow.cs \
 	Cubano.Client/CubanoTheme.cs \
 	Cubano.Client/CubanoTitleCell.cs \
 	Cubano.Client/CubanoTrackTitleView.cs \

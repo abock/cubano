@@ -99,18 +99,6 @@ namespace Cubano.Client
             composite_view.TrackView.HasFocus = true;
             
             InitialShowPresent ();
-            
-            var win = new BubbleWindow (this) {
-                WidthRequest = 220, 
-                HeightRequest = 400
-            };
-            
-            var scroll = new Gtk.ScrolledWindow ();
-            scroll.Add (new SourceView ());
-            scroll.VscrollbarPolicy = PolicyType.Automatic;
-            scroll.HscrollbarPolicy = PolicyType.Automatic;
-            win.Add (scroll);
-            win.ShowAll ();
         }
         
 #region System Overrides 
@@ -213,19 +201,21 @@ namespace Cubano.Client
             source_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
             source_align.SizeAllocated += OnFooterGroupSizeAllocated;
             var source_box = new HBox ();
-            var source_combo = new SourceComboBox ();
-            /*source_combo.ExposeEvent += (o, e) => {
-                RenderBackground (e.Event.Window, e.Event.Region);
-                source_combo.Cells[0].Render (e.Event.Window, source_combo, 
-                    source_combo.Allocation, 
-                    source_combo.Allocation,
-                    source_combo.Allocation,
-                    CellRendererState.Focused);
-            };*/
+            EventBox b = new EventBox ();
+            var source_button = new Button ("Sources");
+            b.Add (source_button);
+            source_button.Clicked += (o, e) => {                   
+                var win = new CubanoSourcePopupWindow () {
+                    WidthRequest = 220, 
+                    HeightRequest = 400
+                };
+                
+                win.Popup (source_button);
+            };
+                
             source_box.PackStart (back_button = new Gtk.ToolButton (Stock.GoBack), false, false, 0);
-            source_box.PackStart (source_combo, false, false, 0);
-            forward_button = new Gtk.ToolButton (Stock.GoForward);
-            //source_box.PackStart (forward_button = new Gtk.ToolButton (Stock.GoForward), false, false, 0);
+            source_box.PackStart (forward_button = new Gtk.ToolButton (Stock.GoForward), false, false, 0);
+            source_box.PackStart (b, false, false, 0);
             source_align.Add (source_box);
             
             track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {

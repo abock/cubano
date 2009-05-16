@@ -36,7 +36,7 @@ namespace Banshee.Gui.Widgets
         private int arrow_size;
         private int corner_radius;
     
-        public BubbleWindow (Widget context) : base (context)
+        public BubbleWindow ()
         {
             ConfigureDefault ();
         }
@@ -45,8 +45,19 @@ namespace Banshee.Gui.Widgets
         {
             ArrowSize = 20;
             CornerRadius = 5;
+            PopupXAlign = 0.5;
+            PopupYAlign = 1.0;
         }
-
+        
+        protected override bool OnExposeEvent (Gdk.EventExpose evnt)
+        {
+            using (var cr = Gdk.CairoHelper.Create (evnt.Window)) {
+                DrawShape (cr);
+            }
+        
+            return true;
+        }
+        
         protected override void DrawShape (Cairo.Context cr)
         {
             cr.SetSourceRGBA (0, 0, 0, 0);

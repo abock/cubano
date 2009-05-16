@@ -33,9 +33,8 @@ namespace Banshee.Gui.Widgets
 {
     public class ShapedPopupWindow : Window
     {
-        public ShapedPopupWindow (Widget context) : base (WindowType.Toplevel)
+        public ShapedPopupWindow () : base (WindowType.Toplevel)
         {
-            TransientFor = (Window)context.Toplevel;
             DestroyWithParent = true;
             Decorated = false;
             SkipPagerHint = true;
@@ -44,7 +43,7 @@ namespace Banshee.Gui.Widgets
             Screen.CompositedChanged += OnCompositedChanged;
         }
         
-#region Shape Logic
+#region Window Shaping
 
         private bool use_shape_extension;
         
@@ -58,15 +57,6 @@ namespace Banshee.Gui.Widgets
             ProbeComposited ();
             base.OnRealized ();
             ShapeWindow ();
-        }
-        
-        protected override bool OnExposeEvent (Gdk.EventExpose evnt)
-        {
-            using (Cairo.Context cr = Gdk.CairoHelper.Create (evnt.Window)) {
-                DrawShape (cr);
-            }
-        
-            return true;
         }
         
         private void ProbeComposited ()
@@ -110,7 +100,7 @@ namespace Banshee.Gui.Widgets
         
 #endregion
 
-#region Container/Margin Logic
+#region Container/Margins
 
         private Widget child;
         private Gdk.Rectangle child_allocation;
@@ -196,6 +186,43 @@ namespace Banshee.Gui.Widgets
             }
 
             base.OnRemoved (widget);
+        }
+
+#endregion
+
+#region Window Popup/Positioning
+
+        public double PopupXAlign { get; set; }
+        public double PopupYAlign { get; set; }
+        
+        public void Popup (Widget widget)
+        {
+            Popup (widget, 0.5, 0.5);
+        }
+        
+        public void Popup (Widget context, double contextXAlign, double contextYAlign)
+        {
+            Realize ();
+            QueueResize ();
+        
+            int x, y;
+            context.GdkWindow.GetOrigin (out x, out y);
+            x += context.Allocation.X;
+            y += context.Allocation.Y;
+            
+            x -= (int)(Allocation.Width * PopupXAlign);
+            y -= (int)(Allocation.Height * PopupYAlign);
+            
+            x += (int)(context.Allocation.Width * contextXAlign);
+            y += (int)(context.Allocation.Height * contextYAlign);
+            
+            Move (x, y);
+            Show ();
+        }
+        
+        protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
+        {
+            return base.OnButtonPressEvent (evnt);
         }
 
 
