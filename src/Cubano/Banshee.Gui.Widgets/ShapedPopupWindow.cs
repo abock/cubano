@@ -152,8 +152,8 @@ namespace Banshee.Gui.Widgets
             }
             
             // Add the frame border
-            requisition.Width = (int)BorderWidth * 2 + MarginLeft + MarginRight;
-            requisition.Height = (int)BorderWidth * 2 + MarginTop + MarginBottom;
+            requisition.Width += (int)BorderWidth * 2 + MarginLeft + MarginRight;
+            requisition.Height += (int)BorderWidth * 2 + MarginTop + MarginBottom;
         }
 
         protected override void OnSizeAllocated (Gdk.Rectangle allocation)
