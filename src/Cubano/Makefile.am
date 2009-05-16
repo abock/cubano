@@ -1,10 +1,12 @@
 ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 
 SOURCES =  \
+	Banshee.Gui.Widgets/BubbleWindow.cs \
 	Banshee.Gui.Widgets/ConnectedSeekableTrackInfoDisplay.cs \
 	Banshee.Gui.Widgets/CoverArtBrush.cs \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
+	Banshee.Gui.Widgets/ShapedPopupWindow.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoSourceContents.cs \
 	Cubano.Client/CubanoTheme.cs \

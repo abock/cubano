@@ -85,15 +85,12 @@ namespace Cubano.Client
         {
         }
         
-        Clutter.Embed embed;
-        Clutter.Texture video_texture;
-                
         protected override void Initialize ()
         {
             new Cubano.NowPlaying.NowPlayingSource ();
-        
-            ConfigureTheme ();
-        
+            
+            Hyena.Gui.Theming.ThemeEngine.SetCurrentTheme<CubanoTheme> ();
+
             BuildPrimaryLayout ();
             ConnectEvents ();
 
@@ -102,6 +99,18 @@ namespace Cubano.Client
             composite_view.TrackView.HasFocus = true;
             
             InitialShowPresent ();
+            
+            var win = new BubbleWindow (this) {
+                WidthRequest = 220, 
+                HeightRequest = 400
+            };
+            
+            var scroll = new Gtk.ScrolledWindow ();
+            scroll.Add (new SourceView ());
+            scroll.VscrollbarPolicy = PolicyType.Automatic;
+            scroll.HscrollbarPolicy = PolicyType.Automatic;
+            win.Add (scroll);
+            win.ShowAll ();
         }
         
 #region System Overrides 
@@ -146,23 +155,7 @@ namespace Cubano.Client
             header.Toolbar.ButtonPressEvent += (o, e) => window_decorator.CheckWindow = false;
             header.Toolbar.ExposeEvent += OnCubanoToolbarExposeEvent;
         }
-
-        // NOTE: this is copied from GtkBaseClient, it was added in 
-        // r5063 for 1.5.x, but I am aiming to make Cubano work on 1.4.x
-        protected void InitialShowPresent ()
-        {
-            bool hide = ApplicationContext.CommandLine.Contains ("hide");
-            bool present = !hide && !ApplicationContext.CommandLine.Contains ("no-present");
-            
-            if (!hide) {
-                Show ();
-            }
-            
-            if (present) {
-                Present ();
-            }
-        }
-
+        
         private void BuildViews ()
         {
             VBox source_box = new VBox ();
@@ -584,34 +577,6 @@ namespace Cubano.Client
 
 #region Cubano Theme/UI
 
-        private void ConfigureTheme ()
-        {
-            // Banshee 1.4.3 and older does not provide a way for Hyena controls
-            // to use any other theme except the GtkTheme; a hack was added for 1.4.3+
-            // that allows reflection to be used to specify a theme provider; this allows
-            // Cubano to run on 1.4.x but will look different on 1.4.3 or older;
-            // This is the client side of the hack. Sigh.
-            
-            var asm = typeof (Hyena.Gui.Theming.Theme).Assembly;
-            var engine_type = asm.GetType ("Hyena.Gui.Theming.ThemeEngine");
-            if (engine_type != null) {
-                var provider_method = engine_type.GetMethod ("SetProvider");
-                if (provider_method != null) {
-                    provider_method.Invoke (null, new object [] { new EventHandler (OnProvideTheme) });
-                }
-            }
-        }
-        
-        private void OnProvideTheme (object o, EventArgs args)
-        {
-            var type = args.GetType ();
-            var theme_prop = type.GetProperty ("Theme");
-            var widget_prop = type.GetProperty ("Widget");
-            if (theme_prop != null && widget_prop != null) {
-                theme_prop.SetValue (args, new CubanoTheme ((Widget)widget_prop.GetValue (args, null)), null);
-            }
-        }
-        
         private void OnCubanoToolbarExposeEvent (object o, ExposeEventArgs args)
         {
             Toolbar toolbar = (Toolbar)o;
