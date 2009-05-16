@@ -23,7 +23,7 @@ AM_GLIB_GNU_GETTEXT
 IT_PROG_INTLTOOL([0.40.0]) 
 
 PKG_CHECK_EXISTS(MONO, mono >= 2.0)
-PKG_CHECK_MODULES(BANSHEE, banshee-1-thickclient >= 1.4.1)
+PKG_CHECK_MODULES(BANSHEE, banshee-1-thickclient >= 1.5.0)
 PKG_CHECK_MODULES(CLUTTER, clutter-sharp >= 0.9 clutter-gtk-sharp >= 0.9)
 AC_SUBST(BANSHEE_LIBS)
 AC_SUBST(CLUTTER_LIBS)
