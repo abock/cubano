@@ -56,7 +56,6 @@
     <Compile Include="Cubano.Client\CubanoTheme.cs" />
     <Compile Include="Cubano.Client\CubanoTrackTitleView.cs" />
     <Compile Include="Cubano.Client\CubanoTitleCell.cs" />
-    <Compile Include="Cubano.Client\CubanoVisualizer.cs" />
     <Compile Include="Cubano.Client\WindowDecorator.cs" />
     <Compile Include="Cubano.Client\CubanoWindowDecorator.cs" />
     <Compile Include="Cubano.Client\CunanoHeader.cs" />
@@ -65,26 +64,10 @@
     <Compile Include="Banshee.Gui.Widgets\BubbleWindow.cs" />
     <Compile Include="Banshee.Gui.Widgets\ShapedPopupWindow.cs" />
     <Compile Include="Cubano.Client\CubanoSourcePopupWindow.cs" />
+    <Compile Include="Cubano.NowPlaying\CubanoVisualizer.cs" />
+    <Compile Include="Cubano.NowPlaying\CubanoClutterVisualizer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Banshee.Core, Version=1.4.0.0, Culture=neutral">
-      <Package>banshee-1-core</Package>
-    </Reference>
-    <Reference Include="Banshee.Services, Version=1.4.0.0, Culture=neutral">
-      <Package>banshee-1-services</Package>
-    </Reference>
-    <Reference Include="Banshee.Widgets, Version=1.4.0.0, Culture=neutral">
-      <Package>banshee-1-thickclient</Package>
-    </Reference>
-    <Reference Include="Banshee.ThickClient, Version=1.4.0.0, Culture=neutral">
-      <Package>banshee-1-thickclient</Package>
-    </Reference>
-    <Reference Include="Hyena, Version=1.4.0.0, Culture=neutral">
-      <Package>banshee-1-hyena</Package>
-    </Reference>
-    <Reference Include="Hyena.Gui, Version=1.4.0.0, Culture=neutral">
-      <Package>banshee-1-hyena-gui</Package>
-    </Reference>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <Reference Include="Mono.Cairo" />
@@ -98,6 +81,25 @@
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
     <Reference Include="clutter-gtk-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
     <Reference Include="clutter-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
+    <Reference Include="Banshee.Core, Version=1.5.0.0, Culture=neutral">
+      <Package>banshee-1-core</Package>
+    </Reference>
+    <Reference Include="Banshee.Services, Version=1.5.0.0, Culture=neutral">
+      <Package>banshee-1-services</Package>
+    </Reference>
+    <Reference Include="Banshee.ThickClient, Version=1.5.0.0, Culture=neutral">
+      <Package>banshee-1-thickclient</Package>
+    </Reference>
+    <Reference Include="Banshee.Widgets, Version=1.5.0.0, Culture=neutral">
+      <Package>banshee-1-thickclient</Package>
+    </Reference>
+    <Reference Include="Hyena, Version=1.5.0.0, Culture=neutral">
+      <Package>banshee-1-hyena</Package>
+    </Reference>
+    <Reference Include="Hyena.Gui, Version=1.5.0.0, Culture=neutral">
+      <Package>banshee-1-hyena-gui</Package>
+    </Reference>
+    <Reference Include="taglib-sharp, Version=2.0.3.2, Culture=neutral, PublicKeyToken=db62eba44689b5b0" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

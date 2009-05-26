@@ -4,17 +4,34 @@ BANSHEE_PATH=@BANSHEE_PATH@
 ASSEMBLY=Cubano.exe
 
 VALGRIND=
-
-for arg in $@; do
-	if test $arg = "--valgrind"; then
-		VALGRIND="valgrind --smc-check=all --tool=memcheck -v --leak-check=full --log-file=valgrind.log --suppressions=/home/aaron/mono-svn/svn/mono/data/mono.supp"
-		shift
-	fi
-done
+GDB=
 
 export LD_LIBRARY_PATH=${BANSHEE_PATH}${LD_LIBRARY_PATH+:$LD_LIBRARY_PATH}
 export MONO_PATH=${PWD}:${BANSHEE_PATH}${MONO_PATH+:$MONO_PATH}
 export MOONLIGHT_DEBUG=deployment
 
-$VALGRIND mono --debug $ASSEMBLY $@ --debug
+function run_gdb () {
+	gdb mono \
+		--eval-command="handle SIGXCPU SIG35 SIGPWR nostop noprint"
 
+
+#		--eval-command="b g_return_if_fail_warning" \
+#		--eval-command="r --debug $ASSEMBLY $@"
+}
+
+for arg in $@; do
+	if test $arg = "--valgrind"; then
+		VALGRIND="valgrind --smc-check=all --tool=memcheck -v --leak-check=full --log-file=valgrind.log --suppressions=/home/aaron/mono-svn/svn/mono/data/mono.supp"
+		shift
+	elif test $arg = "--gdb"; then
+		shift
+		GDB=yes
+	fi
+done
+
+if test -z "$GDB"; then
+	$VALGRIND mono --debug $ASSEMBLY $@ --debug
+else
+	echo "RUNNING IN GDB"
+	run_gdb $@
+fi

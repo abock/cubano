@@ -13,7 +13,6 @@ SOURCES =  \
 	Cubano.Client/CubanoTheme.cs \
 	Cubano.Client/CubanoTitleCell.cs \
 	Cubano.Client/CubanoTrackTitleView.cs \
-	Cubano.Client/CubanoVisualizer.cs \
 	Cubano.Client/CubanoWindow.cs \
 	Cubano.Client/CubanoWindowDecorator.cs \
 	Cubano.Client/CunanoHeader.cs \
@@ -21,6 +20,8 @@ SOURCES =  \
 	Cubano.Client/SearchEntry.cs \
 	Cubano.Client/ViewContainer.cs \
 	Cubano.Client/WindowDecorator.cs \
+	Cubano.NowPlaying/CubanoClutterVisualizer.cs \
+	Cubano.NowPlaying/CubanoVisualizer.cs \
 	Cubano.NowPlaying/NowPlayingInterface.cs \
 	Cubano.NowPlaying/NowPlayingSource.cs \
 	Hyena.Gui.Canvas/AnimationManager.cs \
@@ -58,6 +59,7 @@ REFERENCES_PACKAGES =  \
 	-pkg:clutter-sharp \
 	-pkg:glib-sharp-2.0 \
 	-pkg:gtk-sharp-2.0 \
+	-pkg:taglib-sharp \
 	-r:Mono.Cairo
 
 RESOURCES_BUILD = $(foreach res, $(RESOURCES), \
