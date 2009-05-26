@@ -32,7 +32,7 @@ using Cairo;
 using Banshee.ServiceStack;
 using Banshee.MediaEngine;
 
-namespace Cubano.Client
+namespace Cubano.NowPlaying
 {
     public class CubanoVisualizer : IDisposable
     {
@@ -44,20 +44,24 @@ namespace Cubano.Client
                 set { damage = value; }
             }
         }
-    
-        private object render_points_mutext = new object ();
+        
         private Queue<float []> points = new Queue<float []> ();
         private Gdk.Rectangle render_damage;
         
         public EventHandler<RenderRequestArgs> RenderRequest;
         
+        private object render_points_mutex = new object ();
+        public object RenderPointsMutex {
+            get { return render_points_mutex; }
+        }
+        
         private float [] render_points;
-        protected float [] RenderPoints {
+        public float [] RenderPoints {
             get { return render_points; }
         }
         
         private float render_loudness;
-        protected float RenderLoudness {
+        public float RenderLoudness {
             get { return render_loudness; }
         }
         
@@ -140,7 +144,6 @@ namespace Cubano.Client
         private void RequestRender ()
         {
             Banshee.Base.ThreadAssist.ProxyToMain (delegate {
-                InnerRender ();
                 OnRenderRequest ();
             });
         }
@@ -154,7 +157,7 @@ namespace Cubano.Client
                 return;
             }
 
-            lock (render_points_mutext) {
+            lock (render_points_mutex) {
                 UpdatePoints (spectrum[0]);
             }
             
@@ -254,7 +257,7 @@ namespace Cubano.Client
         
         private void InnerRender ()
         {
-            lock (render_points_mutext) {
+            lock (render_points_mutex) {
                 if (render_points == null) {
                     return;
                 }

@@ -31,6 +31,7 @@ using System;
 using Mono.Unix;
 using Gtk;
 
+using Banshee.MediaEngine;
 using Banshee.ServiceStack;
 using Banshee.Sources;
 using Banshee.Gui;
@@ -41,36 +42,32 @@ using Clutter;
 namespace Cubano.NowPlaying
 {
     public class NowPlayingInterface : VBox, ISourceContents
-    {   
+    {
+        private static readonly int visualizer_height = 60;
+    
         private NowPlayingSource source;
 
         private Embed display;
         private Stage stage;
         private Texture video_texture;
-        private Rectangle visualizer_texture;
+        private CubanoClutterVisualizer visualizer_texture;
         
         public NowPlayingInterface ()
         {
-            Clutter.Application.InitForToolkit ();
-        
-            var engine = ServiceManager.PlayerEngine.ActiveEngine;
-            if (engine != null && engine.GetType ().FullName == "Banshee.GStreamer.PlayerEngine") {
-                var enable_clutter = engine.GetType ().GetMethod ("EnableClutterVideoSink");
-                if (enable_clutter == null) {
-                    throw new ApplicationException ("Banshee GStreamer engine does not have Clutter support");
-                }
-                
-                video_texture = new Texture ();
-                video_texture.SizeChange += OnVideoTextureSizeChange;
-                video_texture.SyncSize = false;
-                
-                //visualizer_texture = new Rectangle (new Color (0, 0, 0, 0));
-                //visualizer_texture.Painted += OnVisualizerPaintEvent;
-                
-                enable_clutter.Invoke (engine, new object [] { video_texture.Handle });
-        
-                ServiceManager.SourceManager.SourceAdded += OnSourceAdded;
+            var engine = ServiceManager.PlayerEngine.ActiveEngine as ISupportClutter;
+            if (engine == null) {
+                throw new ApplicationException ("Banshee GStreamer engine does not have Clutter support");
             }
+                
+            video_texture = new Texture ();
+            video_texture.SizeChange += OnVideoTextureSizeChange;
+            video_texture.SyncSize = false;
+            
+            visualizer_texture = new CubanoClutterVisualizer ();
+                
+            engine.EnableClutterVideoSink (video_texture.Handle);
+        
+            ServiceManager.SourceManager.SourceAdded += OnSourceAdded;
         }
         
         private void OnSourceAdded (SourceAddedArgs args)
@@ -123,8 +120,8 @@ namespace Cubano.NowPlaying
                 ReallocateVideoTexture (texture_width, texture_height);
             }
             
-            //visualizer_texture.SetSize (allocation.Width, 100);
-            //visualizer_texture.SetPosition (0, (int)(allocation.Height - visualizer_texture.Height));
+            visualizer_texture.SetPosition (0, Allocation.Height - visualizer_height);
+            visualizer_texture.SetSize (Allocation.Width, visualizer_height);
         }
         
         public void ActivateDisplay ()
@@ -137,7 +134,7 @@ namespace Cubano.NowPlaying
             stage = display.Stage;
             stage.Color = new Color (0, 0, 0);
             stage.Add (video_texture);
-            //stage.Add (visualizer_texture);
+            stage.Add (visualizer_texture);
             
             PackStart (display, true, true, 0);
             
@@ -149,7 +146,7 @@ namespace Cubano.NowPlaying
         {
             if (stage != null) {
                 stage.Remove (video_texture);
-                //stage.Remove (visualizer_texture);
+                stage.Remove (visualizer_texture);
                 stage = null;
             }
             
@@ -160,24 +157,7 @@ namespace Cubano.NowPlaying
             }
             
             Hide ();
-        }      
-        
-#region Visualizer
-
-        private void OnVisualizerPaintEvent (object o, System.EventArgs args)
-        {
-            Cogl.General.PushMatrix ();
-
-            Cogl.Path.RoundRectangle (0, 0, visualizer_texture.Width, visualizer_texture.Height, 10, 5);
-            
-            Cogl.Path.Ellipse (0, 0, 60, 40);
-            Cogl.General.SetSourceColor4ub (200, 0, 0, 128);
-            Cogl.Path.Fill ();
-
-            Cogl.General.PopMatrix ();
         }
-
-#endregion
         
 #region ISourceContents
         
