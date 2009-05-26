@@ -36,12 +36,12 @@ namespace Cubano.Client
     {
         public CubanoSourcePopupWindow()
         {
-            var scroll = new Gtk.ScrolledWindow ();
+           /* var scroll = new Gtk.ScrolledWindow ();
             scroll.Add (new SourceView ());
             scroll.VscrollbarPolicy = PolicyType.Automatic;
             scroll.HscrollbarPolicy = PolicyType.Automatic;
             Add (scroll);
-            scroll.ShowAll ();
+            scroll.ShowAll (); */
         }
     }
 }

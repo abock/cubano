@@ -71,6 +71,7 @@ namespace Cubano.Client
         private Alignment source_align;
         private Alignment track_info_align;
         private CubanoWindowDecorator window_decorator;
+        private CubanoSourcePopupWindow source_popup;
         
         // Major Interaction Components
         private LtrTrackSourceContents composite_view;
@@ -120,6 +121,11 @@ namespace Cubano.Client
         {
             window_decorator = new CubanoWindowDecorator (this);
             primary_vbox = new VBox ();
+            
+            source_popup = new CubanoSourcePopupWindow () {
+                WidthRequest = 250,
+                HeightRequest = 300
+            };
             
             main_menu = new MainMenu ();
             main_menu.Hide ();
@@ -201,21 +207,12 @@ namespace Cubano.Client
             source_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
             source_align.SizeAllocated += OnFooterGroupSizeAllocated;
             var source_box = new HBox ();
-            EventBox b = new EventBox ();
-            var source_button = new Button ("Sources");
-            b.Add (source_button);
-            source_button.Clicked += (o, e) => {                   
-                var win = new CubanoSourcePopupWindow () {
-                    WidthRequest = 220, 
-                    HeightRequest = 400
-                };
-                
-                win.Popup (source_button);
-            };
+            //var source_button = new Button ("Sources");
+            //source_button.Clicked += (o, e) => source_popup.Popup (source_button);
                 
             source_box.PackStart (back_button = new Gtk.ToolButton (Stock.GoBack), false, false, 0);
             source_box.PackStart (forward_button = new Gtk.ToolButton (Stock.GoForward), false, false, 0);
-            source_box.PackStart (b, false, false, 0);
+            source_box.PackStart (new SourceComboBox (), false, false, 0);
             source_align.Add (source_box);
             
             track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {

@@ -39,6 +39,7 @@ namespace Banshee.Gui.Widgets
             Decorated = false;
             SkipPagerHint = true;
             SkipTaskbarHint = true;
+            KeepAbove = true;
             
             Screen.CompositedChanged += OnCompositedChanged;
         }
@@ -202,11 +203,14 @@ namespace Banshee.Gui.Widgets
         
         public void Popup (Widget context, double contextXAlign, double contextYAlign)
         {
-            Realize ();
-            QueueResize ();
-        
+            if (!IsRealized) {
+                Realize ();
+                QueueResize ();
+            }
+
             int x, y;
             context.GdkWindow.GetOrigin (out x, out y);
+            
             x += context.Allocation.X;
             y += context.Allocation.Y;
             
@@ -216,8 +220,14 @@ namespace Banshee.Gui.Widgets
             x += (int)(context.Allocation.Width * contextXAlign);
             y += (int)(context.Allocation.Height * contextYAlign);
             
-            Move (x, y);
             Show ();
+            Move (x, y);
+            
+            
+            /*GLib.Timeout.Add (50, delegate {
+                Move (x, y);  
+                return false;
+            });*/
         }
         
         protected override bool OnButtonPressEvent (Gdk.EventButton evnt)
