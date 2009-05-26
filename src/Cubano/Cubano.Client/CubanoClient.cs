@@ -26,6 +26,12 @@ namespace Cubano.Client
             Startup<CubanoClient> (args);
         }
         
+        protected override void InitializeGtk ()
+        {
+            Gtk.Application.Init ();
+            Clutter.Application.InitForToolkit ();
+        }
+        
         protected override void OnRegisterServices ()
         {
             ServiceManager.RegisterService<CubanoWindow> ();
