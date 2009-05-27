@@ -42,21 +42,44 @@ namespace Cubano.NowPlaying
         
         private void OnVisualizerRenderRequest (object o, EventArgs args)
         {
-            Console.WriteLine ("RENDER!");
             QueueRedraw ();
         }
         
         protected override void OnPainted ()
         {
-            Cogl.General.PushMatrix ();
-
-            Cogl.Path.RoundRectangle (0, 0, Width, Height, 10, 5);
+            lock (visualizer.RenderPointsMutex) {
+                if (visualizer.RenderPoints == null || visualizer.RenderPoints.Length == 0) {
+                    return;
+                }
             
-            Cogl.Path.Ellipse (0, 0, 60, 40);
-            Cogl.General.SetSourceColor4ub (200, 0, 0, 128);
-            Cogl.Path.Fill ();
-
-            Cogl.General.PopMatrix ();
+                Cogl.General.PushMatrix ();
+                
+                float max_r = Height / 2;
+                float x_ofs = Width / visualizer.RenderPoints.Length;
+                float xc = 0, yc = Height;
+                float r;
+                
+                float min_x = Width, max_x = 0, min_y = Height, max_y = yc;
+                
+                for (int i = 0, n = visualizer.RenderPoints.Length; i < n; i++) {
+                    xc += x_ofs;
+                    r = Height * visualizer.RenderPoints[i];
+                    
+                    Cogl.Path.Ellipse (xc, yc, r, r);
+                    
+                    if (r > 0) {
+                        min_x = Math.Min (min_x, xc - r);
+                        max_x = Math.Max (max_x, xc + r);
+                        min_y = Math.Min (min_y, yc - r);
+                    }
+                }
+                
+                Cogl.General.SetSourceColor4ub (255, 128, 0, 
+                    (byte)((visualizer.RenderLoudness * 128) + 30));
+                Cogl.Path.Fill ();
+                
+                Cogl.General.PopMatrix ();
+            }
         }
     }
 }
