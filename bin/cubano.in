@@ -30,7 +30,7 @@ for arg in $@; do
 done
 
 if test -z "$GDB"; then
-	$VALGRIND mono --debug $ASSEMBLY $@ --debug
+	$VALGRIND mono --debug $ASSEMBLY $@ --debug $CUBANO_OPTIONS
 else
 	echo "RUNNING IN GDB"
 	run_gdb $@

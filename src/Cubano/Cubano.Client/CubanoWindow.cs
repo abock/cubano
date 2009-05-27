@@ -215,6 +215,7 @@ namespace Cubano.Client
             source_box.PackStart (new SourceComboBox (), false, false, 0);
             source_align.Add (source_box);
             
+            
             track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {
                 TopPadding = 20,
                 BottomPadding = 12,
@@ -228,7 +229,10 @@ namespace Cubano.Client
                 Visible = true
             });
             
+            var status_icon = new CubanoTaskStatusButton ();
+            
             footer.PackStart (source_align, false, false, 0);
+            footer.PackStart (status_icon, false, false, 0);
             footer.PackStart (track_info_align, true, true, 0);
             
             var actions = ServiceManager.Get<InterfaceActionService> ().PlaybackActions;

@@ -10,6 +10,7 @@ SOURCES =  \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoSourceContents.cs \
 	Cubano.Client/CubanoSourcePopupWindow.cs \
+	Cubano.Client/CubanoTaskStatusButton.cs \
 	Cubano.Client/CubanoTheme.cs \
 	Cubano.Client/CubanoTitleCell.cs \
 	Cubano.Client/CubanoTrackTitleView.cs \
