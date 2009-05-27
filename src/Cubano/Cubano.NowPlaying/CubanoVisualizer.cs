@@ -97,40 +97,45 @@ namespace Cubano.NowPlaying
     
         public CubanoVisualizer ()
         {
-            ConnectOrDisconnect (true);
-            RequestRender ();
+            ServiceManager.PlayerEngine.EngineAfterInitialize += engine => ConnectOrDisconnect (engine, true);
+            Connect ();
         }
         
-        public void Dispose ()
+        private void ConnectOrDisconnect (PlayerEngine engine, bool connect)
         {
-            ConnectOrDisconnect (false);
-            RequestRender ();
+            var vis_engine = engine as IVisualizationDataSource;
+            if (vis_engine != null) {
+                if (connect) {
+                    vis_engine.DataAvailable += OnVisualizationDataAvailable;
+                } else {
+                    vis_engine.DataAvailable -= OnVisualizationDataAvailable;
+                }
+            }
         }
         
         public void Connect ()
         {
-            ConnectOrDisconnect (true);
+            foreach (var engine in ServiceManager.PlayerEngine.Engines) {
+                if (engine.IsInitialized) {
+                    ConnectOrDisconnect (engine, true);
+                }
+            }
+            
             RequestRender ();
         }
         
         public void Disconnect ()
         {
-            ConnectOrDisconnect (false);
+            foreach (var engine in ServiceManager.PlayerEngine.Engines) {
+                ConnectOrDisconnect (engine, false);
+            }
+            
             RequestRender ();
         }
         
-        private void ConnectOrDisconnect (bool connect)
+        public void Dispose ()
         {
-            foreach (var engine in ServiceManager.PlayerEngine.Engines) {
-                var vis_engine = engine as IVisualizationDataSource;
-                if (vis_engine != null) {
-                    if (connect) {
-                        vis_engine.DataAvailable += OnVisualizationDataAvailable;
-                    } else {
-                        vis_engine.DataAvailable -= OnVisualizationDataAvailable;
-                    }
-                }
-            }
+            Disconnect ();
         }
         
         protected virtual void OnRenderRequest ()
