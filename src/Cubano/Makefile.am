@@ -21,6 +21,7 @@ SOURCES =  \
 	Cubano.Client/SearchEntry.cs \
 	Cubano.Client/ViewContainer.cs \
 	Cubano.Client/WindowDecorator.cs \
+	Cubano.NowPlaying/ArtworkDisplay.cs \
 	Cubano.NowPlaying/CubanoClutterVisualizer.cs \
 	Cubano.NowPlaying/CubanoVisualizer.cs \
 	Cubano.NowPlaying/NowPlayingInterface.cs \

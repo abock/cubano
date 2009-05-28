@@ -136,6 +136,29 @@ namespace Cubano.NowPlaying
             stage.Add (video_texture);
             stage.Add (visualizer_texture);
             
+            var grid = new ArtworkDisplay () {
+                Width = 800,
+                Height = 600
+            };
+            
+            var rand = new Random ();
+            
+            for (int i = 0; i < 50; i++) {
+                var rect = new Rectangle (new Color () {
+                    R = (byte)rand.Next (0, 255),
+                    G = (byte)rand.Next (0, 255),
+                    B = (byte)rand.Next (0, 255),
+                    A = 255
+                }) {
+                    Width = (uint)rand.Next (20, 50),
+                    Height = (uint)rand.Next (20, 50)
+                };
+                
+                grid.Add (rect);
+            }
+            
+            stage.Add (grid);
+            
             PackStart (display, true, true, 0);
             
             display.Show ();

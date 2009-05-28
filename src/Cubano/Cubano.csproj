@@ -67,6 +67,7 @@
     <Compile Include="Cubano.NowPlaying\CubanoVisualizer.cs" />
     <Compile Include="Cubano.NowPlaying\CubanoClutterVisualizer.cs" />
     <Compile Include="Cubano.Client\CubanoTaskStatusButton.cs" />
+    <Compile Include="Cubano.NowPlaying\ArtworkDisplay.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
@@ -80,8 +81,6 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
-    <Reference Include="clutter-gtk-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
-    <Reference Include="clutter-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
     <Reference Include="Banshee.Core, Version=1.5.0.0, Culture=neutral">
       <Package>banshee-1-core</Package>
     </Reference>
@@ -101,6 +100,8 @@
       <Package>banshee-1-hyena-gui</Package>
     </Reference>
     <Reference Include="taglib-sharp, Version=2.0.3.2, Culture=neutral, PublicKeyToken=db62eba44689b5b0" />
+    <Reference Include="clutter-gtk-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
+    <Reference Include="clutter-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
