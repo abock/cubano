@@ -43,7 +43,7 @@ namespace Cubano.NowPlaying
 {
     public class NowPlayingInterface : VBox, ISourceContents
     {
-        private static readonly int visualizer_height = 60;
+        private static readonly int visualizer_height = 120;
     
         private NowPlayingSource source;
 
@@ -51,6 +51,7 @@ namespace Cubano.NowPlaying
         private Stage stage;
         private Texture video_texture;
         private CubanoClutterVisualizer visualizer_texture;
+        private ArtworkDisplay artwork;
         
         public NowPlayingInterface ()
         {
@@ -64,6 +65,7 @@ namespace Cubano.NowPlaying
             video_texture.SyncSize = false;
             
             visualizer_texture = new CubanoClutterVisualizer ();
+            artwork = new ArtworkDisplay ();
                 
             engine.EnableClutterVideoSink (video_texture.Handle);
         
@@ -122,6 +124,9 @@ namespace Cubano.NowPlaying
             
             visualizer_texture.SetPosition (0, Allocation.Height - visualizer_height);
             visualizer_texture.SetSize (Allocation.Width, visualizer_height);
+            
+            artwork.SetPosition (0, 0);
+            artwork.SetSize (Allocation.Width, Allocation.Height);
         }
         
         public void ActivateDisplay ()
@@ -134,30 +139,10 @@ namespace Cubano.NowPlaying
             stage = display.Stage;
             stage.Color = new Color (0, 0, 0);
             stage.Add (video_texture);
+            stage.Add (artwork);
             stage.Add (visualizer_texture);
             
-            var grid = new ArtworkDisplay () {
-                Width = 800,
-                Height = 600
-            };
-            
-            var rand = new Random ();
-            
-            for (int i = 0; i < 50; i++) {
-                var rect = new Rectangle (new Color () {
-                    R = (byte)rand.Next (0, 255),
-                    G = (byte)rand.Next (0, 255),
-                    B = (byte)rand.Next (0, 255),
-                    A = 255
-                }) {
-                    Width = (uint)rand.Next (20, 50),
-                    Height = (uint)rand.Next (20, 50)
-                };
-                
-                grid.Add (rect);
-            }
-            
-            stage.Add (grid);
+            artwork.SetSource (ServiceManager.SourceManager.MusicLibrary);
             
             PackStart (display, true, true, 0);
             
@@ -170,6 +155,7 @@ namespace Cubano.NowPlaying
             if (stage != null) {
                 stage.Remove (video_texture);
                 stage.Remove (visualizer_texture);
+                stage.Remove (artwork);
                 stage = null;
             }
             

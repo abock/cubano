@@ -75,7 +75,7 @@ namespace Cubano.NowPlaying
                 }
                 
                 Cogl.General.SetSourceColor4ub (255, 128, 0, 
-                    (byte)((visualizer.RenderLoudness * 128) + 30));
+                    (byte)((visualizer.RenderLoudness * 60) + 120));
                 Cogl.Path.Fill ();
                 
                 Cogl.General.PopMatrix ();

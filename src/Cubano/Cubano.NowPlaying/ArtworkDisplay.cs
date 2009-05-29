@@ -29,15 +29,80 @@ using System.Collections.Generic;
 
 using Clutter;
 
+using Hyena.Data;
+using Hyena.Collections;
+using Banshee.Base;
+using Banshee.Sources;
+using Banshee.ServiceStack;
+using Banshee.Collection;
+using Banshee.Collection.Gui;
+using Banshee.Collection.Database;
+
 namespace Cubano.NowPlaying
 {
-    public class ArtworkDisplay : Actor, ContainerImplementor
+    internal class ActorCache : LruCache<string, Actor>
     {
-        private List<Actor> children = new List<Actor> ();
+        public ActorCache (int maxCount) : base (maxCount)
+        {
+        }
+        
+        public static int GetActorCountForScreen (double textureSize)
+        {
+            return GetActorCountForScreen (textureSize, Gdk.Screen.Default);
+        }
+        
+        public static int GetActorCountForScreen (double textureSize, Gdk.Screen screen)
+        {
+            return GetActorCountForArea (textureSize, screen.Width, screen.Height);
+        }
+        
+        public static int GetActorCountForArea (double textureSize, int areaWidth, int areaHeight)
+        {
+            return (int)(Math.Ceiling (areaWidth / textureSize) * Math.Ceiling (areaHeight / textureSize));
+        }
+    }
+
+    public class AlbumArtActor : Texture
+    {
+        private static ArtworkManager artwork_manager;
     
+        private AlbumInfo album;
+        public AlbumInfo Album {
+            get { return album; }
+        }
+        
+        public AlbumArtActor (AlbumInfo album, double textureSize) : base ()
+        {
+            if (artwork_manager == null && ServiceManager.Contains<ArtworkManager> ()) {
+                artwork_manager = ServiceManager.Get<ArtworkManager> ();
+            }
+            
+            var image = artwork_manager.LookupScalePixbuf (album.ArtworkId, (int)textureSize);
+            if (image != null) {
+                SetFromRgbData (image.Pixels, image.HasAlpha, image.Width, image.Height,
+                    image.Rowstride, image.HasAlpha ? 4 : 3, TextureFlags.None);
+                Width = (uint)image.Width;
+                Height = (uint)image.Height;
+            }
+            
+            this.album = album;
+        }
+    }
+
+    public class ArtworkDisplay : Actor
+    {
+        private static readonly double ActorSize = 100;
+    
+        private List<Actor> children = new List<Actor> ();
+        private ActorCache actor_cache = new ActorCache (ActorCache.GetActorCountForScreen (ActorSize));
+
         public ArtworkDisplay () : base ()
         {
-            
+        }
+        
+        private IListModel<AlbumInfo> album_model;
+        public IListModel<AlbumInfo> Model {
+            get { return album_model; }
         }
         
         private float padding;
@@ -66,6 +131,78 @@ namespace Cubano.NowPlaying
                 QueueRelayout ();
             }
         }
+        
+        public void SetSource (DatabaseSource source)
+        {
+            if (album_model != null) {
+                album_model.Reloaded -= OnModelReloaded;
+                album_model = null;
+            }
+            
+            foreach (IListModel model in source.CurrentFilters) {
+                album_model = model as IListModel<AlbumInfo>;
+                if (album_model != null) {
+                    break;
+                }
+            }
+            
+            if (album_model != null) {
+                album_model.Reloaded += OnModelReloaded;
+            }
+            
+            QueueRelayout ();
+        }
+
+        private void OnModelReloaded (object o, EventArgs args)
+        {
+            Rebuild ();
+        }
+        
+#region IListModel<T> Interaction
+
+        private Actor GetActorForAlbumInfo (AlbumInfo info)
+        {
+            Actor actor = null;
+            if (actor_cache.TryGetValue (info.ArtworkId, out actor)) {
+                return actor;
+            }
+            
+            actor_cache.Add (info.ArtworkId, actor = new AlbumArtActor (info, ActorSize));
+            return actor;
+        }
+        
+        private void Rebuild ()
+        {
+            Clear ();
+            
+            int max_items = ActorCache.GetActorCountForArea (ActorSize, (int)Width, (int)Height);
+            if (max_items == 0) {
+                return;
+            }
+            
+            Console.WriteLine (max_items);
+            for (int i = 0, n = Model.Count; i < n && children.Count <= max_items; i++) {
+                var info = Model[i];
+                if (info == null || info.ArtworkId == null) {
+                    continue;
+                }
+                
+                var actor = GetActorForAlbumInfo (info);
+                actor.Parent = this;
+                children.Add (actor);
+            }
+            
+            Console.WriteLine ("ACTOR COUNT = {0}", children.Count);
+            Console.WriteLine ("CACHE COUNT = {0}", actor_cache.Count);
+        }
+        
+        public void Clear ()
+        {
+            children.ForEach (actor => actor.Unparent ());
+            children.Clear ();
+        }
+
+#endregion
         
 #region ClutterActor overrides
 
@@ -124,6 +261,8 @@ namespace Cubano.NowPlaying
         protected override void OnAllocate (ActorBox box, bool absolute_origin_changed)
         {
             base.OnAllocate (box, absolute_origin_changed);
+            
+            Rebuild ();
             
             float current_x = Padding;
             float current_y = Padding;
@@ -199,63 +338,6 @@ namespace Cubano.NowPlaying
             }
             
             Cogl.General.PopMatrix ();
-        }
-        
-#endregion
-        
-#region ContainerImplementer
-        
-        public void Add (Actor actor)
-        {
-            children.Add (actor);
-            actor.Parent = this;
-            
-            GLib.Signal.Emit (this, "actor-added", actor);
-            
-            QueueRelayout ();
-        }
-        
-        public void Remove (Actor actor)
-        {
-            if (children.Remove (actor)) {
-                actor.Unparent ();
-                
-                GLib.Signal.Emit (this, "actor-removed", actor);
-                
-                QueueRelayout ();
-            }
-        }
-        
-        public void Foreach (Callback cb)
-        {
-            foreach (var child in children) {
-                cb (child);
-            }
-        }
-        
-        public void Raise (Actor actor, Actor sibling)
-        {
-        }
-        
-        public void Lower (Actor actor, Actor sibling)
-        {
-        }
-        
-        public void SortDepthOrder ()
-        {
-        }
-        
-        public void CreateChildMeta (Actor actor)
-        {
-        }
-        
-        public void DestroyChildMeta (Actor actor)
-        {
-        }
-        
-        public ChildMeta GetChildMeta (Actor actor)
-        {
-            return null;
         }
         
 #endregion
