@@ -62,13 +62,17 @@ namespace Cubano.NowPlaying
         }
     }
 
-    public class AlbumArtActor : Texture
+    internal class AlbumArtActor : Texture
     {
         private static ArtworkManager artwork_manager;
     
         private AlbumInfo album;
         public AlbumInfo Album {
             get { return album; }
+        }
+        
+        public AlbumArtActor (IntPtr raw) : base (raw)
+        {
         }
         
         public AlbumArtActor (AlbumInfo album, double textureSize) : base ()
@@ -81,8 +85,6 @@ namespace Cubano.NowPlaying
             if (image != null) {
                 SetFromRgbData (image.Pixels, image.HasAlpha, image.Width, image.Height,
                     image.Rowstride, image.HasAlpha ? 4 : 3, TextureFlags.None);
-                Width = (uint)image.Width;
-                Height = (uint)image.Height;
             }
             
             this.album = album;
@@ -92,46 +94,129 @@ namespace Cubano.NowPlaying
     public class ArtworkDisplay : Actor
     {
         private static readonly double ActorSize = 100;
-    
-        private List<Actor> children = new List<Actor> ();
+
         private ActorCache actor_cache = new ActorCache (ActorCache.GetActorCountForScreen (ActorSize));
+        private Clone [,] grid = null;
+        private float last_alloc_width, last_alloc_height;
 
         public ArtworkDisplay () : base ()
         {
+            SetSource (ServiceManager.SourceManager.MusicLibrary);
         }
         
+        public ArtworkDisplay (IntPtr raw) : base (raw)
+        {
+        }
+        
+        private int rand_seed = new Random ().Next ();
+        
+        private void BuildCloneGrid ()
+        {
+            if (grid != null) {
+                return;
+            }
+            
+            float pixel_x = 0;
+            float pixel_y = 0;
+            float size = (float)ActorSize;
+        
+            int grid_width = (int)(Math.Ceiling (Gdk.Screen.Default.Width / size));
+            int grid_height = (int)(Math.Ceiling (Gdk.Screen.Default.Height / size));
+            int x = 0, y = 0;
+            
+            grid = new Clone[grid_width, grid_height];
+            
+            // Populate a collection with enough clones to build
+            // a grid large enough to cover the entire screen
+            for (int i = 0; i < actor_cache.MaxCount; i++) {
+                var slot = new Clone (null) {
+                    Parent = this,
+                    Visible = true
+                };
+                
+                slot.Allocate (new ActorBox (pixel_x, pixel_y, size, size), false);
+                
+                grid[x, y] = slot;
+                
+                pixel_x += size;
+                if (x++ == grid_width - 1) {
+                    x = 0;
+                    y++;
+                    pixel_x = 0;
+                    pixel_y += size;
+                }
+            }
+        }
+
+        protected override void OnAllocate (ActorBox box, bool absolute_origin_changed)
+        {
+            base.OnAllocate (box, absolute_origin_changed);
+            
+            float width = Width;
+            float height = Height;
+            
+            if (width <= 0 || height <= 0 || 
+                width == last_alloc_width || height == last_alloc_height || 
+                Model == null) {
+                return;
+            }
+            
+            // Calculate the number of actors that will fit in our window
+            int actors = ActorCache.GetActorCountForArea (ActorSize, (int)Width, (int)Height);
+            if (actors <= 0) {
+                return;
+            }
+            
+            BuildCloneGrid ();
+            
+            last_alloc_width = width;
+            last_alloc_height = height;
+            
+            var rand = new Random (rand_seed);
+            float size = (float)ActorSize;
+            int grid_width = (int)(Math.Ceiling (width / size));
+
+            for (int i = 0; i < actors; i++) {
+                Actor actor = null;
+                while (actor == null) {
+                    // FIXME: do a smarter job at picking a random piece of art
+                    // so that duplicate artwork is only displayed when there isn't
+                    // enough to actually fill the entire grid
+                    actor = GetActorAtIndex (rand.Next (0, Model.Count - 1));
+                }
+                
+                if (actor.Allocation.Width == 0 || actor.Allocation.Height == 0) {
+                    actor.Allocate (new ActorBox (0, 0, 
+                        (float)ActorSize, (float)ActorSize), absolute_origin_changed);
+                }
+                
+                // Assign the artwork actor to a clone slot in the screen grid
+                grid[i % grid_width, i / grid_width].Source = actor;
+            }
+        }
+        
+        protected override void OnPainted ()
+        {
+            if (grid == null || Width <= 0 || Height <= 0) {
+                return;
+            }
+            
+            Cogl.General.PushMatrix ();
+            
+            foreach (var child in grid) {
+                child.Paint ();
+            }
+            
+            Cogl.General.PopMatrix ();
+        }
+        
+#region Data Model
+
         private IListModel<AlbumInfo> album_model;
         public IListModel<AlbumInfo> Model {
             get { return album_model; }
         }
-        
-        private float padding;
-        public float Padding {
-            get { return padding; }
-            set {
-                padding = value;
-                QueueRelayout ();
-            }
-        }
-        
-        private float spacing;
-        public float Spacing {
-            get { return spacing; }
-            set {
-                spacing = value;
-                QueueRelayout ();
-            }
-        }
-        
-        private bool use_transformed_box;
-        public bool UseTransformedBox {
-            get { return use_transformed_box; }
-            set {
-                use_transformed_box = value;
-                QueueRelayout ();
-            }
-        }
-        
+
         public void SetSource (DatabaseSource source)
         {
             if (album_model != null) {
@@ -155,191 +240,39 @@ namespace Cubano.NowPlaying
 
         private void OnModelReloaded (object o, EventArgs args)
         {
-            Rebuild ();
+            QueueRelayout ();
+        }
+                
+        private Actor GetActorAtIndex (int index)
+        {
+            if (index < 0 || index > Model.Count) {
+                return null;
+            }
+            
+            return GetActorForAlbumInfo (Model[index]);
         }
         
-#region IListModel<T> Interaction
-
         private Actor GetActorForAlbumInfo (AlbumInfo info)
         {
             Actor actor = null;
+            
+            if (info == null || info.ArtworkId == null) {
+                return null;
+            }
+
             if (actor_cache.TryGetValue (info.ArtworkId, out actor)) {
                 return actor;
             }
             
-            actor_cache.Add (info.ArtworkId, actor = new AlbumArtActor (info, ActorSize));
+            if (!CoverArtSpec.CoverExists (info.ArtworkId)) {
+                return null;
+            }
+            
+            actor = new AlbumArtActor (info, ActorSize) { Parent = this };
+            actor_cache.Add (info.ArtworkId, actor);
             return actor;
         }
-        
-        private void Rebuild ()
-        {
-            Clear ();
-            
-            int max_items = ActorCache.GetActorCountForArea (ActorSize, (int)Width, (int)Height);
-            if (max_items == 0) {
-                return;
-            }
-            
-            Console.WriteLine (max_items);
-            for (int i = 0, n = Model.Count; i < n && children.Count <= max_items; i++) {
-                var info = Model[i];
-                if (info == null || info.ArtworkId == null) {
-                    continue;
-                }
-                
-                var actor = GetActorForAlbumInfo (info);
-                actor.Parent = this;
-                children.Add (actor);
-            }
-            
-            Console.WriteLine ("ACTOR COUNT = {0}", children.Count);
-            Console.WriteLine ("CACHE COUNT = {0}", actor_cache.Count);
-        }
-        
-        public void Clear ()
-        {
-            children.ForEach (actor => actor.Unparent ());
-            children.Clear ();
-        }
 
-#endregion
-        
-#region ClutterActor overrides
-
-        private void GetPreferredDimension (bool xdim, out float min_dim, out float natural_dim)
-        {
-            float min_a = 0, min_b = 0;
-            float natural_a = 0, natural_b = 0;
-            bool first = true;
-            
-            foreach (var child in children) {
-                float child_dim, child_min, child_natural, ignore;
-                
-                if (xdim) {
-                    child_dim = child.Xu;
-                    child.GetPreferredSize (out child_min, out ignore, out child_natural, out ignore);
-                } else {
-                    child_dim = child.Yu;
-                    child.GetPreferredSize (out ignore, out child_min, out ignore, out child_natural);
-                }
-                
-                if (first) {
-                    first = false;
-                    min_a = child_dim;
-                    natural_a = child_dim;
-                    min_b = min_a + child_min;
-                    natural_b = natural_a + child_natural;
-                } else {
-                    min_a = Math.Min (child_dim, min_a);
-                    natural_a = Math.Min (child_dim, natural_a);
-                    min_b = Math.Max (child_dim + child_min, min_b);
-                    natural_b = Math.Max (child_dim + child_natural, natural_b);
-                }
-            }
-                
-            min_a = Math.Max (0, min_a);
-            natural_a = Math.Max (0, natural_a);
-            min_b = Math.Max (0, min_b);
-            natural_b = Math.Max (0, natural_b);
-            
-            min_dim = min_b - min_a;
-            natural_dim = natural_b - min_a;
-        }
-
-        protected override void OnGetPreferredWidth (float for_height, 
-            out float min_width, out float natural_width)
-        {
-            GetPreferredDimension (true, out min_width, out natural_width);
-        }
-        
-        protected override void OnGetPreferredHeight (float for_width, 
-            out float min_height, out float natural_height)
-        {
-            GetPreferredDimension (false, out min_height, out natural_height);
-        }
-        
-        protected override void OnAllocate (ActorBox box, bool absolute_origin_changed)
-        {
-            base.OnAllocate (box, absolute_origin_changed);
-            
-            Rebuild ();
-            
-            float current_x = Padding;
-            float current_y = Padding;
-            float max_row_height = 0;
-            
-            foreach (var child in children) {
-                float natural_width, natural_height, ignore;
-                
-                child.GetPreferredSize (out ignore, out ignore, out natural_width, out natural_height);
-                
-                // if it fits in the current row, keep it;
-                // otherwise reflow into another row
-                if (current_x + natural_width > box.X2 - box.X1 - Padding) {
-                    current_x = Padding;
-                    current_y += max_row_height + Spacing;
-                    max_row_height = 0;
-                }
-                
-                child.Allocate (new ActorBox () {
-                    X1 = current_x,
-                    Y1 = current_y,
-                    Width = natural_width,
-                    Height = natural_height
-                }, absolute_origin_changed);      
-                
-                // if we take into account the transformation of the children
-                // then we first check if it's transformed; then we get the
-                // onscreen coordinates of the two points of the bounding box
-                // of the actor (origin(x, y) and (origin + size)(x,y)) and
-                // we update the coordinates and area given to the next child
-                //
-                if (UseTransformedBox && (child.IsScaled || child.IsRotated)) {
-                    var v1 = new Vertex ();
-                    if (absolute_origin_changed) {
-                        v1.X = box.X1;
-                        v1.Y = box.Y1;
-                    }
-                    
-                    var v2 = child.ApplyTransformToPoint (v1);
-                    var transformed_box = new ActorBox () {
-                        X1 = v2.X,
-                        Y1 = v2.Y
-                    };
-                    
-                    v1.X = natural_width;
-                    v1.Y = natural_height;
-                    v2 = child.ApplyTransformToPoint (v1);
-                    transformed_box.X2 = v2.X;
-                    transformed_box.Y2 = v2.Y;
-                    
-                    natural_width = transformed_box.Width;
-                    natural_height = transformed_box.Height;
-                }
-                               
-                // Record the maximum child height on current row to know
-                // what's the increment that should be used for the next row
-                if (natural_height > max_row_height) {
-                    max_row_height = natural_height;
-                }
-                
-                current_x += natural_width + Spacing;
-            }            
-        }
-        
-        protected override void OnPainted ()
-        {
-            Cogl.General.PushMatrix ();
-            
-            foreach (var child in children) {
-                if (child.Visible) {
-                    child.Paint ();
-                }
-            }
-            
-            Cogl.General.PopMatrix ();
-        }
-        
 #endregion
 
     }

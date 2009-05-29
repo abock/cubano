@@ -68,6 +68,8 @@
     <Compile Include="Cubano.NowPlaying\CubanoClutterVisualizer.cs" />
     <Compile Include="Cubano.Client\CubanoTaskStatusButton.cs" />
     <Compile Include="Cubano.NowPlaying\ArtworkDisplay.cs" />
+    <Compile Include="Cubano.NowPlaying\NowPlayingStage.cs" />
+    <Compile Include="Cubano.NowPlaying\VideoDisplay.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
@@ -100,8 +102,12 @@
       <Package>banshee-1-hyena-gui</Package>
     </Reference>
     <Reference Include="taglib-sharp, Version=2.0.3.2, Culture=neutral, PublicKeyToken=db62eba44689b5b0" />
-    <Reference Include="clutter-gtk-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
-    <Reference Include="clutter-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=615546e2530286e7" />
+    <Reference Include="clutter-gtk-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=87b7d16e3a31768b">
+      <Package>clutter-gtk-sharp</Package>
+    </Reference>
+    <Reference Include="clutter-sharp, Version=0.9.0.0, Culture=neutral, PublicKeyToken=87b7d16e3a31768b">
+      <Package>clutter-sharp</Package>
+    </Reference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

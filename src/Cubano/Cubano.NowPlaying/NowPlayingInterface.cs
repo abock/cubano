@@ -48,27 +48,14 @@ namespace Cubano.NowPlaying
         private NowPlayingSource source;
 
         private Embed display;
-        private Stage stage;
-        private Texture video_texture;
-        private CubanoClutterVisualizer visualizer_texture;
-        private ArtworkDisplay artwork;
+        private NowPlayingStage stage;
         
         public NowPlayingInterface ()
         {
-            var engine = ServiceManager.PlayerEngine.ActiveEngine as ISupportClutter;
-            if (engine == null) {
-                throw new ApplicationException ("Banshee GStreamer engine does not have Clutter support");
-            }
-                
-            video_texture = new Texture ();
-            video_texture.SizeChange += OnVideoTextureSizeChange;
-            video_texture.SyncSize = false;
+            display = new Embed ();
+            display.Show ();
+            PackStart (display, true, true, 0);
             
-            visualizer_texture = new CubanoClutterVisualizer ();
-            artwork = new ArtworkDisplay ();
-                
-            engine.EnableClutterVideoSink (video_texture.Handle);
-        
             ServiceManager.SourceManager.SourceAdded += OnSourceAdded;
         }
         
@@ -83,86 +70,31 @@ namespace Cubano.NowPlaying
             }
         }
         
-        private void OnVideoTextureSizeChange (object o, SizeChangeArgs args)
-        {
-            ReallocateVideoTexture (args.Width, args.Height);
-        }
-        
-        private void ReallocateVideoTexture (int textureWidth, int textureHeight)
-        {
-            int stage_width, stage_height;
-            
-            stage.GetSize (out stage_width, out stage_height);
-            
-            int new_x, new_y, new_width, new_height;
-            
-            new_height = (textureHeight * stage_width) / textureWidth;
-            if (new_height <= stage_height) {
-                new_width = stage_width;
-                new_x = 0;
-                new_y = (stage_height - new_height) / 2;
-            } else {
-                new_width = (textureWidth * stage_height) / textureHeight;
-                new_height = stage_height;
-                new_x = (stage_width - new_width) / 2;
-                new_y = 0;
-            }
-            
-            video_texture.SetPosition (new_x, new_y);
-            video_texture.SetSize (new_width, new_height);
-        }
-        
         protected override void OnSizeAllocated (Gdk.Rectangle allocation)
         {
             base.OnSizeAllocated (allocation);
             
-            int texture_width, texture_height;
-            video_texture.GetSize (out texture_width, out texture_height);
-            if (texture_width > 0 && texture_height > 0) {
-                ReallocateVideoTexture (texture_width, texture_height);
+            if (stage != null) {
+                stage.SetPosition (0, 0);
+                stage.SetSize (Allocation.Width, Allocation.Height);
             }
-            
-            visualizer_texture.SetPosition (0, Allocation.Height - visualizer_height);
-            visualizer_texture.SetSize (Allocation.Width, visualizer_height);
-            
-            artwork.SetPosition (0, 0);
-            artwork.SetSize (Allocation.Width, Allocation.Height);
         }
         
         public void ActivateDisplay ()
         {
-            if (display != null) {
-                DeactivateDisplay ();
+            if (stage == null) {
+                stage = new NowPlayingStage () { Visible = true };
+                display.Stage.Color = new Color (0, 0, 0);
+                display.Stage.Add (stage);
             }
             
-            display = new Embed ();
-            stage = display.Stage;
-            stage.Color = new Color (0, 0, 0);
-            stage.Add (video_texture);
-            stage.Add (artwork);
-            stage.Add (visualizer_texture);
-            
-            artwork.SetSource (ServiceManager.SourceManager.MusicLibrary);
-            
-            PackStart (display, true, true, 0);
-            
-            display.Show ();
             Show ();
         }
         
         public void DeactivateDisplay ()
         {
             if (stage != null) {
-                stage.Remove (video_texture);
-                stage.Remove (visualizer_texture);
-                stage.Remove (artwork);
-                stage = null;
-            }
-            
-            if (display != null) {
-                Remove (display);
-                display.Dispose ();
-                display = null;
+               // display.Stage.Remove (stage);
             }
             
             Hide ();
