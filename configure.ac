@@ -2,7 +2,7 @@ AC_PREREQ(2.52)
 
 m4_define(cubano_version_major, 1)
 m4_define(cubano_version_minor, 0)
-m4_define(cubano_version_micro, 0alpha2)
+m4_define(cubano_version_micro, 0alpha3)
 
 AC_INIT([cubano],
 	[cubano_version_major.cubano_version_minor.cubano_version_micro])
