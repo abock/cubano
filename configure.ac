@@ -33,6 +33,9 @@ AC_PATH_PROG(MCS, gmcs)
 BANSHEE_PATH=`pkg-config --variable=bansheedir banshee-1-core`
 AC_SUBST(BANSHEE_PATH)
 
+CLUTTER_BUNDLE_FILES=`pkg-config --variable=bundlefiles clutter-sharp clutter-gtk-sharp`
+AC_SUBST(CLUTTER_BUNDLE_FILES)
+
 #AC_ARG_WITH(moonlight-source, AC_HELP_STRING([--with-moonlight-source=<path>],
 #	[Path to the top of the Moonlight source tree]),
 #	[], [with_moonlight_source=$PWD/../moon])
