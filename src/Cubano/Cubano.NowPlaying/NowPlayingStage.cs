@@ -44,8 +44,8 @@ namespace Cubano.NowPlaying
         public NowPlayingStage (Texture video_texture)
         {
             VideoTexture = video_texture;
-            VideoTexture.Opacity = 0;
             
+            Add (VideoTexture);
             Add (artwork_display = new ArtworkDisplay () { Visible = true });
             
             ConfigureVideo ();
@@ -58,20 +58,10 @@ namespace Cubano.NowPlaying
         public void Pause ()
         {
             artwork_display.Pause ();
-            
-            if (video_texture_mapped) {
-                Remove (VideoTexture);
-                video_texture_mapped = false;
-            }
         }
         
         public void Resume ()
         {
-            if (!video_texture_mapped) {
-                Add (VideoTexture);
-                video_texture_mapped = true;
-            }
-            
             artwork_display.Resume ();
         }
         
@@ -141,12 +131,12 @@ namespace Cubano.NowPlaying
         private void ToggleVideoVisibility ()
         {
             TrackInfo track = ServiceManager.PlayerEngine.CurrentTrack;
-            byte opacity = (track != null && (track.MediaAttributes & TrackMediaAttributes.VideoStream) != 0)
-                ? (byte)255 : (byte)0;
-            VideoTexture.AnimationChain
-                .SetEasing (opacity == 0 ? AnimationMode.EaseOutQuad : AnimationMode.EaseInQuad)
-                .SetDuration (2000)
-                .Animate ("opacity", opacity);
+            bool video_playing = (track != null && (track.MediaAttributes & TrackMediaAttributes.VideoStream) != 0);
+            
+            artwork_display.AnimationChain
+                .SetEasing (video_playing ? AnimationMode.EaseInQuad : AnimationMode.EaseOutQuad)
+                .SetDuration (750)
+                .Animate ("opacity", video_playing ? 0 : 255);
         }
         
 #endregion

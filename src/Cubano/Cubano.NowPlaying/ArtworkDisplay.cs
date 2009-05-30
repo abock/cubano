@@ -112,8 +112,8 @@ namespace Cubano.NowPlaying
             SetSource (ServiceManager.SourceManager.MusicLibrary);
             
             cell_select_timeline = new Timeline () {
-                Speed = 3,
-                Duration = 1,
+                Speed = 1,
+                Duration = 5000,
                 Loop = true
             };
             
