@@ -211,7 +211,7 @@ namespace Cubano.Client
             //source_button.Clicked += (o, e) => source_popup.Popup (source_button);
                 
             source_box.PackStart (back_button = new Gtk.ToolButton (Stock.GoBack), false, false, 0);
-            source_box.PackStart (forward_button = new Gtk.ToolButton (Stock.GoForward), false, false, 0);
+            forward_button = new Gtk.ToolButton (Stock.GoForward);
             source_box.PackStart (new SourceComboBox (), false, false, 0);
             source_align.Add (source_box);
             
@@ -229,7 +229,10 @@ namespace Cubano.Client
                 Visible = true
             });
             
-            var status_icon = new CubanoTaskStatusButton ();
+            var status_icon = new CubanoTaskStatusButton () {
+                IntermittentVisibility = false,
+                ShowOnlyBackgroundTasks = false
+            };
             
             footer.PackStart (source_align, false, false, 0);
             footer.PackStart (status_icon, false, false, 0);
