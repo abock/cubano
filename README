@@ -1,38 +1,20 @@
-Cubano is a Moonlight/XAML based client for the Banshee Media Player
-http://banshee-project.org/
+Cubano is a new user interface for the Banshee Media Player. It aims to be
+very simple and usable on devices with small screens, like netbooks.
 
-Cubano currently requires Moonlight from trunk, but works with a stock
-Mono 2.0 or newer. Lots of changes are happening against Moonlight to 
-make it a first class citizen for developing desktop applications,
-and Cubano aims to be the first major Linux Desktop application developed
-with Silverlight technology.
+It uses Clutter for accelerated video playback and some fancy effects in
+the "Now Playing" interface, and leverages Banshee's powerful UI libraries
+for media management.
 
-Building Moonlight from trunk to work as a desktop platform is actually
-very easy.
+  * http://banshee-project.org/
+  * http://clutter-project.org/
 
-In the directory above your cubano checkout:
+Cubano is "bleeding edge" and requires a very up-to-date dependency stack,
+and is being rapidly developed. It is not ready for packaging in distributions
+or general use just yet.
 
-  svn co http://anonsvn.mono-project.com/source/trunk/moon
-  cd moon
-
-  ./autogen.sh --disable-browser-support
-  make
-
-You do not need to specifiy a prefix, as you do not need to 'make install'.
-Installing Moonlight from trunk into your system is not recommended.
-
-Once you have built Moonlight, go back into the top of your cubano directory.
-
-  ./autogen.sh --prefix=/usr
-  make
-  make run
-
-If configure complains that it cannot find Moonlight, you must specify
-the full path to your Moonlight checkout above like this:
-
-  ./autogen.sh --prefix=/usr --with-moonlight-source=/home/me/svn/moon
-
-By default, cubano's configure tries to find your Moonlight checkout at
-../moon, so if you have checked both Moonlight and Cubano out into the same
-directory, you should not need to specify the path to Moonlight.
+  * Mono 2.4
+  * Banshee 1.5.0
+  * clutter 0.9.3 (git master)
+  * clutter-gtk 0.9.1 (git master)
+  * clutter-sharp (git master)
 

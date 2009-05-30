@@ -1,1 +1,11 @@
-2009-04-24: First Alpha release of Cubano
+2009-05-30: Third Alpha release
+
+  - Lots of improvements to 'Now Playing' UI,
+    heavily leveraging the new clutter-sharp
+
+2009-05-14: Second Alpha release
+
+  - Various UI updates and improvements
+  - Use Clutter for accelerated video rendering
+
+2009-04-24: First Alpha release
