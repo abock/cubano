@@ -69,7 +69,6 @@
     <Compile Include="Cubano.Client\CubanoTaskStatusButton.cs" />
     <Compile Include="Cubano.NowPlaying\ArtworkDisplay.cs" />
     <Compile Include="Cubano.NowPlaying\NowPlayingStage.cs" />
-    <Compile Include="Cubano.NowPlaying\VideoDisplay.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />

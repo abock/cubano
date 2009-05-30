@@ -49,12 +49,22 @@ namespace Cubano.NowPlaying
 
         private Embed display;
         private NowPlayingStage stage;
+        private Texture video_texture;
         
         public NowPlayingInterface ()
         {
             display = new Embed ();
             display.Show ();
-            PackStart (display, true, true, 0);
+
+            ServiceManager.PlayerEngine.EngineBeforeInitialize += engine => {
+                var clutter_engine = ServiceManager.PlayerEngine.ActiveEngine as ISupportClutter;
+                if (clutter_engine == null) {
+                    throw new ApplicationException ("Banshee GStreamer engine does not have Clutter support");
+                }
+
+                video_texture = new Texture () { SyncSize = false };
+                clutter_engine.EnableClutterVideoSink (video_texture.Handle);
+            };
             
             ServiceManager.SourceManager.SourceAdded += OnSourceAdded;
         }
@@ -82,22 +92,56 @@ namespace Cubano.NowPlaying
         
         public void ActivateDisplay ()
         {
+            // Create the stage the first time we are activated
+            // This is not done when the source is created, even
+            // though it would avoid a bit of flickering, to help
+            // decrease startup time
             if (stage == null) {
-                stage = new NowPlayingStage () { Visible = true };
+                stage = new NowPlayingStage (video_texture) {
+                    Visible = true
+                };
                 display.Stage.Color = new Color (0, 0, 0);
                 display.Stage.Add (stage);
             }
             
-            Show ();
+            // The clutter embed gets reparented to the toplevel
+            // child container when we go away, so if it's the
+            // first time, we pack it, otherwise we reparent
+            if (display.Parent == null) {
+                PackStart (display, true, true, 0);
+            } else {
+                display.Reparent (this);
+            }
+
+            // Our stage supports pausing/resuming so when it's
+            // not visible, we're not running timeouts/animations
+            display.Show ();
+            stage.Resume ();
         }
         
         public void DeactivateDisplay ()
         {
+            // We're going away, so stop any clock work
             if (stage != null) {
-               // display.Stage.Remove (stage);
+                stage.Pause ();
             }
             
-            Hide ();
+            // The clutter embed must never be unrealized, otherwise
+            // the x server will freak out and abort us if data is
+            // being rendered to the GL window inside the embed.
+            //
+            // To work around this, we reparent the embed to the
+            // toplevel window's child container (there better be one).
+            // This prevents GTK from unrealizing the window during
+            // the reparent, and instead it just unmaps.
+            var top_window = Toplevel as Gtk.Window;
+            if (top_window != null) {
+                var container = top_window.Child as Gtk.Container;
+                if (container != null) {
+                    display.Hide ();
+                    display.Reparent (container);
+                }
+            }
         }
         
 #region ISourceContents

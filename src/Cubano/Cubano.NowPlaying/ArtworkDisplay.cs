@@ -96,19 +96,35 @@ namespace Cubano.NowPlaying
         private static readonly double ActorSize = 100;
 
         private ActorCache actor_cache = new ActorCache (ActorCache.GetActorCountForScreen (ActorSize));
+        private Random random = new Random ();
+        private int allocation_seed;
+        
         private Clone [,] grid = null;
         private float last_alloc_width, last_alloc_height;
+        private int visible_grid_width, visible_grid_height;
+        private int visible_actor_count;
+        
+        private Timeline cell_select_timeline;
+        private bool paused = true;
 
         public ArtworkDisplay () : base ()
         {
             SetSource (ServiceManager.SourceManager.MusicLibrary);
+            
+            cell_select_timeline = new Timeline () {
+                Speed = 3,
+                Duration = 1,
+                Loop = true
+            };
+            
+            cell_select_timeline.Completed += OnCellSelectTimelineCompleted;
+            
+            allocation_seed = random.Next ();
         }
         
         public ArtworkDisplay (IntPtr raw) : base (raw)
         {
         }
-        
-        private int rand_seed = new Random ().Next ();
         
         private void BuildCloneGrid ()
         {
@@ -162,8 +178,8 @@ namespace Cubano.NowPlaying
             }
             
             // Calculate the number of actors that will fit in our window
-            int actors = ActorCache.GetActorCountForArea (ActorSize, (int)Width, (int)Height);
-            if (actors <= 0) {
+            visible_actor_count = ActorCache.GetActorCountForArea (ActorSize, (int)Width, (int)Height);
+            if (visible_actor_count <= 0) {
                 return;
             }
             
@@ -172,27 +188,19 @@ namespace Cubano.NowPlaying
             last_alloc_width = width;
             last_alloc_height = height;
             
-            var rand = new Random (rand_seed);
+            var rand = new Random (allocation_seed);
             float size = (float)ActorSize;
-            int grid_width = (int)(Math.Ceiling (width / size));
+            
+            visible_grid_width = (int)(Math.Ceiling (width / size));
+            visible_grid_height = (int)(Math.Ceiling (height / size));
 
-            for (int i = 0; i < actors; i++) {
-                Actor actor = null;
-                while (actor == null) {
-                    // FIXME: do a smarter job at picking a random piece of art
-                    // so that duplicate artwork is only displayed when there isn't
-                    // enough to actually fill the entire grid
-                    actor = GetActorAtIndex (rand.Next (0, Model.Count - 1));
-                }
-                
-                if (actor.Allocation.Width == 0 || actor.Allocation.Height == 0) {
-                    actor.Allocate (new ActorBox (0, 0, 
-                        (float)ActorSize, (float)ActorSize), absolute_origin_changed);
-                }
-                
+            for (int i = 0; i < visible_actor_count; i++) {
+                var actor = GetRandomActor (rand);
                 // Assign the artwork actor to a clone slot in the screen grid
-                grid[i % grid_width, i / grid_width].Source = actor;
+                grid[i % visible_grid_width, i / visible_grid_width].Source = actor;
             }
+            
+            Resume ();
         }
         
         protected override void OnPainted ()
@@ -203,12 +211,84 @@ namespace Cubano.NowPlaying
             
             Cogl.General.PushMatrix ();
             
+            foreach (var child in waiting_for_slot) {
+                child.Paint ();
+            }
+            
             foreach (var child in grid) {
                 child.Paint ();
             }
             
             Cogl.General.PopMatrix ();
         }
+        
+#region Animation
+
+        private List<Actor> waiting_for_slot = new List<Actor> ();
+
+        private void OnCellSelectTimelineCompleted (object o, EventArgs args)
+        {
+            if (visible_actor_count <= 0 || visible_grid_width <= 0) {
+                return;
+            }
+        
+            int target_x = 0, target_y = 0;
+            Clone cell_target = null;
+            
+            while (cell_target == null) {
+                int index = random.Next (0, visible_actor_count);
+                target_x = index % visible_grid_width;
+                target_y = index / visible_grid_width;
+                cell_target = grid[target_x, target_y];
+                if (waiting_for_slot.Contains (cell_target)) {
+                    cell_target = null;
+                }
+            }
+            
+            var cell_source = new Clone (GetRandomActor ()) { Visible = true, Parent = this };
+            cell_source.Allocate (cell_target.Allocation, false);
+            
+            waiting_for_slot.Insert (0, cell_source);
+
+            cell_target.AnimationChain
+                .SetEasing (AnimationMode.EaseInQuad)
+                .SetDuration (1000)
+                .WhenFinished ((a) => {
+                    grid[target_x, target_y] = cell_source;
+                    waiting_for_slot.Remove (cell_source);
+                    QueueRedraw ();
+                 })
+                .Animate ("opacity", 0);
+        }
+
+        public void Pause ()
+        {
+            paused = true;
+            cell_select_timeline.Pause ();
+            
+            foreach (var child in waiting_for_slot) {
+                if (child.AnimationChain.LastAnimation != null) {
+                    child.AnimationChain.LastAnimation.Timeline.Stop ();
+                }
+            }
+            
+            waiting_for_slot.Clear ();
+        }
+        
+        public void Resume ()
+        {
+            paused = false;
+            InnerResume ();
+        }
+        
+        private void InnerResume ()
+        {
+            if (!cell_select_timeline.IsPlaying && !paused) {
+                cell_select_timeline.Start ();
+            }
+        }
+
+#endregion
         
 #region Data Model
 
@@ -241,6 +321,28 @@ namespace Cubano.NowPlaying
         private void OnModelReloaded (object o, EventArgs args)
         {
             QueueRelayout ();
+        }
+        
+        private Actor GetRandomActor ()
+        {
+            return GetRandomActor (null);
+        }
+        
+        private Actor GetRandomActor (Random rand)
+        {
+            while (true) {
+                // FIXME: do a smarter job at picking a random piece of art
+                // so that duplicate artwork is only displayed when there isn't
+                // enough to actually fill the entire grid
+                var actor = GetActorAtIndex ((rand ?? random).Next (0, Model.Count - 1));
+                if (actor != null) {
+                    if (actor.Allocation.Width == 0 || actor.Allocation.Height == 0) {
+                        actor.Allocate (new ActorBox (0, 0, 
+                            (float)ActorSize, (float)ActorSize), false);
+                    }
+                    return actor;
+                }
+            }
         }
                 
         private Actor GetActorAtIndex (int index)

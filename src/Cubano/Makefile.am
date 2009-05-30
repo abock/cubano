@@ -27,7 +27,6 @@ SOURCES =  \
 	Cubano.NowPlaying/NowPlayingInterface.cs \
 	Cubano.NowPlaying/NowPlayingSource.cs \
 	Cubano.NowPlaying/NowPlayingStage.cs \
-	Cubano.NowPlaying/VideoDisplay.cs \
 	Hyena.Gui.Canvas/AnimationManager.cs \
 	Hyena.Gui.Canvas/Brush.cs \
 	Hyena.Gui.Canvas/CanvasHost.cs \

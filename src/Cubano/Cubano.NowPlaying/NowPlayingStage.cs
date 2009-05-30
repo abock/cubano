@@ -28,24 +28,54 @@ using System;
 
 using Clutter;
 
+using Banshee.Collection;
+using Banshee.ServiceStack;
+using Banshee.MediaEngine;
+
 namespace Cubano.NowPlaying
 {
     public class NowPlayingStage : Group
     {
         private ArtworkDisplay artwork_display;
-        private VideoDisplay video_display;
+        
+        public Texture VideoTexture { get; private set; }
+        private bool video_texture_mapped = false;
     
-        public NowPlayingStage ()
+        public NowPlayingStage (Texture video_texture)
         {
-            Add (artwork_display = new ArtworkDisplay () { Visible = true });
-            Add (video_display = new VideoDisplay () { Visible = false });
+            VideoTexture = video_texture;
+            VideoTexture.Opacity = 0;
             
-            video_display.SizeChange += OnVideoDisplaySizeChange;
+            Add (artwork_display = new ArtworkDisplay () { Visible = true });
+            
+            ConfigureVideo ();
         }
         
         public NowPlayingStage (IntPtr raw) : base (raw)
         {
         }
+                
+        public void Pause ()
+        {
+            artwork_display.Pause ();
+            
+            if (video_texture_mapped) {
+                Remove (VideoTexture);
+                video_texture_mapped = false;
+            }
+        }
+        
+        public void Resume ()
+        {
+            if (!video_texture_mapped) {
+                Add (VideoTexture);
+                video_texture_mapped = true;
+            }
+            
+            artwork_display.Resume ();
+        }
+        
+#region Actor Overrides
         
         protected override void OnAllocate (ActorBox box, bool absolute_origin_changed)
         {
@@ -54,18 +84,33 @@ namespace Cubano.NowPlaying
             artwork_display.Allocate (new ActorBox (0, 0, Width, Height), absolute_origin_changed);
             
             int video_width, video_height;
-            video_display.GetSize (out video_width, out video_height);
+            VideoTexture.GetSize (out video_width, out video_height);
             if (video_width > 0 && video_height > 0) {
-                AllocateVideoDisplay (video_width, video_height);
+                AllocateVideoTexture (video_width, video_height);
             }
         }
         
-        private void OnVideoDisplaySizeChange (object o, SizeChangeArgs args)
+#endregion
+
+#region Video
+
+        private void ConfigureVideo ()
         {
-            AllocateVideoDisplay (args.Width, args.Height);
+            VideoTexture.SizeChange += OnVideoTextureSizeChange;
+            
+            ServiceManager.PlayerEngine.ConnectEvent (OnPlayerEvent,
+                PlayerEvent.StartOfStream |
+                PlayerEvent.EndOfStream);
+            
+            ToggleVideoVisibility ();
         }
         
-        private void AllocateVideoDisplay (int textureWidth, int textureHeight)
+        private void OnVideoTextureSizeChange (object o, SizeChangeArgs args)
+        {
+            AllocateVideoTexture (args.Width, args.Height);
+        }
+        
+        private void AllocateVideoTexture (int textureWidth, int textureHeight)
         {
             int stage_width = (int)Width;
             int stage_height = (int)Height;
@@ -84,8 +129,27 @@ namespace Cubano.NowPlaying
                 new_y = 0;
             }
             
-            video_display.SetPosition (new_x, new_y);
-            video_display.SetSize (new_width, new_height);
+            VideoTexture.SetPosition (new_x, new_y);
+            VideoTexture.SetSize (new_width, new_height);
         }
+        
+        private void OnPlayerEvent (PlayerEventArgs args)
+        {
+            ToggleVideoVisibility ();
+        }
+        
+        private void ToggleVideoVisibility ()
+        {
+            TrackInfo track = ServiceManager.PlayerEngine.CurrentTrack;
+            byte opacity = (track != null && (track.MediaAttributes & TrackMediaAttributes.VideoStream) != 0)
+                ? (byte)255 : (byte)0;
+            VideoTexture.AnimationChain
+                .SetEasing (opacity == 0 ? AnimationMode.EaseOutQuad : AnimationMode.EaseInQuad)
+                .SetDuration (2000)
+                .Animate ("opacity", opacity);
+        }
+        
+#endregion
+
     }
 }
