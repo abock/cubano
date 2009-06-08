@@ -112,12 +112,11 @@ namespace Cubano.NowPlaying
             SetSource (ServiceManager.SourceManager.MusicLibrary);
             
             cell_select_timeline = new Timeline () {
-                Speed = 1,
-                Duration = 5000,
+                Duration = 500,
                 Loop = true
             };
             
-            cell_select_timeline.Completed += OnCellSelectTimelineCompleted;
+            cell_select_timeline.NewFrame += OnCellSelectTimelineNewFrame;
             
             allocation_seed = random.Next ();
         }
@@ -147,10 +146,10 @@ namespace Cubano.NowPlaying
             for (int i = 0; i < actor_cache.MaxCount; i++) {
                 var slot = new Clone (null) {
                     Parent = this,
-                    Visible = true
+                    IsVisible = true
                 };
                 
-                slot.Allocate (new ActorBox (pixel_x, pixel_y, size, size), false);
+                slot.Allocate (new ActorBox (pixel_x, pixel_y, size, size));
                 
                 grid[x, y] = slot;
                 
@@ -164,9 +163,9 @@ namespace Cubano.NowPlaying
             }
         }
 
-        protected override void OnAllocate (ActorBox box, bool absolute_origin_changed)
+        protected override void OnAllocate (ActorBox box, AllocationFlags flags)
         {
-            base.OnAllocate (box, absolute_origin_changed);
+            base.OnAllocate (box, flags);
             
             float width = Width;
             float height = Height;
@@ -225,8 +224,9 @@ namespace Cubano.NowPlaying
 #region Animation
 
         private List<Actor> waiting_for_slot = new List<Actor> ();
+        private Queue<Actor> history_slots = new Queue<Actor> ();
 
-        private void OnCellSelectTimelineCompleted (object o, EventArgs args)
+        private void OnCellSelectTimelineNewFrame (object o, NewFrameArgs args)
         {
             if (visible_actor_count <= 0 || visible_grid_width <= 0) {
                 return;
@@ -240,19 +240,24 @@ namespace Cubano.NowPlaying
                 target_x = index % visible_grid_width;
                 target_y = index / visible_grid_width;
                 cell_target = grid[target_x, target_y];
-                if (waiting_for_slot.Contains (cell_target)) {
+                if (waiting_for_slot.Contains (cell_target) ||
+                    history_slots.Contains (cell_target)) {
                     cell_target = null;
                 }
             }
             
-            var cell_source = new Clone (GetRandomActor ()) { Visible = true, Parent = this };
-            cell_source.Allocate (cell_target.Allocation, false);
+            var cell_source = new Clone (GetRandomActor ()) { IsVisible = true, Parent = this };
+            cell_source.Allocate (cell_target.AllocationGeometry);
             
             waiting_for_slot.Insert (0, cell_source);
+            history_slots.Enqueue (cell_source);
+            if (history_slots.Count > 5) {
+                history_slots.Dequeue ();
+            }
 
             cell_target.AnimationChain
                 .SetEasing (AnimationMode.EaseInQuad)
-                .SetDuration (1000)
+                .SetDuration ((uint)random.Next (300, 1500))
                 .WhenFinished ((a) => {
                     grid[target_x, target_y] = cell_source;
                     waiting_for_slot.Remove (cell_source);
@@ -336,9 +341,9 @@ namespace Cubano.NowPlaying
                 // enough to actually fill the entire grid
                 var actor = GetActorAtIndex ((rand ?? random).Next (0, Model.Count - 1));
                 if (actor != null) {
-                    if (actor.Allocation.Width == 0 || actor.Allocation.Height == 0) {
+                    if (actor.AllocationGeometry.Width == 0 || actor.AllocationGeometry.Height == 0) {
                         actor.Allocate (new ActorBox (0, 0, 
-                            (float)ActorSize, (float)ActorSize), false);
+                            (float)ActorSize, (float)ActorSize));
                     }
                     return actor;
                 }

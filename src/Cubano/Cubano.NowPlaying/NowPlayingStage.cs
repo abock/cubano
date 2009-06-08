@@ -46,7 +46,7 @@ namespace Cubano.NowPlaying
             VideoTexture = video_texture;
             
             Add (VideoTexture);
-            Add (artwork_display = new ArtworkDisplay () { Visible = true });
+            Add (artwork_display = new ArtworkDisplay () { IsVisible = true });
             
             ConfigureVideo ();
         }
@@ -67,11 +67,11 @@ namespace Cubano.NowPlaying
         
 #region Actor Overrides
         
-        protected override void OnAllocate (ActorBox box, bool absolute_origin_changed)
+        protected override void OnAllocate (ActorBox box, AllocationFlags flags)
         {
-            base.OnAllocate (box, absolute_origin_changed);
+            base.OnAllocate (box, flags);
             
-            artwork_display.Allocate (new ActorBox (0, 0, Width, Height), absolute_origin_changed);
+            artwork_display.Allocate (new ActorBox (0, 0, Width, Height), flags);
             
             int video_width, video_height;
             VideoTexture.GetSize (out video_width, out video_height);

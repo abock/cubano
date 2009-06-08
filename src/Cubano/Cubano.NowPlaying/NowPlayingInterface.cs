@@ -98,7 +98,7 @@ namespace Cubano.NowPlaying
             // decrease startup time
             if (stage == null) {
                 stage = new NowPlayingStage (video_texture) {
-                    Visible = true
+                    IsVisible = true
                 };
                 display.Stage.Color = new Color (0, 0, 0);
                 display.Stage.Add (stage);
