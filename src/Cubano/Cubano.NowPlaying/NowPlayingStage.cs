@@ -73,10 +73,10 @@ namespace Cubano.NowPlaying
             
             artwork_display.Allocate (new ActorBox (0, 0, Width, Height), flags);
             
-            int video_width, video_height;
+            float video_width, video_height;
             VideoTexture.GetSize (out video_width, out video_height);
             if (video_width > 0 && video_height > 0) {
-                AllocateVideoTexture (video_width, video_height);
+                AllocateVideoTexture ((int)video_width, (int)video_height);
             }
         }
         
