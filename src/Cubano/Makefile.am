@@ -5,8 +5,11 @@ SOURCES =  \
 	Banshee.Gui.Widgets/ConnectedSeekableTrackInfoDisplay.cs \
 	Banshee.Gui.Widgets/CoverArtBrush.cs \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
+	Banshee.Gui.Widgets/InteractiveLabel.cs \
+	Banshee.Gui.Widgets/ScalableLabel.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
 	Banshee.Gui.Widgets/ShapedPopupWindow.cs \
+	Banshee.Sources.Gui/CategorySourceView.cs \
 	Cubano.Client/CubanoClient.cs \
 	Cubano.Client/CubanoSourceContents.cs \
 	Cubano.Client/CubanoSourcePopupWindow.cs \

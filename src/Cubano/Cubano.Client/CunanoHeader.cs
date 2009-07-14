@@ -30,6 +30,7 @@ using Banshee.I18n;
 
 using Banshee.Gui;
 using Banshee.Gui.Widgets;
+using Banshee.Sources.Gui;
 using Banshee.Widgets;
 using Banshee.ServiceStack;
 
@@ -80,8 +81,11 @@ namespace Cubano.Client
                 children[i].Visible = false;
             }
             
-            Add (Toolbar);
-            Show ();
+            var vbox = new VBox ();
+            vbox.PackStart (Toolbar);
+            vbox.PackStart (new CategorySourceView ());
+            Add (vbox);
+            ShowAll ();
         }
     }
 }
