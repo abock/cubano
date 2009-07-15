@@ -39,12 +39,19 @@ namespace Banshee.Sources.Gui
     {
         private List<SourceLabel> labels = new List<SourceLabel> ();
         
-        private class SourceLabel : InteractiveLabel
+        private class SourceLabel : ActionLabel
         {
             public SourceLabel ()
             {
                 CurrentFontSizeEm = DefaultFontSizeEm = 1.5;
                 ActiveFontSizeEm = 1.6;
+                
+                Activated += (o, e) => {
+                    if (Source != null && Source.CanActivate && 
+                        ServiceManager.SourceManager.ActiveSource != Source) {
+                        ServiceManager.SourceManager.SetActiveSource (Source);
+                    }
+                };
             }
         
             private Source source;
@@ -85,7 +92,7 @@ namespace Banshee.Sources.Gui
         {
             Banshee.Base.ThreadAssist.ProxyToMain (delegate {
                 foreach (var label in labels) {
-                    label.IsActive = label.Source == args.Source;
+                    label.IsSelected = label.Source == args.Source;
                 }
             });
         }

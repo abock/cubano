@@ -1,12 +1,11 @@
 ASSEMBLY = $(top_builddir)/bin/Cubano.exe
 
 SOURCES =  \
+	Banshee.Gui.Widgets/ActionLabel.cs \
 	Banshee.Gui.Widgets/BubbleWindow.cs \
 	Banshee.Gui.Widgets/ConnectedSeekableTrackInfoDisplay.cs \
 	Banshee.Gui.Widgets/CoverArtBrush.cs \
 	Banshee.Gui.Widgets/CoverArtDisplay.cs \
-	Banshee.Gui.Widgets/InteractiveLabel.cs \
-	Banshee.Gui.Widgets/ScalableLabel.cs \
 	Banshee.Gui.Widgets/SeekableTrackInfoDisplay.cs \
 	Banshee.Gui.Widgets/ShapedPopupWindow.cs \
 	Banshee.Sources.Gui/CategorySourceView.cs \

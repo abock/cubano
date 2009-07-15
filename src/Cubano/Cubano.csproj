@@ -70,8 +70,7 @@
     <Compile Include="Cubano.NowPlaying\ArtworkDisplay.cs" />
     <Compile Include="Cubano.NowPlaying\NowPlayingStage.cs" />
     <Compile Include="Banshee.Sources.Gui\CategorySourceView.cs" />
-    <Compile Include="Banshee.Gui.Widgets\ScalableLabel.cs" />
-    <Compile Include="Banshee.Gui.Widgets\InteractiveLabel.cs" />
+    <Compile Include="Banshee.Gui.Widgets\ActionLabel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
