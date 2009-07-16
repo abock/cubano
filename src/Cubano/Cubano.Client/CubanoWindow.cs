@@ -170,39 +170,12 @@ namespace Cubano.Client
 
         private void BuildFooter ()
         {
-        
             status_label = new Label ();
             
-            /*footer_toolbar = (Toolbar)ActionService.UIManager.GetWidget ("/FooterToolbar");
-            footer_toolbar.ShowArrow = false;
-            footer_toolbar.ToolbarStyle = ToolbarStyle.BothHoriz;
-
-            Widget task_status = new Banshee.Gui.Widgets.TaskStatusIcon ();
-
-            EventBox status_event_box = new EventBox ();
-            status_event_box.ButtonPressEvent += OnStatusBoxButtonPress;
+            footer = new HBox (true, 0);
             
-            status_event_box.Add (status_label);
-
-            HBox status_hbox = new HBox (true, 0);
-            status_hbox.PackStart (status_event_box, false, false, 0);
-            
-            Alignment status_align = new Alignment (0.5f, 0.5f, 1.0f, 1.0f);
-            status_align.Add (status_hbox);
-
-            RepeatActionButton repeat_button = new RepeatActionButton ();
-            repeat_button.SizeAllocated += delegate (object o, Gtk.SizeAllocatedArgs args) {
-                status_align.LeftPadding = (uint)args.Allocation.Width;
-            };
-
-          //  ActionService.PopulateToolbarPlaceholder (footer_toolbar, "/FooterToolbar/TaskStatus", task_status, false);
-            ActionService.PopulateToolbarPlaceholder (footer_toolbar, "/FooterToolbar/StatusBar", status_align, true);
-            ActionService.PopulateToolbarPlaceholder (footer_toolbar, "/FooterToolbar/RepeatButton", repeat_button);
-
-            footer_toolbar.ShowAll ();
-            primary_vbox.PackStart (footer_toolbar, false, true, 0);*/
-            
-            footer = new HBox ();
+            var left_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
+            left_align.Add (new CubanoTaskStatusButton ());
 
             track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {
                 TopPadding = 20,
@@ -218,25 +191,25 @@ namespace Cubano.Client
                 Visible = true
             });
             
-            var status_icon = new CubanoTaskStatusButton () {
+            new CubanoTaskStatusButton () {
                 IntermittentVisibility = false,
                 ShowOnlyBackgroundTasks = false
             };
             
-            footer.PackStart (status_icon, false, false, 0);
+            footer.PackStart (left_align, true, true, 0);
             footer.PackStart (track_info_align, true, true, 0);
             
             var actions = ServiceManager.Get<InterfaceActionService> ().PlaybackActions;
             
-            playback_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { RightPadding = 20 };
-            playback_align.SizeAllocated += OnFooterGroupSizeAllocated;
+            playback_align = new Alignment (1.0f, 0.5f, 0.0f, 0.0f) { RightPadding = 20 };
             var playback_box = new HBox ();
+            // playback_box.PackStart (new RepeatActionButton ());
             playback_box.PackStart (actions["PreviousAction"].CreateToolItem (), false, false, 0);
             playback_box.PackStart (actions["PlayPauseAction"].CreateToolItem (), false, false, 0);
             playback_box.PackStart (new NextButton (ActionService), false, false, 0);
             playback_box.PackStart (new ConnectedVolumeButton (), false, false, 10);
             playback_align.Add (playback_box);
-            footer.PackEnd (playback_align, false, false, 0);
+            footer.PackStart (playback_align, true, true, 0);
             
             footer.ShowAll ();
             primary_vbox.PackStart (footer, false, true, 0);
@@ -267,13 +240,6 @@ namespace Cubano.Client
                 header.RightPadding = 7;
                 header.LeftPadding = 20;
             }
-        }
-        
-        private void OnFooterGroupSizeAllocated (object o, SizeAllocatedArgs args)
-        {
-            //track_info_align.Xalign = 1.0f -
-            //    (float)Math.Min (source_align.Allocation.Width, playback_align.Allocation.Width) /
-            //    (float)Math.Max (source_align.Allocation.Width, playback_align.Allocation.Width);
         }
 
 #endregion
