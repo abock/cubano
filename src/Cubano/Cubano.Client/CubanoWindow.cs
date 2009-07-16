@@ -203,25 +203,14 @@ namespace Cubano.Client
             primary_vbox.PackStart (footer_toolbar, false, true, 0);*/
             
             footer = new HBox ();
-            
-            source_align = new Alignment (0.0f, 0.5f, 0.0f, 0.0f) { LeftPadding = 20 };
-            source_align.SizeAllocated += OnFooterGroupSizeAllocated;
-            var source_box = new HBox ();
-            //var source_button = new Button ("Sources");
-            //source_button.Clicked += (o, e) => source_popup.Popup (source_button);
-                
-            source_box.PackStart (back_button = new Gtk.ToolButton (Stock.GoBack), false, false, 0);
-            forward_button = new Gtk.ToolButton (Stock.GoForward);
-            source_box.PackStart (new SourceComboBox (), false, false, 0);
-            source_align.Add (source_box);
-            
-            
+
             track_info_align = new Alignment (0.5f, 0.5f, 0.0f, 0.0f) {
                 TopPadding = 20,
                 BottomPadding = 12,
                 RightPadding = 10,
                 LeftPadding = 10
             };
+            
             track_info_align.Add (new CanvasHost () {
                 Child = new ConnectedSeekableTrackInfoDisplay (),
                 HeightRequest = 60,
@@ -234,7 +223,6 @@ namespace Cubano.Client
                 ShowOnlyBackgroundTasks = false
             };
             
-            footer.PackStart (source_align, false, false, 0);
             footer.PackStart (status_icon, false, false, 0);
             footer.PackStart (track_info_align, true, true, 0);
             
@@ -274,9 +262,10 @@ namespace Cubano.Client
                     = header.RightPadding = 0;
             } else {
                 view_box.LeftPadding = view_box.RightPadding = 25;
-                header.TopPadding = 15;
                 header.BottomPadding = 20;
-                header.LeftPadding = header.RightPadding = 25;
+                header.TopPadding = 6;
+                header.RightPadding = 7;
+                header.LeftPadding = 20;
             }
         }
         
@@ -600,8 +589,25 @@ namespace Cubano.Client
         private bool render_debug = Environment.GetEnvironmentVariable ("CUBANO_RENDER_DEBUG") != null;
         private Random rand;
         
+        private struct Circle { public double X; public double Y; public double R; public double A; }
+        private Circle [] circles;
+        
         private void RenderBackground (Gdk.Window window, Gdk.Region region)
-        {   
+        {
+            rand = rand ?? new Random ();
+        
+            if (circles == null) {
+                for (int i = 0, n = rand.Next (100, 150); i < n; i++) {
+                    circles = circles ?? new Circle[n];
+                    circles[i] = new Circle {
+                        X = rand.Next (0, Screen.Width),
+                        Y = rand.Next (0, Screen.Height),
+                        R = rand.Next (10, 70),
+                        A = rand.NextDouble () * 0.08
+                    };
+                }
+            }
+            
             Cairo.Context cr = Gdk.CairoHelper.Create (window);
 
             foreach (Gdk.Rectangle damage in region.GetRectangles ()) {
@@ -619,16 +625,14 @@ namespace Cubano.Client
                     cr.Pattern = grad;
                     cr.Fill ();
                     grad.Destroy ();
+                 
+                    foreach (var circle in circles) {
+                        cr.Color = new Cairo.Color (0, 0, 0, circle.A);
+                        cr.Arc (circle.X + circle.R, circle.Y + circle.R, circle.R, 0, 2 * Math.PI);
+                        cr.Fill ();
+                    }
                 } else {
                     cr.Color = new Cairo.Color (1, 1, 1);
-                    cr.Fill ();
-                }
-                     
-                if (render_gradient) {
-                    var height = header.Allocation.Height - (header.BottomPadding / 2) - 5;
-                    CairoExtensions.RoundedRectangle (cr, 5, 5, Allocation.Width - 10, height, 3);
-                    
-                    cr.Color = CairoExtensions.GdkColorToCairoColor (Style.Background (StateType.Normal));
                     cr.Fill ();
                 }
 
@@ -639,7 +643,7 @@ namespace Cubano.Client
                 if (render_debug) {
                     cr.LineWidth = 1.0;
                     cr.Color = CairoExtensions.RgbToColor (
-                        (uint)(rand = rand ?? new Random ()).Next (0, 0xffffff));
+                        (uint)rand.Next (0, 0xffffff));
                     cr.Rectangle (damage.X + 0.5, damage.Y + 0.5, damage.Width - 1, damage.Height - 1);
                     cr.Stroke ();
                 }
@@ -660,16 +664,16 @@ namespace Cubano.Client
         {
             if (source_history == null) {
                 source_history = new Hyena.UndoManager ();
-                forward_button.Clicked += (o, e) => source_history.Redo ();
-                back_button.Clicked += (o, e) => source_history.Undo ();
+                // header.SourceForwardButton.Activated += (o, e) => source_history.Redo ();
+                header.SourceBackButton.Activated += (o, e) => source_history.Undo ();
             }
             
             if (newSource != null && oldSource != null) {
                 source_history.AddUndoAction (new SourceUndoAction (oldSource, newSource));
             }
             
-            forward_button.Sensitive = source_history.CanRedo;
-            back_button.Sensitive = source_history.CanUndo;
+            // header.SourceForwardButton.Sensitive = source_history.CanRedo;
+            header.SourceBackButton.Sensitive = source_history.CanUndo;
         }
         
         private class SourceUndoAction : Hyena.IUndoAction
