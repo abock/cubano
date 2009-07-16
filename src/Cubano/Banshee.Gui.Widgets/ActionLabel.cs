@@ -32,7 +32,6 @@ namespace Banshee.Gui.Widgets
 {
     public class ActionLabel : Widget
     {
-        private string text;
         private Pango.Layout layout;
         private int base_point_size;
         private int layout_width;
@@ -45,6 +44,7 @@ namespace Banshee.Gui.Widgets
         public ActionLabel ()
         {
             CanFocus = true;
+            CanActivate = true;
         }
         
 #region Windowing/Widgetry
@@ -123,14 +123,22 @@ namespace Banshee.Gui.Widgets
 
         protected override bool OnEnterNotifyEvent (Gdk.EventCrossing evnt)
         {
+            if (!CanActivate) {
+                return base.OnEnterNotifyEvent (evnt);
+            }
+            
             pending_state = State;
             State = StateType.Prelight;
+            
             return base.OnEnterNotifyEvent (evnt);
         }
 
         protected override bool OnLeaveNotifyEvent (Gdk.EventCrossing evnt)
         {
-            State = pending_state;
+            if (CanActivate) {
+                State = pending_state;
+            }
+            
             return base.OnLeaveNotifyEvent (evnt);
         }
 
@@ -187,7 +195,7 @@ namespace Banshee.Gui.Widgets
 
         protected override bool OnExposeEvent (Gdk.EventExpose evnt)
         {
-            if (evnt.Window != GdkWindow) {
+            if (evnt.Window != GdkWindow || State == StateType.Insensitive) {
                 return true;
             }
         
@@ -201,7 +209,7 @@ namespace Banshee.Gui.Widgets
                     x + 2, y + layout_height - 2,
                     x + layout_width - 4, y + layout_height - 2);
             }
-        
+            
             Gtk.Style.PaintLayout (Style, GdkWindow, State, false, 
                 evnt.Area, this, null, x, y, layout);
                 
@@ -248,6 +256,7 @@ namespace Banshee.Gui.Widgets
             
             layout.SetText (String.IsNullOrEmpty (text) ? String.Empty : text);
             layout.FontDescription.Size = (int)Math.Round (base_point_size * CurrentFontSizeEm);
+            layout.FontDescription.Family = FontFamily;
             QueueResize ();
         }
         
@@ -297,10 +306,22 @@ namespace Banshee.Gui.Widgets
             }
         }
         
+        public bool CanActivate { get; set; }
+        
+        private string text;
         public string Text {
             get { return text; }
             set {
                 text = value;
+                UpdateLayout ();
+            }
+        }
+        
+        private string font_family;
+        public string FontFamily {
+            get { return font_family; }
+            set {
+                font_family = value;
                 UpdateLayout ();
             }
         }
